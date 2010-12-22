@@ -49,10 +49,12 @@
 					</div>
 					<!-- column -->		
 					<div class="sms_holder">
+					<!-- Simple Group users don't need to change their user names
 						<div class="row">
 							<h4><a href="#" class="tooltip" title="<?php echo Kohana::lang("tooltips.profile_username"); ?>"><?php echo Kohana::lang('ui_main.username');?></a></h4>
 							<?php print form::input('username', $form['username'], ' class="text long2" readonly="readonly"'); ?>
 						</div>
+					-->
 						<div class="row">
 							<h4><a href="#" class="tooltip" title="<?php echo Kohana::lang("tooltips.profile_name"); ?>"><?php echo Kohana::lang('ui_main.full_name');?></a></h4>
 							<?php print form::input('name', $form['name'], ' class="text long2"'); ?>
