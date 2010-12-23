@@ -45,21 +45,69 @@ class simplegroups {
 		
 		//whenever a report detail is being drawn add this for some credit
 		Event::add('ushahidi_action.report_meta', array($this, '_give_credit'));
-		Event::add('ushahidi_action.report_form_admin', array($this, '_give_credit'));		
+		Event::add('ushahidi_action.report_form_admin', array($this, '_give_credit'));
+		Event::add('ushahidi_action.report_form_admin', array($this, '_get_number_info_for_report'));		
 		
 		//add a link to a page that shows which groups are using this site.
 		Event::add('ushahidi_action.nav_main_top', array($this, '_public_group_list_link'));
 		
 		//creates dashboard view of stuff
 		Event::add('ushahidi_action.dashboard_content', array($this, '_groups_dashboard'));		
+		
+		//adds info about the person that sent in messages
+		Event::add('ushahidi_action.message_extra_admin',array($this, '_get_number_info_for_message'));
 	}
 	
+	/**************************************
+	* Makes a by line for the sender
+	* of a message sent by a group memeber that became a report
+	***************************************/
+	public function _get_number_info_for_report()
+	{
+		$report_id = Event::$data;
+		
+		$number_items = ORM::factory("simplegroups_groups_number")
+			->join("simplegroups_groups_incident", "simplegroups_groups_incident.number_id", "simplegroups_groups_numbers.id")
+			->where("simplegroups_groups_incident.incident_id", $report_id)
+			->find_all();
+		foreach($number_items as $number_item)
+		{
+			$view = new View('simplegroups/number_info_report');
+			$view->name = $number_item->name;
+			$view->org = $number_item->org;
+			$view->render(TRUE);
+		}
+	}
+	
+	
+	
+	/**************************************
+	* Makes a by line for the sender
+	* of a message sent by a group memeber
+	***************************************/
+	public function _get_number_info_for_message()
+	{
+		$message_id = Event::$data;
+		
+		$number_items = ORM::factory("simplegroups_groups_number")
+			->join("simplegroups_groups_message", "simplegroups_groups_message.number_id", "simplegroups_groups_numbers.id")
+			->where("simplegroups_groups_message.message_id", $message_id)
+			->find_all();
+		foreach($number_items as $number_item)
+		{
+			$view = new View('simplegroups/number_info_message');
+			$view->name = $number_item->name;
+			$view->org = $number_item->org;
+			$view->render(TRUE);
+		}
+	}
 	
 	/**************************************
 	* Creates a dashboard widget with info
 	* on groups
 	**************************************/
-	public function _groups_dashboard()
+	public function _groups_dashboard
+	()
 	{
 		$user_counts_array = array();
 		$report_counts_array = array();
@@ -239,6 +287,7 @@ class simplegroups {
 				$group_message = ORM::factory("simplegroups_groups_message");
 				$group_message->simplegroups_groups_id = $number->simplegroups_groups_id;
 				$group_message->message_id = $sms->id;
+				$group_message->number_id = $number->id;
 				$group_message->save();
 				break;
 			}

@@ -43,6 +43,8 @@ class Simplegroups_Install {
 				  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
 				  `simplegroups_groups_id` int(10) unsigned NOT NULL,
 				  `number` varchar(30) default NULL,
+				  `name` varchar(100) default NULL,
+				  `org` varchar(100) default NULL,
 				  PRIMARY KEY (`id`)
 				) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
 				
@@ -61,6 +63,7 @@ class Simplegroups_Install {
 				  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
 				  `simplegroups_groups_id` int(10) unsigned NOT NULL,
 				  `incident_id` int(10) unsigned NOT NULL,
+				  `number_id` int(10) unsigned NOT NULL,
 				  PRIMARY KEY (`id`)
 				) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
 				
@@ -70,6 +73,7 @@ class Simplegroups_Install {
 				  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
 				  `simplegroups_groups_id` int(10) unsigned NOT NULL,
 				  `message_id` int(10) unsigned NOT NULL,
+				  `number_id` int(10) unsigned NOT NULL,
 				  PRIMARY KEY (`id`)
 				) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
 				

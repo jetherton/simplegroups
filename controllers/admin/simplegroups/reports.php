@@ -455,7 +455,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
         $form['incident_ampm'] = date('a');
         // initialize custom field array
         $form['custom_field'] = $this->_get_custom_form_fields($id,'',true);
-
+	$number_of_message_sender = null;
 
         // Locale (Language) Array
         $this->template->content->locale_array = Kohana::config('locale.all_languages');
@@ -503,6 +503,17 @@ class Reports_Controller extends Admin_simplegroup_Controller
             $message_id = $_GET['mid'];
             $service_id = "";
             $message = ORM::factory('message', $message_id);
+	    
+	    
+	    //figure out the group number that sent the message
+	    $number_items = ORM::factory("simplegroups_groups_number")
+			->join("simplegroups_groups_message", "simplegroups_groups_message.number_id", "simplegroups_groups_numbers.id")
+			->where("simplegroups_groups_message.message_id", $message_id)
+			->find_all();
+		foreach($number_items as $number_item)
+		{
+			$number_of_message_sender = $number_item;
+		}
 
             if ($message->loaded == true && $message->message_type == 1)
             {
@@ -806,6 +817,10 @@ class Reports_Controller extends Admin_simplegroup_Controller
 			$group_incident = ORM::factory("simplegroups_groups_incident");
 			$group_incident->incident_id = $incident->id;
 			$group_incident->simplegroups_groups_id = $this->group->id;
+			if($number_of_message_sender)
+			{
+				$group_incident->number_id = $number_of_message_sender->id;
+			}
 			$group_incident->save();
 		}
 

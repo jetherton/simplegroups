@@ -110,12 +110,34 @@
 			</div>
 			
 			<div class="row">
-				<h4>White Listed Phone Numbers<span><br/>Enter a list of phone numbers, each number on a different line, that are allowed to send in SMSs that are automatically made into reports. 
+				<h4>White Listed Phone Numbers<span><br/>Enter phone numbers that are allowed to send in SMSs to this group.  
 				<br/>Numbers must be in the exact same format as when they're recieved.</span></h4>
-				<?php print form::textarea('numbers', $form['numbers'], ' rows="12" cols="40"') ?>		
+				<table style="width:500px;" border="1" id="white_list_table">
+				<tr><th>Number</th><th>Name</th><th>Organization</th><th></th></tr>
+				<?php
+					$last_id = 1;
+					foreach($whitelist as $item)
+					{
+						echo "<tr id=\"white_list_item_".$last_id."\">";
+						echo '<td style="width:150px;"><input type="text" id="white_list_number_'.$last_id.'" name="white_list_number_'.$last_id.'" value="'.$item->number.'"></td>';
+						echo '<td style="width:150px;"><input type="text" id="white_list_name_'.$last_id.'" name="white_list_name_'.$last_id.'" value="'.$item->name.'"></td>';
+						echo '<td style="width:150px;"><input type="text" id="white_list_org_'.$last_id.'" name="white_list_org_'.$last_id.'" value="'.$item->org.'"></td>';
+						echo '<td style="width:50px;"><a href="#" id="whitelistdelete_'.$last_id.'">delete</a></tr>';
+						$last_id++;
+					}
+				?>
+				</table>
+				
+				<?php echo '<input type="hidden" name="white_list_id" value="'.$last_id.'" id="white_list_id">'; ?>
+				
+				<div class="btns">
+				<ul>
+					<li><a href="#" class="btn_addNumber"><?php echo strtoupper("Add New Number");?></a></li>		
+				</ul>
+			</div>
 			</div>
 			
-			
+			<hr/>
 			
 			
 			

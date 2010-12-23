@@ -125,15 +125,13 @@ class Simplegroups_settings_Controller extends Admin_Controller
         $this->template->content->title = "edit group";
 	$this->template->content->logo_file = false;
 	$this->template->content->users = array();
-
-
+	
         // setup and initialize form field names
         $form = array
         (
             'name'      => '',
             'description'      => '',
-            'logo'           => '',
-	    'numbers' => ''
+            'logo'           => ''
         );
 
         //  copy the form as errors, so the errors will be stored with keys corresponding to the form field names
@@ -163,10 +161,11 @@ class Simplegroups_settings_Controller extends Admin_Controller
 
 		// Validate photo uploads
 		$post->add_rules('logo', 'upload::valid', 'upload::type[gif,jpg,png]', 'upload::size[8M]');
-
+			
 		// Test to see if things passed the rule checks
 		if ($post->validate())
 		{
+			
 			// Save the Group
 			$group = new simplegroups_groups_Model($id);
 			$group->name = $post->name;
@@ -203,40 +202,36 @@ class Simplegroups_settings_Controller extends Admin_Controller
 
 			//delete everything in the white list db to make room for the new ones
 			ORM::factory('simplegroups_groups_number')->where("simplegroups_groups_id", $id)->delete_all();
-
-			$numbers = nl2br(trim($post->numbers));
-			if($numbers != "" && $numbers != null)
-			{
-				$numbers_array = explode("<br />", $numbers);
-				//now put back the new ones
-				foreach($numbers_array as $number)
-				{
-					$number_item = ORM::factory('simplegroups_groups_number');
-					$number_str = trim($number);
-					if(strlen($number_str) > 30)
-					{
-						// repopulate the form fields
-						$form = arr::overwrite($form, $post->as_array());
-						// populate the error fields, if any
-						$errors['numbers'] = "A Number can't be greater than 30 characters long";
-						$form_error = TRUE;
-						$this->template->content->id = $id;
-						$this->template->content->form = $form;
-						$this->template->content->errors = $errors;
-						$this->template->content->form_error = $form_error;
-						$this->template->content->form_saved = $form_saved;
-						// Javascript Header
-						$this->template->editor_enabled = TRUE;
-						$this->template->js = new View('simplegroups/simplegroups_editgroups_js');
-
-						return;						
-					}
-					$number_item->number = $number_str;
-					$number_item->simplegroups_groups_id = $id;
-					$number_item->save();
-				}
-			}
 			
+			
+			$white_list_size = $post->white_list_id;
+			for($i = 1; $i < $white_list_size; $i++)
+			{
+				//check to make sure this is a valid number
+				if(!isset($_POST["white_list_number_$i"]))
+				{
+					continue;
+				}
+				
+				$number_item = ORM::factory('simplegroups_groups_number');
+				
+				$value = trim($_POST["white_list_number_$i"]);
+				if(!$this->_check_length($value, 30, "Can't have a phone number with more than 30 characters")){return;}
+				$number_item->number = $value;
+				
+				$value = trim($_POST["white_list_name_$i"]);
+				if(!$this->_check_length($value, 100, "Can't have a phone number name with more than 100 characters")){return;}
+				$number_item->name = $value;
+				
+				$value = trim($_POST["white_list_org_$i"]);
+				if(!$this->_check_length($value, 100, "Can't have a phone number organization with more than 100 characters")){return;}
+				$number_item->org = $value;
+				
+				$number_item->simplegroups_groups_id = $id;
+				
+				$number_item->save();
+			}
+	
 			//update the users
 			//delete everything
 			ORM::factory('simplegroups_groups_users')->where("simplegroups_groups_id", $id)->delete_all();
@@ -294,19 +289,9 @@ class Simplegroups_settings_Controller extends Admin_Controller
 				// Merge To Form Array For Display
 				$form = arr::overwrite($form, $group_arr);
 				
-				$numbers ="";
-				$count=0;
 				$listers = ORM::factory('simplegroups_groups_number')->where("simplegroups_groups_id", $id)->find_all();
-				foreach($listers as $item)
-				{
-					$count++;
-					if($count > 1)
-					{
-						$numbers = $numbers."\n";
-					}
-					$numbers = $numbers.$item->number;
-				}
-				$form['numbers'] = $numbers;			
+				$this->template->content->whitelist = $listers;
+
 			}
 			else
 			{
@@ -359,6 +344,28 @@ class Simplegroups_settings_Controller extends Admin_Controller
 	}//end function
 
 	
+	private function _check_length($variable, $max_length, $message)
+	{
+		if(strlen($variable) >$max_length)
+		{
+			// repopulate the form fields
+			$form = arr::overwrite($form, $post->as_array());
+			// populate the error fields, if any
+			$errors['numbers'] = $message;
+			$form_error = TRUE;
+			$this->template->content->id = $id;
+			$this->template->content->form = $form;
+			$this->template->content->errors = $errors;
+			$this->template->content->form_error = $form_error;
+			$this->template->content->form_saved = $form_saved;
+			// Javascript Header
+			$this->template->editor_enabled = TRUE;
+			$this->template->js = new View('simplegroups/simplegroups_editgroups_js');
+			return false;
+		}
+		return true;
+
+	}
 
 	
 }

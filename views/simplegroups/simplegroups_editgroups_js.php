@@ -18,6 +18,28 @@
 		
 			
 		/* Form Actions */
+		
+		// Action on Save Only
+		$('.btn_addNumber').live('click', function () {
+			var id = $("#white_list_id").val();
+			$("#white_list_table").append("<tr id=\"white_list_item_"+id+"\">"
+				+"<td style=\"width:150px;\"><input type=\"text\" id=\"white_list_number_"+id+"\" name=\"white_list_number_"+id+"\" value=\"\"></td>"
+				+"<td style=\"width:150px;\"><input type=\"text\" id=\"white_list_name_"+id+"\" name=\"white_list_name_"+id+"\" value=\"\"></td>"
+				+"<td style=\"width:150px;\"><input type=\"text\" id=\"white_list_org_"+id+"\" name=\"white_list_org_"+id+"\" value=\"\"></td>"
+				+"<td style=\"width:50px;\"><a href=\"#\" id=\"whitelistdelete_"+id+"\">delete</a></td></tr>");
+			id = (id - 1) + 2;
+			$("#white_list_id").val(id);
+			return false;
+		});
+	
+		//removes things from the list of white listed numbers
+		$("a[id^='whitelistdelete_']").live('click', function()
+		{
+			var ID = this.id.substring(16);
+			$("#white_list_item_" + ID).remove();
+			return false;
+		});
+		
 		// Action on Save Only
 		$('.btn_save').live('click', function () {
 			$("#save").attr("value", "1");
