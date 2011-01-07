@@ -31,9 +31,11 @@ class Dashboard_Controller extends Admin_simplegroup_Controller
         // Retrieve Dashboard Count...
 
         // Total Reports
-        $this->template->content->reports_total = ORM::factory('simplegroups_groups_incident')
-		->where("simplegroups_groups_id", $this->group->id)
+        $this->template->content->reports_total = ORM::factory('incident')
+		->join("simplegroups_groups_incident", "simplegroups_groups_incident.incident_id", "incident.id")
+		->where("simplegroups_groups_incident.simplegroups_groups_id", $this->group->id)
 		->count_all();
+    
 
         // Total Categories
         $this->template->content->categories = ORM::factory('category')->count_all();
