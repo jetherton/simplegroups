@@ -210,7 +210,7 @@ class simplegroups {
 	public function _admin_map_reports()
 	{
 		//check if the $_SESSION variable is even set. May not be.
-		if(!isset($_SESSION))
+		if(!isset($_SESSION) || !isset($_SESSION['auth_user']))
 		{
 			return;
 		}
@@ -249,6 +249,10 @@ class simplegroups {
 	****************************************/
 	public function _admin_map_reports_count()
 	{
+		if(!isset($_SESSION) || !isset($_SESSION['auth_user']))
+		{
+			return;
+		}
 		$user = new User_Model($_SESSION['auth_user']->id);
 		//figure out what group this user is
 		//if they're not a groupie, then quit
