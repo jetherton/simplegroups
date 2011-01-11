@@ -56,7 +56,43 @@ class simplegroups {
 		
 		//adds info about the person that sent in messages
 		Event::add('ushahidi_action.message_extra_admin',array($this, '_get_number_info_for_message'));
+		
+		//hook into the message action hook so we can add the "forward too" action
+		Event::add('ushahidi_action.message_extra_admin',array($this, '_add_forward_to'));
 	}
+	
+	
+	/**************************************
+	* Makes a by line for the sender
+	* of a message sent by a group memeber that became a report
+	***************************************/
+	public function _add_forward_to()
+	{
+		//if the person is a group user don't show them this:
+		$user = new User_Model($_SESSION['auth_user']->id);
+		//figure out what group this user is
+		//if they're not a groupie, then quit
+		$group_id = groups::get_user_group($user);
+		if($group_id)
+		{
+			return;
+		}
+		
+		$message_id = Event::$data;
+		
+		$groups = ORM::factory("simplegroups_groups")->find_all();
+		$groups_array = array();
+		foreach($groups as $group)
+		{
+			$groups_array[$group->id] = $group->name;
+		}
+	
+		$view = new View('simplegroups/forwardto');
+		$view->message_id = $message_id;
+		$view->groups_array = $groups_array;
+		$view->render(TRUE);
+	}
+	
 	
 	/**************************************
 	* Makes a by line for the sender
