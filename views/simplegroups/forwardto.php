@@ -10,6 +10,24 @@ function forwardMessage<?php echo $message_id; ?>()
 }
 
 </script>
+<?php
+	$assigned_groups_text = "";
+	$count = 0;
+	foreach($assigned_groups as $assigned_group)
+	{
+		$count++;
+		if($count > 1)
+		{
+			$assigned_groups_text = $assigned_groups_text.", ";
+		}
+		$assigned_groups_text = $assigned_groups_text.  "<a href=\"".url::site()."admin/simplegroups_settings/edit/".$assigned_group->id."\">".$assigned_group->name."</a>";
+	}
+	
+	if($assigned_groups_text != "")
+	{
+		echo "Assigned to group(s): ". $assigned_groups_text. "<br/>";
+	}
+?>
 Forward To:
 <?php print form::dropdown("input_forwardto_".$message_id, $groups_array, 'standard'); ?>
 <a href="javascript:forwardMessage<?php echo $message_id; ?>()"  style="border: #d1d1d1 1px solid; background-color:#F2F7Fa; color: #5c5c5c; padding: 0px 9px; line-height:24px; text-decoration:none;">Forward</a>

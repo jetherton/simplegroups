@@ -86,9 +86,17 @@ class simplegroups {
 		{
 			$groups_array[$group->id] = $group->name;
 		}
+		
+		//figure out if the current message has already been assigned to a group
+		
+		$assigned_groups = ORM::factory("simplegroups_groups")
+			->join("simplegroups_groups_message", "simplegroups_groups_message.simplegroups_groups_id", "simplegroups_groups.id")
+			->where("simplegroups_groups_message.message_id", $message_id)
+			->find_all();
 	
 		$view = new View('simplegroups/forwardto');
 		$view->message_id = $message_id;
+		$view->assigned_groups = $assigned_groups;
 		$view->groups_array = $groups_array;
 		$view->render(TRUE);
 	}
