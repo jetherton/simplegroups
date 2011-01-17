@@ -1,15 +1,20 @@
 <script type="text/javascript"> 
 function forwardMessage<?php echo $message_id; ?>()
 {
+	$("#forwarded_<?php echo $message_id; ?>").fadeIn("slow");
 	var groupId = $("#input_forwardto_<?php echo $message_id; ?>").val();
 	
-	$.get("<?php echo url::site()."admin/simplegroups/forwardto/index/".$message_id."/"; ?>" + groupId);
-	var forwarded = document.getElementById("forwarded_<?php echo $message_id; ?>");
-	forwarded.style.display = "block";
+	$.get("<?php echo url::site()."admin/simplegroups/forwardto/index/".$message_id."/"; ?>" + groupId,
+		function(data) {
+			var forwardSpan = $("#msg_fwrd_to_<?php echo $message_id; ?>");
+			forwardSpan.html(data);
+			$("#forwarded_<?php echo $message_id; ?>").fadeOut("slow");
+		});
 	return false;
 }
 
 </script>
+
 <?php
 	$assigned_groups_text = "";
 	$count = 0;
@@ -25,7 +30,11 @@ function forwardMessage<?php echo $message_id; ?>()
 	
 	if($assigned_groups_text != "")
 	{
-		echo "Assigned to group(s): ". $assigned_groups_text. "<br/>";
+		echo "<span id=\"msg_fwrd_to_".$message_id."\"> Assigned to group(s): ". $assigned_groups_text. "</span><br/>";
+	}
+	else
+	{
+		echo "<span id=\"msg_fwrd_to_".$message_id."\"></span><br/>";
 	}
 ?>
 Forward To:

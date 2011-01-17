@@ -88,7 +88,7 @@ class groups_Core {
 				return $group->simplegroups_groups_id;
 			}
 		}
-		return false;
+		return FALSE;
 	}
 
 	
