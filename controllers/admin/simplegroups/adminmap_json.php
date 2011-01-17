@@ -35,7 +35,14 @@ class Adminmap_json_Controller extends Admin_simplegroup_Controller
 	*/
 	function index()
 	{
-		adminmap_helper::json_index($this, "admin/simplegroups/reports/edit/");
+		$group_where = " AND ( ".$this->table_prefix."simplegroups_groups_incident.simplegroups_groups_id = ".$this->group->id.") ";
+		$joins = array();
+		$joins[] = array("simplegroups_groups_incident", "incident.id", "simplegroups_groups_incident.incident_id");
+		
+		adminmap_helper::json_index($this, 
+			"admin/simplegroups/reports/edit/", 
+			$group_where, 
+			$joins);
 	}
 
 
@@ -44,17 +51,34 @@ class Adminmap_json_Controller extends Admin_simplegroup_Controller
      */
      public function cluster()
     {
-        adminmap_helper::json_cluster($this, "admin/simplegroups/reports/edit/", "admin/simplegroups/reports/index");
+	$group_where = " AND ( ".$this->table_prefix."simplegroups_groups_incident.simplegroups_groups_id = ".$this->group->id.") ";
+	$group_joins = array();
+	$group_joins[] = array("simplegroups_groups_incident", "incident.id", "simplegroups_groups_incident.incident_id");
+        
+	adminmap_helper::json_cluster($this, 
+		"admin/simplegroups/reports/edit/", 
+		"admin/simplegroups/reports/index", 
+		true,
+		$group_where, 
+		$group_joins);
     }
 
 
-     /**************************************************************
-     * Retrieve timeline JSON
-     */
-    public function timeline( $category_ids = "0," )
-    {
-	adminmap_helper::json_timeline($this, $category_ids);
-    }
+	/**************************************************************
+	* Retrieve timeline JSON
+	*/
+	public function timeline( $category_ids = "0," )
+	{
+		$group_where = " AND ( ".$this->table_prefix."simplegroups_groups_incident.simplegroups_groups_id = ".$this->group->id.") ";
+			$joins = array();
+			$joins[] = array("simplegroups_groups_incident", "incident.id", "simplegroups_groups_incident.incident_id");
+
+		adminmap_helper::json_timeline($this, 
+			$category_ids, 
+			true,
+			$group_where, 
+			$joins = $joins);
+	}
 
 
 

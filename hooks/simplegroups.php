@@ -37,11 +37,6 @@ class simplegroups {
 		//checks incoming SMSs for whitelist numbers and then updates the groups messages accordingly
 		Event::add('ushahidi_action.message_sms_add', array($this, '_incoming_sms'));
 		
-		//intercept lists reports going to the admin map plugin and make sure they take into acocunt our groupieness
-		Event::add('ushahidi_filter.admin_map_get_reports', array($this, '_admin_map_reports'));
-		
-		//intercept the counts of reports going to the admin map plugin and make sure they take into acocunt our groupieness
-		Event::add('ushahidi_filter.admin_map_get_reports_count', array($this, '_admin_map_reports_count'));
 		
 		//whenever a report detail is being drawn add this for some credit
 		Event::add('ushahidi_action.report_meta', array($this, '_give_credit'));
@@ -245,79 +240,6 @@ class simplegroups {
 		}
 	}//end method _admin_map_let_view()
 	
-	
-	/***************************************
-	* Runs our own fancy database queries 
-	* to get the reports that should go to the 
-	* admin map
-	****************************************/
-	public function _admin_map_reports()
-	{
-		//check if the $_SESSION variable is even set. May not be.
-		if(!isset($_SESSION) || !isset($_SESSION['auth_user']))
-		{
-			return;
-		}
-		$user = new User_Model($_SESSION['auth_user']->id);
-		//figure out what group this user is
-		//if they're not a groupie, then quit
-		$group_id = groups::get_user_group($user);
-		if(!$group_id)
-		{
-			return;
-		}
-		else //they are a groupie
-		{
-			$group_where = " AND ( ".$this->table_prefix."simplegroups_groups_incident.simplegroups_groups_id = ".$group_id.") ";
-			$reports = groups::get_reports(
-				Event::$data['category_ids'],
-				Event::$data['approved_text'], 
-				Event::$data['where_text']. $group_where, 
-				Event::$data['logical_operator'],
-				Event::$data['order_by'],
-				Event::$data['order_by_direction'],
-				Event::$data['limit'], 
-				Event::$data['offset']
-				);
-				
-			Event::$data['incidents'] = $reports;
-		}
-	} //end of method
-	
-	
-	
-	/***************************************
-	* Runs our own fancy database queries 
-	* to get the reports count that should go to the 
-	* admin map
-	****************************************/
-	public function _admin_map_reports_count()
-	{
-		if(!isset($_SESSION) || !isset($_SESSION['auth_user']))
-		{
-			return;
-		}
-		$user = new User_Model($_SESSION['auth_user']->id);
-		//figure out what group this user is
-		//if they're not a groupie, then quit
-		$group_id = groups::get_user_group($user);
-		if(!$group_id)
-		{
-			return;
-		}
-		else //they are a groupie
-		{
-			$group_where = " AND ( ".$this->table_prefix."simplegroups_groups_incident.simplegroups_groups_id = ".$group_id.") ";
-			$reports_count = groups::get_reports_count(
-				Event::$data['category_ids'],
-				Event::$data['approved_text'], 
-				Event::$data['where_text']. $group_where, 
-				Event::$data['logical_operator']
-				);
-				
-			Event::$data['incidents_count'] = $reports_count;
-		}
-	} //end of method
 	
 	
 	
