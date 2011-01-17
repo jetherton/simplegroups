@@ -272,6 +272,9 @@ class Simplegroups_settings_Controller extends Admin_Controller
         } //end if($_POST)
         else
         {
+		//initialize this stuff
+		$this->template->content->whitelist = array();
+
 		if ( $id )
 		{
 			// Retrieve Current group
@@ -297,6 +300,7 @@ class Simplegroups_settings_Controller extends Admin_Controller
 			{
 			    // Redirect
 			    //url::redirect('admin/simplegroup_settings/');
+
 			}
 		}
 		
