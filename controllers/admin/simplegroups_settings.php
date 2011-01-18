@@ -183,6 +183,7 @@ class Simplegroups_settings_Controller extends Admin_Controller
 			$group->name = $post->name;
 			$group->description = $post->description;
 			$group->own_instance = $post->own_instance;
+			$group->save();
 			
 			//logo
 			$filename = upload::save('logo');
