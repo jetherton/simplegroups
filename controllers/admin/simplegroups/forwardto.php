@@ -56,6 +56,11 @@ class Forwardto_Controller extends Admin_Controller
 		$group_message->message_id = $message_id;
 		$group_message->simplegroups_groups_id = $group_id;
 		$group_message->save();
+		
+		//get the message so we can forward it to the groups own site
+		$message = ORM::factory("message", $message_id);
+		
+		groups::forward_message_to_own_instance($message->message, $message->message_from, $group_id);
 	}
 	//figure out which groups now are associated with this messgage
 

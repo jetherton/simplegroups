@@ -62,6 +62,10 @@
 					<h4>Group Description<span></span></h4>
 					<?php print form::textarea('description', $form['description'], ' rows="12" cols="40"') ?>
 				</div>
+				<div class="row">
+					<h4>Group's Own Ushahidi FrontlineSMS URL<span><br/>Optional. Must be in the format http://myhost/frontlinesms/?key=*MY_KEY*&s=${sender_number}&m=${message_content}</span></h4>
+					<?php print form::input('own_instance', $form['own_instance'], ' class="text title"'); ?>
+				</div>
 				<!-- Photo Fields -->
 				<div class="row link-row">
 					<h4>Logo</h4>

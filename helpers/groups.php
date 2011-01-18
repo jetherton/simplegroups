@@ -14,6 +14,54 @@ class groups_Core {
 		self::$table_prefix = Kohana::config('database.default.table_prefix');
 	}
 	
+	
+	//This will take the given message and forward it, via the FrontlineSMS URL, to 
+	//another ushahidi site
+	public static function forward_message_to_own_instance($message, $sender, $group_id)
+	{
+		//get the own_instance url
+		$group_info = ORM::factory('simplegroups_groups', $group_id);
+		$own_instance = $group_info->own_instance;
+		
+		//if $own_instance hasn't been filled out then quit
+		if(strlen($own_instance) < 8)
+		{
+			return;
+		}
+		
+		//url encode the parameters
+		$message = urlencode($message);
+		$sender = urlencode($sender);
+		
+		//parse out the url variables, also making sure that the format is correct
+		//check for the sender's number
+		if(strpos($own_instance, '${sender_number}') !== false)
+		{
+			$own_instance = str_replace('${sender_number}', $sender, $own_instance);
+		}
+		else //can't find it, it's not formatted correctly
+		{
+			return;
+		}
+		//check for the message
+		if(strpos($own_instance, '${message_content}') !== false)
+		{
+			$own_instance = str_replace('${message_content}', $message, $own_instance);
+		}
+		else //can't find it, it's not formatted correctly
+		{
+			return;
+		}
+		//now make the HTTP get
+		$curl_handle = curl_init();
+		curl_setopt($curl_handle,CURLOPT_URL,$own_instance);
+		curl_setopt($curl_handle,CURLOPT_CONNECTTIMEOUT,15); // Timeout set to 15 seconds. This is somewhat arbitrary and can be changed.
+		curl_setopt($curl_handle,CURLOPT_RETURNTRANSFER,1); // Set cURL to store data in variable instead of print
+		$buffer = curl_exec($curl_handle);
+		curl_close($curl_handle);
+		
+	}
+	
 	/**
 	 * Generate Messages Sub Tab Menus
      * @param int $service_id

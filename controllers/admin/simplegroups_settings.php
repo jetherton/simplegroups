@@ -64,6 +64,12 @@ class Simplegroups_settings_Controller extends Admin_Controller
 
 						    //delete the users of this group
 						    ORM::factory('simplegroups_groups_users')->where("simplegroups_groups_id", $group_id)->delete_all();
+						    
+						    //delete the associations with incidents and this group
+						    ORM::factory('simplegroups_groups_incident')->where("simplegroups_groups_id", $group_id)->delete_all();
+						    
+						    //delete the associations with incidents and this group
+						    ORM::factory('simplegroups_groups_message')->where("simplegroups_groups_id", $group_id)->delete_all();
 						}//end if
 					}//end foreach
 					$form_action = strtoupper("Group Deleted");
@@ -131,8 +137,13 @@ class Simplegroups_settings_Controller extends Admin_Controller
         (
             'name'      => '',
             'description'      => '',
-            'logo'           => ''
+            'logo'           => '',
+	    'own_instance' => ''
         );
+	
+	//initialize this stuff
+	$this->template->content->whitelist = array();
+
 
         //  copy the form as errors, so the errors will be stored with keys corresponding to the form field names
         $errors = $form;
@@ -158,6 +169,7 @@ class Simplegroups_settings_Controller extends Admin_Controller
 		// $post->add_rules('locale','required','alpha_dash','length[5]');
 		$post->add_rules('name','required', 'length[1,100]');
 		$post->add_rules('description','required');
+		$post->add_rules('own_instance','length[3,1000]');
 
 		// Validate photo uploads
 		$post->add_rules('logo', 'upload::valid', 'upload::type[gif,jpg,png]', 'upload::size[8M]');
@@ -170,6 +182,7 @@ class Simplegroups_settings_Controller extends Admin_Controller
 			$group = new simplegroups_groups_Model($id);
 			$group->name = $post->name;
 			$group->description = $post->description;
+			$group->own_instance = $post->own_instance;
 			
 			//logo
 			$filename = upload::save('logo');
@@ -272,8 +285,6 @@ class Simplegroups_settings_Controller extends Admin_Controller
         } //end if($_POST)
         else
         {
-		//initialize this stuff
-		$this->template->content->whitelist = array();
 
 		if ( $id )
 		{
@@ -285,7 +296,8 @@ class Simplegroups_settings_Controller extends Admin_Controller
 				$group_arr = array
 				(
 					'name' => $group->name,
-					'description' => $group->description
+					'description' => $group->description,
+					'own_instance' => $group->own_instance
 				);
 				$this->template->content->logo_file = $group->logo;
 

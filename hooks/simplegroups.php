@@ -264,6 +264,10 @@ class simplegroups {
 				$group_message->message_id = $sms->id;
 				$group_message->number_id = $number->id;
 				$group_message->save();
+				
+				//check and see if it needs to be forwarded
+				groups::forward_message_to_own_instance($sms->message, $sms->message_from, $number->simplegroups_groups_id);
+				
 				break;
 			}
 		}

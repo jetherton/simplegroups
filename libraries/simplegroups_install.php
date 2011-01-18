@@ -35,6 +35,7 @@ class Simplegroups_Install {
 				  `name` varchar(100) default NULL,
 				  `description` longtext,
 				  `logo` varchar(200) default NULL,
+				  `own_instance` varchar(1000) default NULL,
 				  PRIMARY KEY (`id`)
 				) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
 		
@@ -87,6 +88,25 @@ class Simplegroups_Install {
 				VALUES (NULL ,  'simplegroups',  'All group members of the Simple Groups plugin should have this role',  
 				'0',  '0',  '0',  '0',  '0',  '0',  '0',  '0',  '0',  '0',  '0', '0');");
 		}
+		
+		
+		//check and see if the simplegroups_groups table already has the own_instance field. If not make it
+		$result = $this->db->query('DESCRIBE `'.Kohana::config('database.default.table_prefix').'simplegroups_groups`');
+		$has_own_instance = false;
+		foreach($result as $row)
+		{
+			if($row->Field == "own_instance")
+			{
+				$has_own_instance = true;
+				break;
+			}
+		}
+		
+		if(!$has_own_instance)
+		{
+			$this->db->query('ALTER TABLE `'.Kohana::config('database.default.table_prefix').'simplegroups_groups` ADD `own_instance` VARCHAR(1000) NULL DEFAULT NULL');
+		}
+		
 					
 	}//end of run_install
 
