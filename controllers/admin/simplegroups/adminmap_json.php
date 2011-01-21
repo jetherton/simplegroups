@@ -41,6 +41,7 @@ class Adminmap_json_Controller extends Admin_simplegroup_Controller
 		
 		adminmap_helper::json_index($this, 
 			"admin/simplegroups/reports/edit/", 
+			true,
 			$group_where, 
 			$joins);
 	}
