@@ -227,6 +227,10 @@
 								</div>
 								<div id="divMap" class="map_holder_reports"></div>
 							</div>
+							<?php
+							// Action::report_form_admin - Runs just after the report description
+							Event::run('ushahidi_action.report_form_admin_location', $id);
+							?>
 							<div class="incident-find-location">
 								<?php print form::input('location_find', '', ' title="'.Kohana::lang('ui_main.location_example').'" class="findtext"'); ?>
 								<div class="btns" style="float:left;">
