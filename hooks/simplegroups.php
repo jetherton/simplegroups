@@ -23,7 +23,7 @@ class simplegroups {
 		// Hook into routing
 		Event::add('system.pre_controller', array($this, 'add'));
 		$this->table_prefix = Kohana::config('database.default.table_prefix');
-		
+		$this->post_data = null; //initialize this for later use
 	}
 	
 	/**
@@ -54,7 +54,108 @@ class simplegroups {
 		
 		//hook into the message action hook so we can add the "forward too" action
 		Event::add('ushahidi_action.message_extra_admin',array($this, '_add_forward_to'));
+		
+		//hook into the user edit page so we can choose which group a user is in when they are created
+		Event::add('ushahidi_action.users_form_admin',array($this, '_edit_user_form'));
+		
+		//hook into the user edit page post being tested
+		Event::add('ushahidi_action.user_submit_admin', array($this, '_edit_user_submit'));
+		
+		//hook into the user being saved so we can save our change of user
+		Event::add('ushahidi_action.user_edit', array($this, '_edit_user'));
 	}
+	
+	/*************************************
+	 * Saves changes to the group assignment of a
+	 * user that's being edited
+	 ************************************/
+	 public function _edit_user()
+	 {
+		$user = Event::$data;
+
+		//clear any group assocations they may already have
+		$group_users = ORM::factory("simplegroups_groups_users")
+			->where("users_id", $user->id)
+			->find_all();
+		foreach($group_users as $group_user)
+		{
+			$group_user->delete();
+		}
+		
+		//check and see if they selected a group
+		if($this->post_data->group != "NONE")
+		{
+			$group_user = ORM::factory("simplegroups_groups_users");
+			$group_user->simplegroups_groups_id = $this->post_data->group;
+			$group_user->users_id = $user->id;
+			$group_user->save();
+		}
+		
+	 }//end of _edit_user()
+	
+	/*************************************
+	 * Saves changes to the group assignment of a
+	 * user that's being edited
+	 ************************************/
+	public function _edit_user_submit()
+	{
+		$this->post_data = Event::$data;
+		
+		//did they pick a group?
+		if($this->post_data->group == "NONE")
+		{
+			return;
+		}
+		
+		//so they picked a group, is their role simplegroups?
+		if($this->post_data->role == "simplegroups")
+		{
+			//they did so all is cool
+			return;
+		}
+		
+		//no good
+		$this->post_data->add_rules('role','matches["simplegroups"]');
+		
+		
+	}//end of _edit_user_submit
+	
+	/*************************************
+	 * Adds a drop down box to pick which
+	 * group a  user is a part of when you're
+	 * editing a user.
+	 ************************************/
+	 public function _edit_user_form()
+	 {
+		$user_id = Event::$data;
+
+		//get a list of all the groups
+		$groups = ORM::factory("simplegroups_groups")
+			->find_all();
+		$groups_array = array("NONE"=>"--No Group--");
+		foreach($groups as $group)
+		{
+			$groups_array[$group->id] = $group->name;
+		}
+		
+		//find out if our user in question is a group members
+		$users_groups = ORM::factory("simplegroups_groups")
+			->join('simplegroups_groups_users', 'simplegroups_groups_users.simplegroups_groups_id', 'simplegroups_groups.id')
+			->where('simplegroups_groups_users.users_id', $user_id)
+			->find_all();
+		
+		$user_group_id = "NONE";
+		foreach($users_groups as $users_group)
+		{
+			$user_group_id = $users_group->id;
+		}
+
+		$view = new View('simplegroups/edit_user');
+		$view->groups = $groups_array;
+		$view->user_group_id = $user_group_id;
+		$view->render(TRUE);
+
+}//end _edit_user()
 	
 	
 	/**************************************
