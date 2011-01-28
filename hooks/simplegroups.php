@@ -356,20 +356,23 @@ class simplegroups {
 		$numbers = ORM::factory("simplegroups_groups_number")->find_all();
 		foreach($numbers as $number)
 		{
-			//makes it a fuzzy search
-			if( !(strpos($sms->message_from, $number->number) === false) ||
-				($number->number == $sms->message_from))
+			if($number->number)
 			{
-				$group_message = ORM::factory("simplegroups_groups_message");
-				$group_message->simplegroups_groups_id = $number->simplegroups_groups_id;
-				$group_message->message_id = $sms->id;
-				$group_message->number_id = $number->id;
-				$group_message->save();
-				
-				//check and see if it needs to be forwarded
-				groups::forward_message_to_own_instance($sms->message, $sms->message_from, $number->simplegroups_groups_id);
-				
-				break;
+				//makes it a fuzzy search
+				if( !(strpos($sms->message_from, $number->number) === false) ||
+					($number->number == $sms->message_from))
+				{
+					$group_message = ORM::factory("simplegroups_groups_message");
+					$group_message->simplegroups_groups_id = $number->simplegroups_groups_id;
+					$group_message->message_id = $sms->id;
+					$group_message->number_id = $number->id;
+					$group_message->save();
+					
+					//check and see if it needs to be forwarded
+					groups::forward_message_to_own_instance($sms->message, $sms->message_from, $number->simplegroups_groups_id);
+					
+					break;
+				}
 			}
 		}
 	}//end method
