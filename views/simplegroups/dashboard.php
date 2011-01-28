@@ -61,6 +61,9 @@
 							<li>
 								<a href="<?php echo url::site() . 'admin/simplegroups/reports' ?>" class="reports"><?php echo Kohana::lang('ui_main.reports');?></a>
 								<strong><?php echo number_format($reports_total); ?></strong>
+								<ul style="overflow:visible;">
+									<li><a href="<?php echo url::site() . 'admin/simplegroups/reports?status=a' ?>"><?php echo Kohana::lang('ui_main.not_approved');?></a><strong>(<?php echo $reports_total_unapproved; ?>)</strong></li>
+								</ul>
 							</li>
 							<li>
 								<a href="<?php echo url::site() . 'admin/simplegroups/messages' ?>" class="messages"><?php echo Kohana::lang('ui_main.messages');?></a>

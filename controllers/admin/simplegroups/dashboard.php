@@ -35,6 +35,14 @@ class Dashboard_Controller extends Admin_simplegroup_Controller
 		->join("simplegroups_groups_incident", "simplegroups_groups_incident.incident_id", "incident.id")
 		->where("simplegroups_groups_incident.simplegroups_groups_id", $this->group->id)
 		->count_all();
+		
+	// Total Reports - Unapproved
+        $this->template->content->reports_total_unapproved = ORM::factory('incident')
+		->join("simplegroups_groups_incident", "simplegroups_groups_incident.incident_id", "incident.id")
+		->where("simplegroups_groups_incident.simplegroups_groups_id", $this->group->id)
+		->where('incident.incident_active', 0)
+		->count_all();
+
     
 
         // Total Categories
