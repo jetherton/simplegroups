@@ -296,7 +296,7 @@ class simplegroups {
 	{
 		$this_page = url::current();
 		$menu = "<li><a href=\"".url::site()."simplegroups/groups\" ";
-		$menu .= ($this_page == 'simplegroups/groups') ? " class=\"active\"" : "";
+		$menu .= ( strpos($this_page, "simplegroups") !== false) ? " class=\"active\"" : "";
 	 	$menu .= ">GROUPS</a></li>";
 		echo $menu;
 	}

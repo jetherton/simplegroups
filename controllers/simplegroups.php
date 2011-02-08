@@ -15,7 +15,7 @@ class Simplegroups_Controller extends Main_Controller {
 
     public function index($group_id = 1)
     {
-        $this->template->header->this_page = "page_".$group_id;
+        $this->template->header->this_page = "Simple Groups";
         $this->template->content = new View('simplegroups/about');
 
         if ( ! $group_id)
