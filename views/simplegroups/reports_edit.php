@@ -231,6 +231,9 @@
 							// Action::report_form_admin - Runs just after the report description
 							Event::run('ushahidi_action.report_form_admin_location', $id);
 							?>
+							
+							<div id="find_location_results"></div>
+							
 							<div class="incident-find-location">
 								<?php print form::input('location_find', '', ' title="'.Kohana::lang('ui_main.location_example').'" class="findtext"'); ?>
 								<div class="btns" style="float:left;">
@@ -239,7 +242,7 @@
 									</ul>
 								</div>
 								<div id="find_loading" class="incident-find-loading"></div>
-								<div style="clear:both;"><?php echo Kohana::lang('ui_main.pinpoint_location');?>.</div>
+								<div style="clear:both;">Type in the name of the place you want to find. For example "Salala" or "Plebo."</div>
 							</div>
 							<div class="row">
 								<div class="town">

@@ -89,6 +89,47 @@ class Simplegroups_Install {
 				'0',  '0',  '0',  '0',  '0',  '0',  '0',  '0',  '0',  '0',  '0', '0');");
 		}
 		
+		//create roles table for simple groups
+		$this->db->query('CREATE TABLE IF NOT EXISTS `'.Kohana::config('database.default.table_prefix').'simplegroups_roles` (
+				  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+				  `name` varchar(100) default NULL,
+				  `edit_group_settings` tinyint(4) NOT NULL default \'0\',
+				  `add_users` tinyint(4) NOT NULL default \'0\',
+				  `delete_users` tinyint(4) NOT NULL default \'0\',
+				  PRIMARY KEY (`id`)
+				) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
+				
+		//now make up some roles
+		//admin can add new users
+		//super admin can add new users, remove users, and edit group settings
+		if(!ORM::factory('simplegroups_roles')->where('name', 'Admin')->find()->loaded)
+		{
+			$admin = ORM::factory('simplegroups_roles');
+			$admin->name = "Admin";
+			$admin->edit_group_settings = 0;
+			$admin->add_users = 1;
+			$admin->delete_users = 0;
+			$admin->save();
+		}
+		
+		if(!ORM::factory('simplegroups_roles')->where('name', 'Super Admin')->find()->loaded)
+		{
+			$su_admin = ORM::factory('simplegroups_roles');
+			$su_admin->name = "Super Admin";
+			$su_admin->edit_group_settings = 1;
+			$su_admin->add_users = 1;
+			$su_admin->delete_users = 1;
+			$su_admin->save();
+		}
+		
+		//create mapping between simple groups users and their roles.
+		$this->db->query('CREATE TABLE IF NOT EXISTS `'.Kohana::config('database.default.table_prefix').'simplegroups_users_roles` (
+				  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+				  `roles_id` int(10) unsigned NOT NULL,
+				  `users_id` int(10) unsigned NOT NULL,
+				  PRIMARY KEY (`id`)
+				) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
+		
 		
 		//check and see if the simplegroups_groups table already has the own_instance field. If not make it
 		$result = $this->db->query('DESCRIBE `'.Kohana::config('database.default.table_prefix').'simplegroups_groups`');
