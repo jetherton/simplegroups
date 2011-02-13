@@ -51,7 +51,7 @@
 				</div>
 			</div>
 			<!-- f-col -->
-			<div class="f-col">
+			<div>
 
 				
 				<div class="row">
@@ -60,7 +60,7 @@
 				</div>
 				<div class="row">
 					<h4>Group Description<span></span></h4>
-					<?php print form::textarea('description', $form['description'], ' rows="12" cols="40"') ?>
+					<?php print form::textarea('description', $form['description'], ' rows="17" cols="80" style="width:800px; height:300px;"') ?>
 				</div>
 				<div class="row">
 					<h4>Group's Own Ushahidi FrontlineSMS URL<span><br/>Optional. Must be in the format http://myhost/frontlinesms/?key=*MY_KEY*&s=${sender_number}&m=${message_content}</span></h4>
@@ -95,21 +95,54 @@
 			
 			<div class="row">
 				<h4>Group Users</h4>
+				<table class="table">
+					<thead>
+						<tr><th>User</th><th colspan="<?php //echo count($group_roles); ?>">User's Roles</th></tr>
+					</thead>
 				<?php
 					foreach($users as $user)
 					{
 						$checked = false;
 						$value = "false";
+						$role_enabled = "DISABLED";
+						$role_style = "style=\"background:#eee; color:#888;\"";
 						if($user->simplegroups_groups_id != null)
 						{
 							$checked = true;
 							$value = "true";
+							$role_enabled = "";
+							$role_style = "";
 						}
+						echo "<tr>";
+						echo "<td><span style=\"font-size:150%;\">";
 						print form::label('user_id_'.$user->id, $user->name);
-						print form::checkbox('user_id_'.$user->id, $value, $checked);	
-						echo "<br/>";
+						echo "</span>";
+						print form::checkbox('user_id_'.$user->id, $value, $checked, "onclick=\"userClicked(".$user->id.")\"");	
+						
+						echo "</td><td id=\"role_row_".$user->id."\" $role_style>";
+						
+						
+						foreach($group_roles as $role)
+						{	
+							//should this be checked?
+							$role_checked = false;
+							$role_value = "false";
+							if(isset($group_users_roles[$user->id]) && isset($group_users_roles[$user->id][$role->id]))
+							{
+								$role_checked = true;
+								$role_value = "true";
+							}
+							print form::label('role_id_'.$user->id.'_'.$role->id, $role->name);
+							print form::checkbox('role_id_'.$user->id.'_'.$role->id, $role_value, $role_checked, $role_enabled);	
+							echo "&nbsp;&nbsp;&nbsp;";
+						}
+						
+						echo "</td>";
+						echo "</tr>";
+						
 					}
 				?>
+				</table>
 				<br/>
 			</div>
 			

@@ -101,6 +101,16 @@ class Simplegroups_Install {
 				
 		//now make up some roles
 		//admin can add new users
+		//Users, can just do simple things like make reports and read messages
+		if(!ORM::factory('simplegroups_roles')->where('name', 'User')->find()->loaded)
+		{
+			$admin = ORM::factory('simplegroups_roles');
+			$admin->name = "User";
+			$admin->edit_group_settings = 0;
+			$admin->add_users = 0;
+			$admin->delete_users = 0;
+			$admin->save();
+		}
 		//super admin can add new users, remove users, and edit group settings
 		if(!ORM::factory('simplegroups_roles')->where('name', 'Admin')->find()->loaded)
 		{

@@ -262,6 +262,37 @@ class Simplegroups_settings_Controller extends Admin_Controller
 					$user_item->save();
 				}
 			}//end for each 
+			
+			
+			//update the users to roles mapping
+			//delete everything
+			$roles = ORM::factory('simplegroups_users_roles')
+				->join('simplegroups_groups_users', 'simplegroups_users_roles.users_id', 'simplegroups_groups_users.users_id','LEFT')
+				->where("simplegroups_groups_users.simplegroups_groups_id", $id)
+				->find_all();
+			foreach($roles as $role)
+			{
+				$role->delete();
+			}
+				
+			//put it all backtogether
+			foreach($_POST as $post_id => $data)
+			{
+				
+				if( substr($post_id, 0,8) == "role_id_")
+				{
+					//get the user ID number
+					$ids_str = substr($post_id, 8);
+					$position_of_ = strpos($ids_str, "_");
+					$user_id = substr($ids_str, 0, $position_of_);
+					$role_id = substr($ids_str, $position_of_ + 1);
+					
+					$user_role = ORM::factory('simplegroups_users_roles');
+					$user_role->roles_id = $role_id;
+					$user_role->users_id = $user_id;
+					$user_role->save();
+				}
+			}//end for each 
 
 
 			// SAVE AND CLOSE?
@@ -318,6 +349,8 @@ class Simplegroups_settings_Controller extends Admin_Controller
 		}
 		
 			$this->template->content->users = $this->_get_users($id);
+			$this->template->content->group_roles = $this->_get_group_roles();
+			$this->template->content->group_users_roles = $this->_get_group_user_to_roles_mapping($id);
 
         }
 
@@ -333,6 +366,50 @@ class Simplegroups_settings_Controller extends Admin_Controller
 	$this->template->editor_enabled = TRUE;
         $this->template->js = new View('simplegroups/simplegroups_editgroups_js');
     }//end method
+
+	/*************************************************
+	* This will return a list of all the possible roles a group
+	* user could have
+	*************************************************/
+	private function _get_group_roles()
+	{
+		$roles = ORM::factory('simplegroups_roles')->find_all();
+		return $roles;
+	}
+	
+	/************************************************************
+	 * Returns a 2D array of group users and their roles
+	 ************************************************************/
+	private function _get_group_user_to_roles_mapping($id)
+	{
+		if(!$id)
+		{
+			return array();
+		}
+		
+		$where_text = "roles.name = 'simplegroups' AND (simplegroups_groups_users.simplegroups_groups_id = $id 
+					OR simplegroups_groups_users.simplegroups_groups_id is NULL)";
+		
+		//get all the users that have the 'simplegroups' role, but aren't part of other groups
+		$users = ORM::factory('user')
+			->select("users.*, simplegroups_roles.id as role_id")
+			->join('simplegroups_users_roles', 'users.id', 'simplegroups_users_roles.users_id','LEFT')
+			->join('simplegroups_roles', 'simplegroups_roles.id', 'simplegroups_users_roles.roles_id','LEFT')
+			->join('roles_users', 'users.id', 'roles_users.user_id','LEFT')
+			->join('roles', 'roles.id', 'roles_users.role_id','LEFT')
+			->join('simplegroups_groups_users', 'users.id', 'simplegroups_groups_users.users_id','LEFT')
+			->where($where_text)
+			->find_all();
+			
+		//now turn this all into a 2d array where the first dimension is the user's id number and the 2nd dimension is the role id number
+		$mapping = array();
+		foreach ($users as $user)
+		{
+			$mapping[$user->id][$user->role_id] = 1;
+		}
+		
+		return $mapping;
+	}
 
 
 	/*function to get the users that are available and are already signed up for a group*/

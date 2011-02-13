@@ -62,6 +62,35 @@
 			return false;
 		});
 		
+		
+		// User Clicked action
+		function userClicked(id)
+		{
+			if($('#user_id_'+id).attr('checked'))
+			{
+				$('#role_row_'+id).css("background", "#fff");
+				$('#role_row_'+id).css("color", "#555");
+				var kids = $('#role_row_'+id).find(':checkbox');
+				kids.each(function()
+				{
+					$(this).removeAttr("disabled");
+				});
+			}
+			else
+			{
+				$('#role_row_'+id).css("background", "#eee");
+				$('#role_row_'+id).css("color", "#888");
+				var kids = $('#role_row_'+id).find(':checkbox');
+				kids.each(function()
+				{
+					$(this).attr("disabled", true);
+					$(this).attr("checked", false);
+				});
+			}
+			
+			return false;
+		}
+		
 			
 		
 		// Initialize tinyMCE Wysiwyg Editor
