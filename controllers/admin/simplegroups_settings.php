@@ -86,7 +86,7 @@ class Simplegroups_settings_Controller extends Admin_Controller
 		
 		
 		$users_counts = ORM::factory('simplegroups_groups_users')
-			->select("simplegroups_groups_users.*, COUNT(simplegroups_groups_users.simplegroups_groups_id) as user_count")
+			->select("simplegroups_groups_users.*, COUNT(".Kohana::config('database.default.table_prefix')."simplegroups_groups_users.simplegroups_groups_id) as user_count")
 			->groupby("simplegroups_groups_users.simplegroups_groups_id")
 			->find_all();
 			
@@ -96,7 +96,7 @@ class Simplegroups_settings_Controller extends Admin_Controller
 		}
 			
 		$reports_counts = ORM::factory('simplegroups_groups_incident')
-			->select("simplegroups_groups_incident.*, COUNT(simplegroups_groups_incident.simplegroups_groups_id) as report_count")
+			->select("simplegroups_groups_incident.*, COUNT(".Kohana::config('database.default.table_prefix')."simplegroups_groups_incident.simplegroups_groups_id) as report_count")
 			->groupby("simplegroups_groups_incident.simplegroups_groups_id")
 			->find_all();
 			

@@ -260,7 +260,7 @@ class groups_Core {
 			{
 				// Retrieve incidents by category			
 				$incidents = ORM::factory('incident')
-					->select('incident.*, COUNT(incident.id) as category_count')
+					->select('incident.*, COUNT('.Kohana::config('database.default.table_prefix').'incident.id) as category_count')
 					->with('location')
 					->join('incident_category', 'incident.id', 'incident_category.incident_id','LEFT')
 					->join('media', 'incident.id', 'media.incident_id','LEFT')
@@ -275,7 +275,7 @@ class groups_Core {
 			{
 				// Retrieve incidents by category			
 				$incidents = ORM::factory('incident')
-					->select('incident.*, COUNT(incident.id) as category_count')
+					->select('incident.*, COUNT('.Kohana::config('database.default.table_prefix').'incident.id) as category_count')
 					->with('location')
 					->join('incident_category', 'incident.id', 'incident_category.incident_id','LEFT')
 					->join('media', 'incident.id', 'media.incident_id','LEFT')
@@ -346,7 +346,7 @@ class groups_Core {
 		{
 			// Retrieve incidents by category			
 			$incidents_count = ORM::factory('incident')
-				->select('incident.*, COUNT(incident.id) as category_count')
+				->select('incident.*, COUNT('.Kohana::config('database.default.table_prefix').'incident.id) as category_count')
 				->with('location')
 				->join('incident_category', 'incident.id', 'incident_category.incident_id','LEFT')
 				->join('media', 'incident.id', 'media.incident_id','LEFT')
