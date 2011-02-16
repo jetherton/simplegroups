@@ -83,12 +83,34 @@ class simplegroups {
 		}
 		
 		//check and see if they selected a group
-		if($this->post_data->group != "NONE")
+		if(isset($this->post_data->group) && $this->post_data->group != "NONE")
 		{
 			$group_user = ORM::factory("simplegroups_groups_users");
 			$group_user->simplegroups_groups_id = $this->post_data->group;
 			$group_user->users_id = $user->id;
 			$group_user->save();
+		}
+		
+		//clear out any group roles for this user
+		$users_group_roles = ORM::factory("simplegroups_users_roles")
+			->where("users_id", $user->id)
+			->find_all();
+		foreach($users_group_roles as $users_group_role)
+		{
+			$users_group_role->delete();
+		}
+		
+		//if any new group roles have been added add them
+		foreach($this->post_data as $key=>$item)
+		{			
+			if (strpos($key, "group_role_id_") !== false)
+			{
+				$group_role_id = substr($key, 14);
+				$users_group_role = ORM::factory("simplegroups_users_roles");
+				$users_group_role->users_id = $user->id;
+				$users_group_role->roles_id = $group_role_id;
+				$users_group_role->save();
+			}
 		}
 		
 	 }//end of _edit_user()
@@ -99,25 +121,7 @@ class simplegroups {
 	 ************************************/
 	public function _edit_user_submit()
 	{
-		$this->post_data = Event::$data;
-		
-		//did they pick a group?
-		if($this->post_data->group == "NONE")
-		{
-			return;
-		}
-		
-		//so they picked a group, is their role simplegroups?
-		if($this->post_data->role == "simplegroups")
-		{
-			//they did so all is cool
-			return;
-		}
-		
-		//no good
-		$this->post_data->add_rules('role','matches["simplegroups"]');
-		
-		
+		$this->post_data = Event::$data;		
 	}//end of _edit_user_submit
 	
 	/*************************************
