@@ -360,6 +360,111 @@ class groups_Core {
 
 	}//end method	
 	
+	
+	
+	/*************************************************
+	* This will return a list of all the possible roles a group
+	* user could have
+	*************************************************/
+	public static function get_group_roles()
+	{
+		$roles = ORM::factory('simplegroups_roles')->find_all();
+		return $roles;
+	}
+	
+	/**************************************************************
+	* Returns an array of simple group roles keyed by their ID number
+	* if the ID number is set then the role represented by that 
+	* number applies to the given user
+	**************************************************************/
+	public static function get_roles_for_user($user_id)
+	{
+		if(!$user_id)
+		{
+			return array();
+		}
+		
+		$where_text = "simplegroups_users_roles.users_id = $user_id";
+		
+		//get all the users that have the 'simplegroups' role, but aren't part of other groups
+		$roles = ORM::factory('simplegroups_roles')
+			->join('simplegroups_users_roles', 'simplegroups_users_roles.roles_id', 'simplegroups_roles.id','LEFT')			
+			->where($where_text)
+			->find_all();
+			
+		//now turn this all into a 2d array where the first dimension is the user's id number and the 2nd dimension is the role id number
+		$mapping = array();
+		foreach ($roles as $role)
+		{
+			$mapping[$role->id] = $role;
+		}
+		
+		return $mapping;
+	}
+	
+	/************************************************************
+	 * Returns a 2D array of group users and their roles
+	 ************************************************************/
+	public static function get_group_users_to_roles_mapping($id)
+	{
+		if(!$id)
+		{
+			return array();
+		}
+		
+		$where_text = "roles.name = 'simplegroups' AND (simplegroups_groups_users.simplegroups_groups_id = $id 
+					OR simplegroups_groups_users.simplegroups_groups_id is NULL)";
+		
+		//get all the users that have the 'simplegroups' role, but aren't part of other groups
+		$users = ORM::factory('user')
+			->select("users.*, simplegroups_roles.id as role_id")
+			->join('simplegroups_users_roles', 'users.id', 'simplegroups_users_roles.users_id','LEFT')
+			->join('simplegroups_roles', 'simplegroups_roles.id', 'simplegroups_users_roles.roles_id','LEFT')
+			->join('roles_users', 'users.id', 'roles_users.user_id','LEFT')
+			->join('roles', 'roles.id', 'roles_users.role_id','LEFT')
+			->join('simplegroups_groups_users', 'users.id', 'simplegroups_groups_users.users_id','LEFT')
+			->where($where_text)
+			->find_all();
+			
+		//now turn this all into a 2d array where the first dimension is the user's id number and the 2nd dimension is the role id number
+		$mapping = array();
+		foreach ($users as $user)
+		{
+			$mapping[$user->id][$user->role_id] = 1;
+		}
+		
+		return $mapping;
+	}
+	
+	
+	
+	
+	/*function to get the users that are available and are already signed up for a group*/
+	public static function get_available_users_for_group( $id )
+	{
+		if($id)
+		{
+			$where_text = "roles.name = 'simplegroups' AND (simplegroups_groups_users.simplegroups_groups_id = $id 
+					OR simplegroups_groups_users.simplegroups_groups_id is NULL)";
+		}
+		else
+		{
+			$where_text = "roles.name = 'simplegroups' AND (simplegroups_groups_users.simplegroups_groups_id is NULL)";
+		}
+		//get all the users that have the 'simplegroups' role, but aren't part of other groups
+		$users = ORM::factory('user')
+			->select("users.*, simplegroups_groups_users.simplegroups_groups_id")
+			->join('roles_users', 'users.id', 'roles_users.user_id','LEFT')
+			->join('roles', 'roles.id', 'roles_users.role_id','LEFT')
+			->join('simplegroups_groups_users', 'users.id', 'simplegroups_groups_users.users_id','LEFT')
+			->where($where_text)
+			->find_all();
+
+		
+		return $users;
+	}//end function
+	
+	
 }//end class
 
 

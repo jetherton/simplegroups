@@ -149,9 +149,17 @@ class simplegroups {
 		{
 			$user_group_id = $users_group->id;
 		}
+		
+		//get list of group roles
+		$roles = groups::get_group_roles();
+		
+		//get list of roles for this particular user
+		$users_roles = groups::get_roles_for_user($user_id);
 
 		$view = new View('simplegroups/edit_user');
 		$view->groups = $groups_array;
+		$view->roles = $roles;
+		$view->users_roles = $users_roles;
 		$view->user_group_id = $user_group_id;
 		$view->render(TRUE);
 
