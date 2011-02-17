@@ -50,6 +50,9 @@
 				<div class="report-form">			
 					<div class="head">
 						<input type="image" src="<?php echo url::base() ?>media/img/admin/btn-save-settings.gif" class="save-rep-btn" />
+						<?php if( $permissions["delete_users"]) 
+							{
+						?>
 						<a href="#" onclick="var answer = confirm('Are You Sure You Want To Delete This User?')
 										if (answer)
 										{
@@ -58,7 +61,10 @@
 											// Submit Form
 											$('#mainForm').submit();			
 										}
-			" style="border:solid 1px #995555; padding:5px; float:right; margin-right:20px; color:#000; background-color:#cc9999; text-decoration:none;" > DELETE</a>
+						" style="border:solid 1px #995555; padding:5px; float:right; margin-right:20px; color:#000; background-color:#cc9999; text-decoration:none;" > DELETE</a>
+						<?php 
+							}
+						?>
 					</div>
 					<!-- column -->		
 					<div class="sms_holder">

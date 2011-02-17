@@ -272,6 +272,7 @@ class Users_Controller extends Admin_simplegroup_Controller
         
         
 	$this->template->content->id = $user_id;
+	$this->template->content->permissions = $permissions;
         $this->template->content->user = $user;
         $this->template->content->form = $form;
         $this->template->content->errors = $errors;
