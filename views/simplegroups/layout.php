@@ -161,6 +161,28 @@
 						<li><a <?php if($this_page=="reports") echo 'class="active"' ;?> href="<?php echo url::site(); ?>admin/simplegroups/reports" >Reports</a></li>
 						<li><a <?php if($this_page=="messages") echo 'class="active"' ;?> href="<?php echo url::site(); ?>admin/simplegroups/messages" >Messages</a></li>
 						<li><a <?php if($this_page=="adminmap") echo 'class="active"' ;?> href="<?php echo url::site(); ?>admin/simplegroups/adminmap" >Map</a></li>
+						<?php 
+							//get permissions
+							$permissions = groups::get_permissions_for_user($this->user->id);
+							if($permissions["add_users"] || $permissions["delete_users"])
+							{
+						?>
+								<li><a <?php if($this_page=="users") echo 'class="active"' ;?> href="<?php echo url::site(); ?>admin/simplegroups/users" >Users</a></li>
+						<?php
+							}
+						?>
+						
+						<?php 
+							//get permissions
+							if($permissions["edit_group_settings"] )
+							{
+						?>
+								<li><a <?php if($this_page=="simple_group_settings") echo 'class="active"' ;?> href="<?php echo url::site(); ?>admin/simplegroups/settings" >Group Settings</a></li>
+						<?php
+							}
+						?>
+						    
+						
 				</ul>
 				<!-- sub-nav -->
 				<ul class="sub-nav">

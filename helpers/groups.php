@@ -260,7 +260,7 @@ class groups_Core {
 			{
 				// Retrieve incidents by category			
 				$incidents = ORM::factory('incident')
-					->select('incident.*, COUNT('.Kohana::config('database.default.table_prefix').'incident.id) as category_count')
+					->select('incident.*, COUNT(incident.id) as category_count')
 					->with('location')
 					->join('incident_category', 'incident.id', 'incident_category.incident_id','LEFT')
 					->join('media', 'incident.id', 'media.incident_id','LEFT')
@@ -275,7 +275,7 @@ class groups_Core {
 			{
 				// Retrieve incidents by category			
 				$incidents = ORM::factory('incident')
-					->select('incident.*, COUNT('.Kohana::config('database.default.table_prefix').'incident.id) as category_count')
+					->select('incident.*, COUNT(incident.id) as category_count')
 					->with('location')
 					->join('incident_category', 'incident.id', 'incident_category.incident_id','LEFT')
 					->join('media', 'incident.id', 'media.incident_id','LEFT')
@@ -346,7 +346,7 @@ class groups_Core {
 		{
 			// Retrieve incidents by category			
 			$incidents_count = ORM::factory('incident')
-				->select('incident.*, COUNT('.Kohana::config('database.default.table_prefix').'incident.id) as category_count')
+				->select('incident.*, COUNT(incident.id) as category_count')
 				->with('location')
 				->join('incident_category', 'incident.id', 'incident_category.incident_id','LEFT')
 				->join('media', 'incident.id', 'media.incident_id','LEFT')
@@ -402,18 +402,53 @@ class groups_Core {
 		return $mapping;
 	}
 	
+	public static function get_permissions_for_user($user_id)
+	{
+		$roles = groups::get_roles_for_user($user_id);
+		$permissions = array(
+							"edit_group_settings"=>false,
+							"add_users"=>false,
+							"delete_users"=>false
+						);
+		
+		foreach($roles as $role)
+		{
+			if($role->edit_group_settings == 1)
+			{
+				$permissions["edit_group_settings"] = true;
+			}
+			if($role->add_users == 1)
+			{
+				$permissions["add_users"] = true;
+			}
+			if($role->edit_group_settings == 1)
+			{
+				$permissions["delete_users"] = true;
+			}
+		}
+		
+		return $permissions;
+	}
+	
 	/************************************************************
 	 * Returns a 2D array of group users and their roles
 	 ************************************************************/
-	public static function get_group_users_to_roles_mapping($id)
+	public static function get_group_users_to_roles_mapping($id, $include_non_group_members = true)
 	{
 		if(!$id)
 		{
 			return array();
 		}
 		
-		$where_text = "roles.name = 'simplegroups' AND (simplegroups_groups_users.simplegroups_groups_id = $id 
-					OR simplegroups_groups_users.simplegroups_groups_id is NULL)";
+		if($include_non_group_members)
+		{
+			$where_text = "roles.name = 'simplegroups' AND (simplegroups_groups_users.simplegroups_groups_id = $id 
+						OR simplegroups_groups_users.simplegroups_groups_id is NULL)";
+		}
+		else
+		{
+			$where_text = "roles.name = 'simplegroups' AND (simplegroups_groups_users.simplegroups_groups_id = $id) ";		
+		}
 		
 		//get all the users that have the 'simplegroups' role, but aren't part of other groups
 		$users = ORM::factory('user')
@@ -451,6 +486,25 @@ class groups_Core {
 		{
 			$where_text = "roles.name = 'simplegroups' AND (simplegroups_groups_users.simplegroups_groups_id is NULL)";
 		}
+		//get all the users that have the 'simplegroups' role, but aren't part of other groups
+		$users = ORM::factory('user')
+			->select("users.*, simplegroups_groups_users.simplegroups_groups_id")
+			->join('roles_users', 'users.id', 'roles_users.user_id','LEFT')
+			->join('roles', 'roles.id', 'roles_users.role_id','LEFT')
+			->join('simplegroups_groups_users', 'users.id', 'simplegroups_groups_users.users_id','LEFT')
+			->where($where_text)
+			->find_all();
+
+		
+		return $users;
+	}//end function
+	
+	
+		/*function to get the users that are already signed up for a group*/
+	public static function get_users_for_group( $id )
+	{
+
+		$where_text = "roles.name = 'simplegroups' AND (simplegroups_groups_users.simplegroups_groups_id = $id ) ";
 		//get all the users that have the 'simplegroups' role, but aren't part of other groups
 		$users = ORM::factory('user')
 			->select("users.*, simplegroups_groups_users.simplegroups_groups_id")

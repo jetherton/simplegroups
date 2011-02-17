@@ -82,13 +82,26 @@ class simplegroups {
 			$group_user->delete();
 		}
 		
-		//check and see if they selected a group
-		if(isset($this->post_data->group) && $this->post_data->group != "NONE")
+		//check and see if the person doing the editing is a group user
+		$current_user = new User_Model($_SESSION['auth_user']->id);
+		$group_id = groups::get_user_group($current_user);
+		if($group_id)
 		{
 			$group_user = ORM::factory("simplegroups_groups_users");
-			$group_user->simplegroups_groups_id = $this->post_data->group;
+			$group_user->simplegroups_groups_id = $group_id;
 			$group_user->users_id = $user->id;
 			$group_user->save();
+		}
+		else
+		{
+			//check and see if they selected a group
+			if(isset($this->post_data->group) && $this->post_data->group != "NONE")
+			{
+				$group_user = ORM::factory("simplegroups_groups_users");
+				$group_user->simplegroups_groups_id = $this->post_data->group;
+				$group_user->users_id = $user->id;
+				$group_user->save();
+			}
 		}
 		
 		//clear out any group roles for this user
@@ -131,27 +144,42 @@ class simplegroups {
 	 ************************************/
 	 public function _edit_user_form()
 	 {
-		$user_id = Event::$data;
-
-		//get a list of all the groups
-		$groups = ORM::factory("simplegroups_groups")
-			->find_all();
-		$groups_array = array("NONE"=>"--No Group--");
-		foreach($groups as $group)
-		{
-			$groups_array[$group->id] = $group->name;
-		}
-		
-		//find out if our user in question is a group members
-		$users_groups = ORM::factory("simplegroups_groups")
-			->join('simplegroups_groups_users', 'simplegroups_groups_users.simplegroups_groups_id', 'simplegroups_groups.id')
-			->where('simplegroups_groups_users.users_id', $user_id)
-			->find_all();
-		
+		$groups_array = null;
 		$user_group_id = "NONE";
-		foreach($users_groups as $users_group)
+		$user_id = Event::$data;
+		
+		//check and see if the person doing the editing is a group user
+		$current_user = new User_Model($_SESSION['auth_user']->id);
+		$group_id = groups::get_user_group($current_user);
+		if($group_id)
 		{
-			$user_group_id = $users_group->id;
+			$group = ORM::factory("simplegroups_groups")
+				->where("id", $group_id)
+				->find();
+			$groups_array = array($group->id => $group->name);
+		}
+		else
+		{
+			//get a list of all the groups
+			$groups = ORM::factory("simplegroups_groups")
+				->find_all();
+			$groups_array = array("NONE"=>"--No Group--");
+			foreach($groups as $group)
+			{
+				$groups_array[$group->id] = $group->name;
+			}
+		
+			//find out if our user in question is a group members
+			$users_groups = ORM::factory("simplegroups_groups")
+				->join('simplegroups_groups_users', 'simplegroups_groups_users.simplegroups_groups_id', 'simplegroups_groups.id')
+				->where('simplegroups_groups_users.users_id', $user_id)
+				->find_all();
+			
+			
+			foreach($users_groups as $users_group)
+			{
+				$user_group_id = $users_group->id;
+			}
 		}
 		
 		//get list of group roles

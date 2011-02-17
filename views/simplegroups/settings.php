@@ -1,6 +1,6 @@
 <div class="bg">
 	<h2>
-		<?php  echo groups::manage_subtabs("edit"); ?>
+		Edit Group
 	</h2>
 </div>
 	<?php print form::open(NULL, array('enctype' => 'multipart/form-data', 'id' => 'reportForm', 'name' => 'reportForm')); ?>
@@ -38,15 +38,7 @@
 				<h3><?php echo $id ? "Edit Group" : "New Group"; ?></h3>
 				<div class="btns" style="float:right;">
 					<ul>
-						<li><a href="#" class="btn_save"><?php echo strtoupper("Save Group");?></a></li>
-						<li><a href="#" class="btn_save_close"><?php echo strtoupper("Save and Close");?></a></li>
-						<?php 
-						if($id)
-						{
-							echo "<li><a href=\"#\" class=\"btn_delete btns_red\">".strtoupper("Delete This Group")."</a></li>";
-						}
-						?>
-						<li><a href="<?php echo url::base().'admin/simplegroups_settings/';?>" class="btns_red"><?php echo strtoupper(Kohana::lang('ui_main.cancel'));?></a>&nbsp;&nbsp;&nbsp;</li>
+						<li><a href="#" class="btn_save"><?php echo strtoupper("Save Settings");?></a></li>						
 					</ul>
 				</div>
 			</div>
@@ -102,6 +94,7 @@
 				<?php
 					foreach($users as $user)
 					{
+						/*
 						$checked = false;
 						$value = "false";
 						$role_enabled = "DISABLED";
@@ -113,13 +106,12 @@
 							$role_enabled = "";
 							$role_style = "";
 						}
+						*/
 						echo "<tr>";
 						echo "<td><span style=\"font-size:150%;\">";
-						echo "<a href=\"".url::base()."admin/users/edit/".$user->id."\">".$user->name. "</a>";
-						echo "</span>";
-						print form::checkbox('user_id_'.$user->id, $value, $checked, "onclick=\"userClicked(".$user->id.")\"");	
-						
-						echo "</td><td id=\"role_row_".$user->id."\" $role_style>";
+						echo "<a href=\"".url::base()."admin/simplegroups/users/edit/".$user->id."\">".$user->name. "</a>";
+						echo "</span>";						
+						echo "</td><td id=\"role_row_".$user->id."\" >";
 						
 						
 						foreach($group_roles as $role)
@@ -133,7 +125,7 @@
 								$role_value = "true";
 							}
 							print form::label('role_id_'.$user->id.'_'.$role->id, $role->name);
-							print form::checkbox('role_id_'.$user->id.'_'.$role->id, $role_value, $role_checked, $role_enabled);	
+							print form::checkbox('role_id_'.$user->id.'_'.$role->id, $role_value, $role_checked);	
 							echo "&nbsp;&nbsp;&nbsp;";
 						}
 						
@@ -180,28 +172,11 @@
 			
 			<div class="btns">
 				<ul>
-					<li><a href="#" class="btn_save"><?php echo strtoupper("Save Group");?></a></li>
-					<li><a href="#" class="btn_save_close"><?php echo strtoupper("Save and Close");?></a></li>
-					<?php 
-					if($id)
-					{
-						echo "<li><a href=\"#\" class=\"btn_delete btns_red\">".strtoupper("Delete This Group")."</a></li>";
-					}
-					?>
-					<li><a href="<?php echo url::site().'admin/simplegroups_settings/';?>" class="btns_red"><?php echo strtoupper(Kohana::lang('ui_main.cancel'));?></a></li>
+					<li><a href="#" class="btn_save"><?php echo strtoupper("Save Settings");?></a></li>
 				</ul>
 			</div>						
 		</div>
 	<?php print form::close(); ?>
 	
-	<?php
-		if($id)
-		{
-			// Hidden Form to Perform the Delete function
-			print form::open(url::site().'admin/simplegroups_settings', array('id' => 'reportMain', 'name' => 'reportMain'));
-			$array=array('action'=>'d','group_id[]'=>$id);
-			print form::hidden($array);
-			print form::close();
-		}
-	?>
+</div>
 </div>
