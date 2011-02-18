@@ -247,7 +247,8 @@ class Reports_Controller extends Admin_simplegroup_Controller
 
         }
 
-	$db = new Database;
+
+$db = new Database;
 
 
 	// Category ID
@@ -1508,10 +1509,245 @@ class Reports_Controller extends Admin_simplegroup_Controller
             return "1=1";
         }
     }
+    
+    
+        /**
+    * Download Reports in CSV format
+    */
+
+    function download()
+    {
+        
+	$permissions = groups::get_permissions_for_user($this->user->id);
+	if(!$permissions["edit_group_settings"] )
+	{
+		url::redirect(url::site().'admin/simplegroups/dashboard');
+	}
+
+        $this->template->content = new View('simplegroups/reports_download');
+        $this->template->content->title = Kohana::lang('ui_admin.download_reports');
+
+        $form = array(
+            'data_point'   => '',
+            'data_include' => '',
+            'from_date'    => '',
+            'to_date'      => ''
+        );
+        
+        $errors = $form;
+        $form_error = FALSE;
+
+        // check, has the form been submitted, if so, setup validation
+        if ($_POST)
+        {
+            // Instantiate Validation, use $post, so we don't overwrite $_POST fields with our own things
+            $post = Validation::factory($_POST);
+
+             //  Add some filters
+            $post->pre_filter('trim', TRUE);
+
+            // Add some rules, the input field, followed by a list of checks, carried out in order
+            $post->add_rules('data_point.*','required','numeric','between[1,4]');
+            $post->add_rules('data_include.*','numeric','between[1,5]');
+            $post->add_rules('from_date','date_mmddyyyy');
+            $post->add_rules('to_date','date_mmddyyyy');
+
+            // Validate the report dates, if included in report filter
+            if (!empty($_POST['from_date']) || !empty($_POST['to_date']))
+            {
+                // Valid FROM Date?
+                if (empty($_POST['from_date']) || (strtotime($_POST['from_date']) > strtotime("today"))) {
+                    $post->add_error('from_date','range');
+                }
+
+                // Valid TO date?
+                if (empty($_POST['to_date']) || (strtotime($_POST['to_date']) > strtotime("today"))) {
+                    $post->add_error('to_date','range');
+                }
+
+                // TO Date not greater than FROM Date?
+                if (strtotime($_POST['from_date']) > strtotime($_POST['to_date'])) {
+                    $post->add_error('to_date','range_greater');
+                }
+            }
+
+            // Test to see if things passed the rule checks
+            if ($post->validate())
+            {
+                // Add Filters
+                $filter = " ( 1=1";
+                // Report Type Filter
+                foreach($post->data_point as $item)
+                {
+                    if ($item == 1) {
+                        $filter .= " OR incident_active = 1 ";
+                    }
+                    if ($item == 2) {
+                        $filter .= " OR incident_verified = 1 ";
+                    }
+                    if ($item == 3) {
+                        $filter .= " OR incident_active = 0 ";
+                    }
+                    if ($item == 4) {
+                        $filter .= " OR incident_verified = 0 ";
+                    }
+                }
+                $filter .= ") ";
+		
+		//are we stripping out HTML from the description
+		$strip_html = false;
+		if(isset($post->strip_html))
+		{
+			$strip_html = true;
+		}
+
+                // Report Date Filter
+                if (!empty($post->from_date) && !empty($post->to_date))
+                {
+                    $filter .= " AND ( incident_date >= '" . date("Y-m-d H:i:s",strtotime($post->from_date)) . "' AND incident_date <= '" . date("Y-m-d H:i:s",strtotime($post->to_date)) . "' ) ";
+                }
+
+		//make sure only reports from this group are downloaded
+		
+		$filter .= " AND (simplegroups_groups_incident.simplegroups_groups_id = '".$this->group->id."') ";
+
+                // Retrieve reports
+                $incidents = ORM::factory('incident')
+			->join("simplegroups_groups_incident", "simplegroups_groups_incident.incident_id", "incident.id")
+			->where($filter)
+			->orderby('incident_dateadd', 'desc')
+			->find_all();
+
+                // Column Titles
+                $report_csv = "#,INCIDENT TITLE,INCIDENT DATE";
+                foreach($post->data_include as $item)
+                {
+                    if ($item == 1) {
+                        $report_csv .= ",LOCATION";
+                    }
+                    
+                    if ($item == 2) {
+                        $report_csv .= ",DESCRIPTION";
+                    }
+                    
+                    if ($item == 3) {
+                        $report_csv .= ",CATEGORY";
+                    }
+                    
+                    if ($item == 4) {
+                        $report_csv .= ",LATITUDE";
+                    }
+                    
+                    if($item == 5) {
+                        $report_csv .= ",LONGITUDE";
+                    }
+                }
+                $report_csv .= ",APPROVED,VERIFIED";
+                $report_csv .= "\n";
+
+                foreach ($incidents as $incident)
+                {
+                    $report_csv .= '"'.$incident->id.'",';
+                    $report_csv .= '"'.$this->_csv_text($incident->incident_title).'",';
+                    $report_csv .= '"'.$incident->incident_date.'"';
+
+                    foreach($post->data_include as $item)
+                    {
+                        switch ($item)
+                        {
+                            case 1:
+                                $report_csv .= ',"'.$this->_csv_text($incident->location->location_name).'"';
+                            break;
+
+                            case 2:
+				if($strip_html)
+				{
+					$report_csv .= ',"'.$this->_csv_text(strip_tags($incident->incident_description)).'"';
+				}
+				else
+				{
+					$report_csv .= ',"'.$this->_csv_text($incident->incident_description).'"';
+				}
+                            break;
+
+                            case 3:
+                                $report_csv .= ',"';
+                            
+                                foreach($incident->incident_category as $category)
+                                {
+                                    if ($category->category->category_title)
+                                    {
+                                        $report_csv .= $this->_csv_text($category->category->category_title) . ", ";
+                                    }
+                                }
+                                $report_csv .= '"';
+                            break;
+                        
+                            case 4:
+                                $report_csv .= ',"'.$this->_csv_text($incident->location->latitude).'"';
+                            break;
+                        
+                            case 5:
+                                $report_csv .= ',"'.$this->_csv_text($incident->location->longitude).'"';
+                            break;
+                        }
+                    }
+                    
+                    if ($incident->incident_active)
+                    {
+                        $report_csv .= ",YES";
+                    }
+                    else
+                    {
+                        $report_csv .= ",NO";
+                    }
+                    
+                    if ($incident->incident_verified)
+                    {
+                        $report_csv .= ",YES";
+                    }
+                    else
+                    {
+                        $report_csv .= ",NO";
+                    }
+                    
+                    $report_csv .= "\n";
+                }
+
+                // Output to browser
+                header("Content-type: text/x-csv");
+                header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+                header("Content-Disposition: attachment; filename=" . time() . ".csv");
+                header("Content-Length: " . strlen($report_csv));
+                echo $report_csv;
+                exit;
+
+            }
+            // No! We have validation errors, we need to show the form again, with the errors
+            else
+            {
+                // repopulate the form fields
+                $form = arr::overwrite($form, $post->as_array());
+
+                // populate the error fields, if any
+                $errors = arr::overwrite($errors, $post->errors('report'));
+                $form_error = TRUE;
+            }
+        }
+
+        $this->template->content->form = $form;
+        $this->template->content->errors = $errors;
+        $this->template->content->form_error = $form_error;
+
+        // Javascript Header
+        $this->template->js = new View('simplegroups/reports_download_js');
+        $this->template->js->calendar_img = url::base() . "media/img/icon-calendar.gif";
+    }//end method
+
 
     private function _csv_text($text)
     {
         $text = stripslashes(htmlspecialchars($text));
         return $text;
     }
-}
+}//end class

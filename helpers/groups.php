@@ -100,6 +100,13 @@ class groups_Core {
 		$menu .= ($this_sub_page == "edit") ? Kohana::lang('ui_main.create_report') : "<a href=\"".url::base()."admin/simplegroups/reports/edit\">".Kohana::lang('ui_main.create_report')."</a>";
 
 		$menu .= ($this_sub_page == "comments") ? Kohana::lang('ui_main.comments') : "<a href=\"".url::base()."admin/simplegroups/comments\">".Kohana::lang('ui_main.comments')."</a>";
+		
+		$user = new User_Model($_SESSION['auth_user']->id);
+		$permissions = groups::get_permissions_for_user($user->id);
+		if($permissions["edit_group_settings"] )
+		{
+			$menu .= ($this_sub_page == "download") ? Kohana::lang('ui_main.download_reports') : "<a href=\"".url::base()."admin/simplegroups/reports/download\">".Kohana::lang('ui_main.download_reports')."</a>";
+		}
 
 		echo $menu;
 	}
