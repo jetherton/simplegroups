@@ -88,9 +88,9 @@ class groups_Core {
 
 	/**
 	 * Generate Report Sub Tab Menus
-     * @param string $this_sub_page
+	 * @param string $this_sub_page
 	 * @return string $menu
-     */
+	 */
 	public static function reports_subtabs($this_sub_page = FALSE)
 	{
 		$menu = "";
@@ -112,6 +112,22 @@ class groups_Core {
 	}
 
 
+
+/**
+	 * Generate Report Sub Tab Menus
+	 * @param string $this_sub_page
+	 * @return string $menu
+	 */
+	public static function users_subtabs($this_sub_page = FALSE)
+	{
+		$menu = "";
+
+		$menu .= ($this_sub_page == "users") ? Kohana::lang('ui_admin.manage_users') : "<a href=\"".url::site()."admin/simplegroups/users/\">".Kohana::lang('ui_admin.manage_users')."</a>";
+		
+		$menu .= ($this_sub_page == "users_edit") ? Kohana::lang('ui_admin.manage_users_edit') : "<a href=\"".url::site()."admin/simplegroups/users/edit/\">".Kohana::lang('ui_admin.manage_users_edit')."</a>";
+
+		echo $menu;
+	}
 
 
 

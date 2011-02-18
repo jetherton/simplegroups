@@ -15,8 +15,7 @@
 ?>
 			<div class="bg">
 				<h2>
-					View Users
-					<a href="http://montserrado/ushahidi-1/Ushahidi_Web/admin/simplegroups/users/edit/">Add/Edit Users</a>					
+					<?php groups::users_subtabs("users"); ?>
 				</h2>
 				<!-- report-table -->
 				<div class="report-form">
