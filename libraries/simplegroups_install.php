@@ -37,7 +37,7 @@ class Simplegroups_Install {
 				  `logo` varchar(200) default NULL,
 				  `own_instance` varchar(1000) default NULL,
 				  PRIMARY KEY (`id`)
-				) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
+				) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
 		
 		//create the table that tracks the phone numbers associated with a group
 		$this->db->query('CREATE TABLE IF NOT EXISTS `'.Kohana::config('database.default.table_prefix').'simplegroups_groups_numbers` (
@@ -47,7 +47,7 @@ class Simplegroups_Install {
 				  `name` varchar(100) default NULL,
 				  `org` varchar(100) default NULL,
 				  PRIMARY KEY (`id`)
-				) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
+				) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
 				
 				
 		//create the table that tracks the users associated with a group
@@ -56,7 +56,7 @@ class Simplegroups_Install {
 				  `simplegroups_groups_id` int(10) unsigned NOT NULL,
 				  `users_id` int(10) unsigned NOT NULL,
 				  PRIMARY KEY (`id`)
-				) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
+				) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
 				
 		
 		//create the table that tracks the incidents/reports associated with a group
@@ -66,7 +66,7 @@ class Simplegroups_Install {
 				  `incident_id` int(10) unsigned NOT NULL,
 				  `number_id` int(10) unsigned NOT NULL,
 				  PRIMARY KEY (`id`)
-				) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
+				) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
 				
 			
 		//create the table that tracks the messages associated with a group
@@ -76,7 +76,7 @@ class Simplegroups_Install {
 				  `message_id` int(10) unsigned NOT NULL,
 				  `number_id` int(10) unsigned NOT NULL,
 				  PRIMARY KEY (`id`)
-				) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
+				) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
 				
 		//check and see if the simplegroups role already exists
 		if(ORM::factory('role')->where("name", "simplegroups")->count_all() == 0)
@@ -97,7 +97,7 @@ class Simplegroups_Install {
 				  `add_users` tinyint(4) NOT NULL default \'0\',
 				  `delete_users` tinyint(4) NOT NULL default \'0\',
 				  PRIMARY KEY (`id`)
-				) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
+				) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
 				
 		//now make up some roles
 		//admin can add new users
@@ -138,7 +138,7 @@ class Simplegroups_Install {
 				  `roles_id` int(10) unsigned NOT NULL,
 				  `users_id` int(10) unsigned NOT NULL,
 				  PRIMARY KEY (`id`)
-				) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
+				) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
 		
 		
 		//check and see if the simplegroups_groups table already has the own_instance field. If not make it
@@ -157,6 +157,38 @@ class Simplegroups_Install {
 		{
 			$this->db->query('ALTER TABLE `'.Kohana::config('database.default.table_prefix').'simplegroups_groups` ADD `own_instance` VARCHAR(1000) NULL DEFAULT NULL');
 		}
+		
+		
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		///					CATEGORIES AND SIMPLE GROUPS					////
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+		//Create the simpelgroups category table
+		$this->db->query('CREATE TABLE IF NOT EXISTS `'.Kohana::config('database.default.table_prefix').'simplegroups_category` ( 
+			`id` int(11) unsigned NOT NULL auto_increment,
+			`parent_id` INT NOT NULL DEFAULT \'0\',
+			`locale` varchar(10) NOT NULL default \'en_US\',
+			`category_type` tinyint(4) default NULL,
+			`category_title` varchar(255) default NULL,
+			`category_description` text default NULL,
+			`category_color` varchar(20) default NULL,
+			`category_image` varchar(100) default NULL,
+			`category_image_thumb` varchar(100) default NULL,
+			`category_image_shadow` varchar(100) default NULL,
+			`category_visible` tinyint(4) NOT NULL default \'1\',
+			`category_trusted` tinyint(4) NOT NULL default \'0\',
+			`simplegroups_groups_id` int(10) unsigned NOT NULL,
+			`applies_to_report` tinyint(4) default \'0\',
+			`applies_to_message` tinyint(4) default \'0\',
+			`selected_by_default` tinyint(4) default \'0\',
+			PRIMARY KEY  (`id`), KEY `category_visible` (`category_visible`) ) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
+
+		$this->db->query('CREATE TABLE IF NOT EXISTS `'.Kohana::config('database.default.table_prefix').'simplegroups_incident_category` (                                    -- table description
+			`id` int(11) NOT NULL auto_increment,
+			`incident_id` bigint(20) NOT NULL default \'0\',
+			`simplegroups_category_id` int(11) NOT NULL default \'0\',
+			PRIMARY KEY  (`id`), UNIQUE KEY `incident_simplegroups_category_ids` (`incident_id`,`simplegroups_category_id`)
+			) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 		
 					
 	}//end of run_install
