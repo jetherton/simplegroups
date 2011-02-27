@@ -183,11 +183,29 @@ class Simplegroups_Install {
 			`selected_by_default` tinyint(4) default \'0\',
 			PRIMARY KEY  (`id`), KEY `category_visible` (`category_visible`) ) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 
-		$this->db->query('CREATE TABLE IF NOT EXISTS `'.Kohana::config('database.default.table_prefix').'simplegroups_incident_category` (                                    -- table description
+		$this->db->query('CREATE TABLE IF NOT EXISTS `'.Kohana::config('database.default.table_prefix').'simplegroups_incident_category` ( 
 			`id` int(11) NOT NULL auto_increment,
 			`incident_id` bigint(20) NOT NULL default \'0\',
 			`simplegroups_category_id` int(11) NOT NULL default \'0\',
 			PRIMARY KEY  (`id`), UNIQUE KEY `incident_simplegroups_category_ids` (`incident_id`,`simplegroups_category_id`)
+			) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
+			
+		
+		$this->db->query('CREATE TABLE IF NOT EXISTS `'.Kohana::config('database.default.table_prefix').'simplegroups_message_category` ( 
+			`id` int(11) NOT NULL auto_increment,
+			`message_id` bigint(20) NOT NULL default \'0\',
+			`simplegroups_category_id` int(11) NOT NULL default \'0\',
+			PRIMARY KEY  (`id`), UNIQUE KEY `message_simplegroups_category_ids` (`message_id`,`simplegroups_category_id`)
+			) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
+			
+			
+		$this->db->query('CREATE TABLE IF NOT EXISTS `'.Kohana::config('database.default.table_prefix').'simplegroups_category_lang`(
+			`id` INT(11) unsigned  NOT NULL AUTO_INCREMENT, 
+			`simplegroups_category_id` int(11) NOT NULL, 
+			`locale` VARCHAR(10) default NULL, 
+			`category_title` VARCHAR(255) default NULL, 
+			`category_description` TEXT default NULL, 
+			PRIMARY KEY (`id`)
 			) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 		
 					

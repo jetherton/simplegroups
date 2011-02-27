@@ -109,3 +109,139 @@
 			}
 		}
 		
+	
+	</script>
+	
+	<style type="text/css">
+		.lightbox_bg {
+			background:#777 none repeat scroll 0 0;
+			display:none;
+			height:100%;
+			left:0;
+			filter:alpha(opacity=50);
+			opacity: 0.5;
+			top:0;
+			width:100%;
+			z-index:50;
+			display:none;
+			position:fixed;
+		}
+		.modal{
+			border: solid 2px black;
+			padding: 10px;
+			position:absolute;			
+			z-index:51;
+			background: white;
+			width: 400px;
+
+		}
+		
+		.cat_span{
+			font-size:10pt;
+			color:black;
+			padding-left:3px;
+			padding-right:3px;
+		}
+		
+		td.cat{
+			border:none;
+			padding:5px 3px 3px 3px; 			
+			vertical-align:middle;
+		}
+		
+		.no_cat{
+			text-align:center;
+		}
+		
+	</style>
+    
+    <script type="text/javascript">
+		
+		
+	function editCategory ( message_id, this_this )
+	{
+		//add modal background
+		$('<div id="mask" />').addClass('lightbox_bg').appendTo('body').show();
+		//show the modal dialog box
+		$('<div id="modalbox" />').text('').addClass('modal').appendTo('body');
+		
+		//find out where on the page the edit categories link was clicked
+		var message_pos = findPosition(this_this);
+		
+		//Get the window height and width
+		var winH = $(window).height();
+		var winW = $(window).width();
+               
+		//Set the popup window to center
+		$('#modalbox').css('top',  message_pos[1]-50);
+		$('#modalbox').css('left', winW/2-$('#modalbox').width()/2);
+		
+		
+		$('#modalbox').html('<div style="float:right;"><a href="#" onclick="closeEditCategory(); return false;"> Close</a></div><div id="category_content" style="text-align:center;"> <img src="<?php echo url::base(); ?>media/img/loading_g2.gif"/></div>');
+		
+		//get the HTML for the next set of kid admin areas
+			$.get("<?php echo url::base() ?>admin/simplegroups/messages/category_info/"+message_id,
+			function(data){
+				$('#category_content').html(data);	
+
+				// Category treeview
+				$("#category-column-1,#category-column-2").treeview({
+					persist: "location",
+					collapsed: true,
+					unique: false
+				});
+				
+			});
+			
+		return false;
+	}
+	
+	
+	//use this to save the category info
+	function saveCategories(message_id)
+	{
+			
+		$.post("<?php echo url::base() ?>admin/simplegroups/messages/save_category_info/"+message_id, 
+			$("#message_categories").serialize(), 
+			function(data){
+				$('#category_content').html("<h2>Categories Saved</h2>");	
+				
+				$('#message_cat_info_'+message_id).html(data);	
+				
+				timeOutStr = "closeEditCategory();";
+				setTimeout(timeOutStr, 2000);
+			});
+		/*.error(function(){ //save this for jquery 1.5
+			$('#category_content').html("<h2> Error saving changes. Please try again</h2>");	
+			});
+		*/
+		$('#category_content').html('<img src="<?php echo url::base(); ?>media/img/loading_g2.gif"/>');
+		return false;
+	}
+	
+	
+	function closeEditCategory()
+	{
+		$('#modalbox').remove();
+		$('#mask').remove();
+		return false;
+	}
+	
+	
+	function findPosition( oElement ) 
+	{
+		if( typeof( oElement.offsetParent ) != 'undefined' ) 
+		{
+			for( var posX = 0, posY = 0; oElement; oElement = oElement.offsetParent ) 
+			{
+				posX += oElement.offsetLeft;
+				posY += oElement.offsetTop;
+			}
+			return [ posX, posY ];
+		} 
+		else 
+		{
+			return [ oElement.x, oElement.y ];
+		}
+	}
+		

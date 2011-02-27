@@ -172,43 +172,45 @@ class Messages_Controller extends Admin_simplegroup_Controller
 
         $messages = ORM::factory('message')
                                 ->join('reporter','message.reporter_id','reporter.id')
-				->join('simplegroups_groups_message', 'message.id', 'simplegroups_groups_message.message_id')
+				->join('simplegroups_groups_message', 'message.id', 'simplegroups_groups_message.message_id')				
 				->where("simplegroups_groups_message.simplegroups_groups_id", $this->group->id)
                                 ->where('service_id', $service_id)
                                 ->where($filter)
                                 ->orderby('message_date','desc')
                                 ->find_all((int) Kohana::config('settings.items_per_page_admin'), $pagination->sql_offset);
             
-        // Get Message Count
-        // ALL
-        $this->template->content->count_all = ORM::factory('message')
-							->join('reporter','message.reporter_id','reporter.id')
-							->join('simplegroups_groups_message', 'message.id', 'simplegroups_groups_message.message_id')
-							->where("simplegroups_groups_message.simplegroups_groups_id", $this->group->id)							
-                                                        ->where('service_id', $service_id)
-                                                        ->where('message_type', 1)
-                                                        ->count_all();
-            
-        // Trusted
-        $this->template->content->count_trusted = ORM::factory('message')
-            ->join('reporter','message.reporter_id','reporter.id')
-	    ->join('simplegroups_groups_message', 'message.id', 'simplegroups_groups_message.message_id')
-	    ->where("simplegroups_groups_message.simplegroups_groups_id", $this->group->id)
-            ->where('service_id', $service_id)
-            ->where("( reporter.level_id = '4' OR reporter.level_id = '5' ) AND ( message.message_level != '99' )")
-            ->where('message_type', 1)
-            ->count_all();
         
-        // Spam
-        $this->template->content->count_spam = ORM::factory('message')
-                                                        ->join('reporter','message.reporter_id','reporter.id')
-							->join('simplegroups_groups_message', 'message.id', 'simplegroups_groups_message.message_id')
-							->where("simplegroups_groups_message.simplegroups_groups_id", $this->group->id)
-                                                        ->where('service_id', $service_id)
-                                                        ->where('message_type', 1)
-                                                        ->where("message.message_level = '99'")
-                                                        ->count_all();
+	//create a category to message mapping. This is annoyingly complex and I'm sure there's a better
+	//way to do it. I coudln't rely on ORM all the way because I don't want to touch the Message model
+	//I also didn't want to add Big-O(n) hits to the database, so this way I just add O(1) hit and O(2n) php cycles
+	//but I think database hits are more expensive. Maybe I'm wrong. Anyway... Things stay polynomial with an overal
+	//and reduced O(n)
+	$message_ids = array();
+	foreach($messages as $message)
+	{
+		$message_ids[] = $message->id;
+	}
 
+	$category_mapping = array();
+	
+	//make sure there are some messages
+	if(count($message_ids) > 0)
+	{
+		$message_categories = ORM::factory('simplegroups_category')
+					->select("simplegroups_category.*, simplegroups_message_category.message_id AS message_id")
+					->join('simplegroups_message_category', 'simplegroups_category.id', 'simplegroups_message_category.simplegroups_category_id')
+					->in("simplegroups_message_category.message_id", implode(',', $message_ids))
+					->find_all();
+		
+		foreach($message_categories as $message_category)
+		{
+			$category_mapping[$message_category->message_id][] = $message_category;
+		}
+	}
+		
+        
+	//populate the view
+	$this->template->content->category_mapping = $category_mapping;
         $this->template->content->messages = $messages;
         $this->template->content->service_id = $service_id;
         $this->template->content->services = ORM::factory('service')->find_all();
@@ -216,6 +218,7 @@ class Messages_Controller extends Admin_simplegroup_Controller
         $this->template->content->form_error = $form_error;
         $this->template->content->form_saved = $form_saved;
         $this->template->content->form_action = $form_action;
+	$this->template->treeview_enabled = TRUE;
         
         $levels = ORM::factory('level')->orderby('level_weight')->find_all();
         $this->template->content->levels = $levels;
@@ -344,6 +347,167 @@ class Messages_Controller extends Admin_simplegroup_Controller
     }
 
 
+
+
+	/*******************************************
+	* This will return info about the categories of
+	* a message
+	********************************************/
+	function category_info($message_id = false)
+	{	
+		//we're not going to use the template
+		$this->auto_render = FALSE;
+		$this->template = "";
+	
+		//if not message id is specified then bounce.
+		if ($message_id == false)
+		{
+			return;
+		}
+		
+		//get message
+		$message = ORM::factory('message', $message_id);
+		
+		if(!$message->loaded)
+		{
+			return;
+		}
+		
+		// Retrieve Categories
+                $message_category = array();
+		$categories = ORM::factory('simplegroups_message_category')
+			->where("message_id", $message_id)
+			->find_all();
+
+		foreach($categories as $category)
+		{
+			$message_category[] = $category->simplegroups_category_id;
+		}
+                
+		// Load the View		
+		$view = View::factory('simplegroups/messages/message_category_edit');					
+		$view->message = $message;		
+		$view->message_category = $message_category;
+		$view->new_category_toggle_js = $this->_new_category_toggle_js();
+		$view->categories = $this->_get_categories();
+		$view->render(TRUE);
+	}//end method
+
+	
+	
+	
+	function save_category_info($message_id = false)
+	{
+		//we're not going to use the template
+		$this->auto_render = FALSE;
+		$this->template = "";
+	
+		//if not message id is specified then bounce.
+		if ($message_id == false)
+		{
+			return;
+		}
+		
+		//get message and make sure it exists
+		$message = ORM::factory('message', $message_id);		
+		if(!$message->loaded)
+		{
+			return;
+		}
+		
+		//first delete all the current category mappings
+		ORM::factory('simplegroups_message_category')
+			->where('message_id', $message_id)
+			->delete_all();
+		
+		//check if any categories were even selected
+		if(isset($_POST['incident_category']))
+		{
+			//now loop through the new data and add it in there
+			foreach($_POST['incident_category'] as $cat_id)
+			{
+				$message_cat = ORM::factory('simplegroups_message_category');
+				$message_cat->message_id = $message_id;
+				$message_cat->simplegroups_category_id = $cat_id;
+				$message_cat->save();
+			}
+		}
+		
+		$this->render_message_categories($message_id);
+	}
+	
+	/***************************************************
+	* This will render the display of categories for a 
+	* message
+	***************************************************/
+	function render_message_categories($message_id)
+	{
+		//we're not going to use the template
+		$this->auto_render = FALSE;
+		$this->template = "";
+	
+		//if not message id is specified then bounce.
+		if ($message_id == false)
+		{
+			return;
+		}
+		
+		//get message
+		$message = ORM::factory('message', $message_id);
+		
+		if(!$message->loaded)
+		{
+			return;
+		}
+		
+		// Retrieve Categories                
+		$categories = ORM::factory('simplegroups_category')
+			->join("simplegroups_message_category", "simplegroups_category.id", "simplegroups_message_category.simplegroups_category_id")
+			->where("simplegroups_message_category.message_id", $message_id)
+			->find_all();
+		
+		$message_categories = array();
+		
+		if(count($categories) > 0)
+		{
+			$message_categories[$message_id] = $categories;
+		}
+
+
+		// Load the View		
+		$view = View::factory('simplegroups/messages/message_category_info');					
+		$view->message_id = $message_id;
+		$view->category_mapping = $message_categories;
+		$view->render(TRUE);
+	}
+	
+	//get the javascript for the selecting categories
+	private function _new_category_toggle_js()
+	{
+		return "<script type=\"text/javascript\">
+			$(document).ready(function() {
+			$('a#category_toggle').click(function() {
+			$('#category_add').toggle(400);
+			return false;
+			});
+			});
+			</script>";
+	}
+	
+	//get categories
+	private function _get_categories()
+	{
+		$categories = ORM::factory('simplegroups_category')	
+			->where('parent_id', '0')
+			->where('simplegroups_groups_id', $this->group->id)
+			->where('applies_to_message', 1)
+			->orderby('category_title', 'ASC')
+			->find_all();
+
+		return $categories;
+	}
+
+
     /**
      * setup simplepie
      * @param string $raw_data
@@ -360,4 +524,13 @@ class Messages_Controller extends Admin_simplegroup_Controller
     }
 
 
-}
+
+
+
+
+
+
+}//end class
+
+
+	

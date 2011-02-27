@@ -1,6 +1,6 @@
 <div class="bg">
 	<h2>
-		Edit Group
+		<?php groups::settings_subtabs("edit group"); ?>
 	</h2>
 </div>
 	<?php print form::open(NULL, array('enctype' => 'multipart/form-data', 'id' => 'reportForm', 'name' => 'reportForm')); ?>

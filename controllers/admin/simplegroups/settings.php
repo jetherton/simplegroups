@@ -298,4 +298,317 @@ class Settings_Controller extends Admin_simplegroup_Controller
 	}
 
 	
-}
+
+
+	/*
+	Add Edit Categories
+	*/
+	function categories()
+	{
+		$this->template->content = new View('simplegroups/categories');
+		$this->template->content->title = Kohana::lang('ui_admin.categories');
+
+		// Locale (Language) Array
+		$locales = locale::get_i18n();
+
+		// Setup and initialize form field names
+		$form = array
+		(
+			'action' => '',
+			'category_id'	   => '',
+			'parent_id'		 => '',
+			'category_title'	  => '',
+			'category_description'	  => '',
+			'category_color'  => '',
+			'category_image'  => '',
+			'category_image_thumb'  => '',
+			'category_visible'  => '',
+			'category_applies_to_report'  => '',
+			'category_applies_to_msg'  => '',
+			'category_select_by_default'  => ''
+			
+		);
+
+		// Add the different language form keys for fields
+		foreach($locales as $lang_key => $lang_name){
+			$form['category_title_'.$lang_key] = '';
+		}
+
+		// copy the form as errors, so the errors will be stored with keys corresponding to the form field names
+		$errors = $form;
+		$form_error = FALSE;
+		$form_saved = FALSE;
+		$form_action = "";
+		$parents_array = array();
+
+		// Check, has the form been submitted, if so, setup validation
+
+		if ($_POST)
+		{
+			// Instantiate Validation, use $post, so we don't overwrite $_POST fields with our own things
+
+			$post = Validation::factory(array_merge($_POST,$_FILES));
+
+			 //	 Add some filters
+
+			$post->pre_filter('trim', TRUE);
+
+			// Add Action
+
+			if ($post->action == 'a')
+			{
+				// Add some rules, the input field, followed by a list of checks, carried out in order
+				$post->add_rules('parent_id','required','numeric');
+				$post->add_rules('category_title','required', 'length[3,80]');
+				$post->add_rules('category_description','required');
+				$post->add_rules('category_color','required', 'length[6,6]');
+				$post->add_rules('category_image', 'upload::valid', 'upload::type[gif,jpg,png]', 'upload::size[50K]');
+
+				$post->add_callbacks('parent_id', array($this,'parent_id_chk'));
+
+				// Add the different language form keys for fields
+				foreach($locales as $lang_key => $lang_name){
+					$post->add_rules('category_title_lang['.$lang_key.']','length[3,80]');
+				}
+			}
+
+			// Test to see if things passed the rule checks
+			if ($post->validate())
+			{
+				
+				$category_id = $post->category_id;
+				$category = new Simplegroups_category_Model($category_id);
+
+				// Grab languages if they already exist
+
+				$category_lang = Simplegroups_category_lang_Model::simplegroups_category_langs($category->id);
+				if(isset($category_lang[$category->id]))
+				{
+					$category_lang = $category_lang[$category->id];
+				}else{
+					$category_lang = FALSE;
+				}
+
+				if( $post->action == 'd' )
+				{ // Delete Action
+
+					// Delete localizations
+
+					ORM::factory('simplegroups_category_lang')
+						->where(array('simplegroups_category_id' => $category_id))
+						->delete_all();
+
+					// Delete category itself
+
+					ORM::factory('simplegroups_category')
+						->where('category_trusted != 1 AND simplegroups_groups_id = '.$this->group->id.' ')
+						->delete($category_id);
+
+					$form_saved = TRUE;
+					$form_action = strtoupper(Kohana::lang('ui_admin.deleted'));
+				}
+				elseif( $post->action == 'v' )
+				{ // Show/Hide Action
+					if ($category->loaded==true)
+					{
+						if ($category->category_visible == 1) {
+							$category->category_visible = 0;
+						}
+						else
+						{
+							$category->category_visible = 1;
+						}
+
+						$category->save();
+						$form_saved = TRUE;
+						$form_action = strtoupper(Kohana::lang('ui_admin.modified'));
+					}
+				}
+				elseif( $post->action == 'i' )
+				{ // Delete Image/Icon Action
+
+					if ($category->loaded==true)
+					{
+						$category_image = $category->category_image;
+						$category_image_thumb = $category->category_image_thumb;
+
+						if ( ! empty($category_image)
+							 AND file_exists(Kohana::config('upload.directory', TRUE).$category_image))
+						{
+							unlink(Kohana::config('upload.directory', TRUE) . $category_image);
+						}
+
+						if ( ! empty($category_image_thumb)
+							 AND file_exists(Kohana::config('upload.directory', TRUE).$category_image_thumb))
+						{
+							unlink(Kohana::config('upload.directory', TRUE) . $category_image_thumb);
+						}
+
+						$category->category_image = null;
+						$category->category_image_thumb = null;
+						$category->save();
+						$form_saved = TRUE;
+						$form_action = strtoupper(Kohana::lang('ui_admin.modified'));
+					}
+
+				}
+				elseif( $post->action == 'a' )
+				{
+					// Save Action
+					$category->parent_id = $post->parent_id;
+					$category->category_title = $post->category_title;
+					$category->category_description = $post->category_description;
+					$category->category_color = $post->category_color;
+					$category->simplegroups_groups_id = $this->group->id;
+					$category->category_visible = isset($_POST['category_visible']) ? 1 : 0;
+					$category->applies_to_report = isset($_POST['applies_to_report']) ? 1 : 0;
+					$category->applies_to_message = isset($_POST['applies_to_message']) ? 1 : 0;
+					$category->selected_by_default = isset($_POST['selected_by_default']) ? 1 : 0;
+					//add visible, applies to report, applies to messge, select by default
+					$category->save();
+
+					// Save Localizations
+					foreach($post->category_title_lang as $lang_key => $localized_category_name){
+
+						if(isset($category_lang[$lang_key]['id']))
+						{
+							// Update
+							$cl = ORM::factory('simplegroups_category_lang',$category_lang[$lang_key]['id']);
+						}else{
+							// Add New
+							$cl = ORM::factory('simplegroups_category_lang');
+						}
+ 						$cl->category_title = $localized_category_name;
+ 						$cl->locale = $lang_key;
+ 						$cl->simplegroups_category_id = $category->id;
+						$cl->save();
+					}
+
+					// Upload Image/Icon
+					$filename = upload::save('category_image');
+					if ($filename)
+					{
+						$new_filename = "simplegroups_category_".$category->id."_".time();
+
+						// Resize Image to 32px if greater
+						Image::factory($filename)->resize(32,32,Image::HEIGHT)
+							->save(Kohana::config('upload.directory', TRUE) . $new_filename.".png");
+						// Create a 16x16 version too
+						Image::factory($filename)->resize(16,16,Image::HEIGHT)
+							->save(Kohana::config('upload.directory', TRUE) . $new_filename."_16x16.png");
+
+						// Remove the temporary file
+						unlink($filename);
+
+						// Delete Old Image
+						$category_old_image = $category->category_image;
+						if ( ! empty($category_old_image)
+							AND file_exists(Kohana::config('upload.directory', TRUE).$category_old_image))
+							unlink(Kohana::config('upload.directory', TRUE).$category_old_image);
+
+						// Save
+						$category->category_image = $new_filename.".png";
+						$category->category_image_thumb = $new_filename."_16x16.png";
+						$category->save();
+					}
+
+					$form_saved = TRUE;
+					$form_action = strtoupper(Kohana::lang('ui_admin.added_edited'));
+
+					// Empty $form array
+					array_fill_keys($form, '');
+				}
+			}
+			// No! We have validation errors, we need to show the form again, with the errors
+			else
+			{
+				// repopulate the form fields
+				$form = arr::overwrite($form, $post->as_array());
+
+			   // populate the error fields, if any
+				$errors = arr::overwrite($errors, $post->errors('category'));
+				$form_error = TRUE;
+			}
+		}
+		// Pagination
+		$pagination = new Pagination(array(
+							'query_string' => 'page',
+							'items_per_page' => (int) Kohana::config('settings.items_per_page_admin'),
+							'total_items'	 => ORM::factory('simplegroups_category')
+													->where('parent_id','0')
+													->where('simplegroups_groups_id', $this->group->id)
+													->count_all()
+						));
+
+		$categories = ORM::factory('simplegroups_category')
+									->with('simplegroups_category_lang')
+									->where('parent_id','0')
+									->where('simplegroups_groups_id', $this->group->id)
+									->orderby('category_title', 'asc')
+									->find_all((int) Kohana::config('settings.items_per_page_admin'),
+												$pagination->sql_offset);
+
+		$parents_array = ORM::factory('simplegroups_category')
+									 ->where('parent_id','0')
+									 ->where('simplegroups_groups_id', $this->group->id)
+									 ->select_list('id', 'category_title');
+
+		// add none to the list
+		$parents_array[0] = "--- Top Level Category ---";
+
+		// Put "--- Top Level Category ---" at the top of the list
+		ksort($parents_array);
+
+		$this->template->content->form = $form;
+		$this->template->content->errors = $errors;
+		$this->template->content->form_error = $form_error;
+		$this->template->content->form_saved = $form_saved;
+		$this->template->content->form_action = $form_action;
+		$this->template->content->pagination = $pagination;
+		$this->template->content->total_items = $pagination->total_items;
+		$this->template->content->categories = $categories;
+
+		$this->template->content->parents_array = $parents_array;
+
+		// Javascript Header
+		$this->template->colorpicker_enabled = TRUE;
+		$this->template->js = new View('simplegroups/categories_js');
+		$this->template->form_error = $form_error;
+
+		$this->template->content->locale_array = $locales;
+		$this->template->js->locale_array = $locales;
+	} //end method
+
+	/**
+	 * Checks if parent_id for this category exists
+	 * @param Validation $post $_POST variable with validation rules
+	 */
+	public function parent_id_chk(Validation $post)
+	{
+		// If add->rules validation found any errors, get me out of here!
+		if (array_key_exists('parent_id', $post->errors()))
+			return;
+
+		$category_id = $post->category_id;
+		$parent_id = $post->parent_id;
+		// This is a parent category - exit
+		if ($parent_id == 0)
+			return;
+
+		$parent_exists = ORM::factory('simplegroups_category')
+									->where('id', $parent_id)
+									->find();
+
+		if ( ! $parent_exists->loaded)
+		{ // Parent Category Doesn't Exist
+			$post->add_error( 'parent_id', 'exists');
+		}
+
+		if ( ! empty($category_id) AND $category_id == $parent_id)
+		{ // Category ID and Parent ID can't be the same!
+			$post->add_error( 'parent_id', 'same');
+		}
+	}//end function
+
+
+}//end class

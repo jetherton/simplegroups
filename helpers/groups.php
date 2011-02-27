@@ -110,6 +110,23 @@ class groups_Core {
 
 		echo $menu;
 	}
+	
+	
+	/**
+	 * Generate Report Sub Tab Menus
+	 * @param string $this_sub_page
+	 * @return string $menu
+	 */
+	public static function settings_subtabs($this_sub_page = FALSE)
+	{
+		$menu = "";
+
+		$menu .= ($this_sub_page == "edit group") ? "Edit Group" : "<a href=\"".url::base()."admin/simplegroups/settings\">Edit Group</a>";
+
+		$menu .= ($this_sub_page == "group categories") ? "Group Categories" : "<a href=\"".url::base()."admin/simplegroups/settings/categories\">Group Categories</a>";
+
+		echo $menu;
+	}
 
 
 
@@ -540,6 +557,124 @@ class groups_Core {
 		
 		return $users;
 	}//end function
+	
+	
+	public static function hex2RGB($hexStr, $returnAsString = false, $seperator = ',') 
+	{
+		$hexStr = preg_replace("/[^0-9A-Fa-f]/", '', $hexStr); // Gets a proper hex string
+		$rgbArray = array();
+		if (strlen($hexStr) == 6) 
+		{ //If a proper hex code, convert using bitwise operation. No overhead... faster
+			$colorVal = hexdec($hexStr);
+			$rgbArray['red'] = 0xFF & ($colorVal >> 0x10);
+			$rgbArray['green'] = 0xFF & ($colorVal >> 0x8);
+			$rgbArray['blue'] = 0xFF & $colorVal;
+		} 
+		elseif (strlen($hexStr) == 3) 
+		{ //if shorthand notation, need some string manipulations
+			$rgbArray['red'] = hexdec(str_repeat(substr($hexStr, 0, 1), 2));
+			$rgbArray['green'] = hexdec(str_repeat(substr($hexStr, 1, 1), 2));
+			$rgbArray['blue'] = hexdec(str_repeat(substr($hexStr, 2, 1), 2));
+		} 
+		else 
+		{
+			return false; //Invalid hex color code
+		}
+		return $returnAsString ? implode($seperator, $rgbArray) : $rgbArray; // returns the rgb string or the associative array
+	}
+	
+	
+	/************************************************************************************************
+	* Function, this'll merge colors. Given an array of string hex RGB colors  it'll return a hex string
+	* of all the colors merged together
+	*/
+	public static function merge_colors($colors)
+	{
+		//check if we're dealing with just one color
+		if(count($colors)==1)
+		{
+			foreach($colors as $color)
+			{
+				return $color;
+			}
+		}
+		//now for each color break it into RGB, add them up, then normalize
+		$red = 0;
+		$green = 0;
+		$blue = 0;
+		foreach($colors as $color)
+		{
+			$numeric_colors = self::hex2RGB($color);
+			$red = $red + $numeric_colors['red'];
+			$green = $green + $numeric_colors['green'];
+			$blue = $blue + $numeric_colors['blue'];
+		}
+		//now normalize
+		$color_length = sqrt( ($red*$red) + ($green*$green) + ($blue*$blue));
+	
+		//make sure there's no divide by zero
+		if($color_length == 0)
+		{
+			$color_length = 255;
+		}
+		$red = ($red / $color_length) * 255;
+		$green = ($green / $color_length) * 255;
+		$blue = ($blue / $color_length) * 255;
+	
+		
+		//pad with zeros if there's too much space
+		$red = dechex($red);
+		if(strlen($red) < 2)
+		{
+			$red = "0".$red;
+		}
+		$green = dechex($green);
+		if(strlen($green) < 2)
+		{
+			$green = "0".$green;
+		}
+		$blue = dechex($blue);
+		if(strlen($blue) < 2)
+		{
+			$blue = "0".$blue;
+		}
+		//now put the color back together and return it
+		return $red.$green.$blue;
+		
+	}//end method merge colors
+	
+	
+	static function changeBrightness ( $hex, $adjust )
+	{
+		$red   = hexdec( $hex[0] . $hex[1] );
+		$green = hexdec( $hex[2] . $hex[3] );
+		$blue  = hexdec( $hex[4] . $hex[5] );
+
+		$cb = $red + $green + $blue;
+
+		if ( $cb > $adjust ) 
+		{
+			$db = ( $cb - $adjust ) % 255;
+
+			$red -= $db; $green -= $db; $blue -= $db;
+			if ( $red < 0 ) $red = 0;
+			if ( $green < 0 ) $green = 0;
+			if ( $blue < 0 ) $blue = 0;
+		} 
+		else 
+		{
+			$db = ( $adjust - $cb ) % 255;
+
+			$red += $db; $green += $db; $blue += $db;
+			if ( $red > 255 ) $red = 255;
+			if ( $green > 255 ) $green = 255;
+			if ( $blue > 255 ) $blue = 255;
+		}
+
+		return str_pad( dechex( $red ), 2, '0', 0 )
+			. str_pad( dechex( $green ), 2, '0', 0 )
+			. str_pad( dechex( $blue ), 2, '0', 0 );
+	}
 	
 	
 }//end class

@@ -88,14 +88,6 @@
 					<input type="hidden" name="level"  id="level"  value="">
 					<input type="hidden" name="message_id[]" id="message_single" value="">
 					<div class="table-holder">
-					
-					<?php
-						$view = View::factory('simplegroups/messages/messages_table');
-						////////////////////////Plug in the correct variables here and then delete this stuff below
-						$view->message_id = $message->id;
-						$view->category_mapping = $category_mapping;
-						$view->render(TRUE);
-					?>
 						<table class="table">
 							<thead>
 								<tr>
