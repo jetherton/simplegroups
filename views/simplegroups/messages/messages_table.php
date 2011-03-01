@@ -15,79 +15,6 @@
 ?>
 
 
-<style type="text/css">
-.table .col-2 {
-	width: 325px;
-}
-
-.table .post {
-	width: 325px;
-}
-
-.table .col-4 {
-	width: 100px;
-}
-
-.cat_edit{
-	float:right;
-	font-size:75%;
-	margin-right:15px;
-}
-
-
-</style>
-
-
-			<div class="bg">
-				<h2>
-					<?php groups::messages_subtabs($service_id); ?>
-				</h2>
-
-<?php
-	Event::run('ushahidi_action.admin_messages_custom_layout');
-	// Kill the rest of the page if this event has been utilized by a plugin
-	if( ! Event::has_run('ushahidi_action.admin_messages_custom_layout')){
-?>
-
-				<!-- tabs -->
-				<div class="tabs">
-					<!-- tabset -->
-					<ul class="tabset">
-						<li><a href="<?php echo url::site()."admin/simplegroups/messages/index/".$service_id; ?>?type=1" <?php if ($type == '1') echo "class=\"active\""; ?>><?php echo Kohana::lang('ui_main.inbox');?></a></li>
-					</ul>
-					<!-- tab -->
-					<div class="tab">
-						<ul>
-							<li><a href="#" onClick="messagesAction('d', 'DELETE', '')"><?php echo strtoupper(Kohana::lang('ui_main.delete'));?></a></li>
-						</ul>
-					</div>
-				</div>
-				<?php
-				if ($form_error) {
-				?>
-					<!-- red-box -->
-					<div class="red-box">
-						<h3><?php echo Kohana::lang('ui_main.error');?></h3>
-						<ul><?php echo Kohana::lang('ui_main.select_one');?></ul>
-					</div>
-				<?php
-				}
-
-				if ($form_saved) {
-				?>
-					<!-- green-box -->
-					<div class="green-box" id="submitStatus">
-						<h3><?php echo Kohana::lang('ui_main.messages');?> <?php echo $form_action; ?> <a href="#" id="hideMessage" class="hide">hide this message</a></h3>
-					</div>
-				<?php
-				}
-				?>
-				<!-- report-table -->
-				<?php print form::open(NULL, array('id' => 'messageMain', 'name' => 'messageMain')); ?>
-					<input type="hidden" name="action" id="action" value="">
-					<input type="hidden" name="level"  id="level"  value="">
-					<input type="hidden" name="message_id[]" id="message_single" value="">
-					<div class="table-holder">
 						<table class="table">
 							<thead>
 								<tr>
@@ -242,10 +169,3 @@
 								?>
 							</tbody>
 						</table>
-					</div>
-				<?php print form::close(); ?>
-			</div>
-
-<?php
-	}
-?>

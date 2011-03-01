@@ -244,4 +244,63 @@
 			return [ oElement.x, oElement.y ];
 		}
 	}
+	
+	/*Figures out what filter the user wants
+	 * calls the server to get the results
+	 * and then displays it
+	 */
+	function filterAction()
+	{
+		//get the id of the category that we're to filter by
+		var cat_id = $("#cat_filter").val();
+		var service_id = $("#service_id").val();
+		
+		//figure out which tab is currently selected
+		var tab_id = "";
+		var kids = $(".tabset").find('a');
+		kids.each(function(){
+			if($(this).hasClass("active"))
+			{
+				tab_id = $(this).attr("id");
+			}
+		});
+		
+		
+		
+		//turn on the wating image
+		$('#filter_wait').html('<img src="<?php echo url::base(); ?>media/img/loading_g.gif"/>');
+		
+		//get the HTML for the next set of kid admin areas
+			$.get("<?php echo url::base() ?>admin/simplegroups/messages/get_table/"+service_id+"/"+cat_id+"/"+tab_id,
+			function(data){
+				$('#table_holder').html(data);	
+				$('#filter_wait').html('');
+			});
+		
+		return false;
+	}
+	
+	function filterTabClick(tabId)
+	{
+		//remove the selected class from all the tabs		
+		var kids = $(".tabset").find('a');
+		kids.removeClass("active");		
+		$("#"+tabId).addClass("active");
+		
+		var cat_id = $("#cat_filter").val();
+		var service_id = $("#service_id").val();
+		
+		//turn on the wating image
+		$('<img id="tab_wait" src="<?php echo url::base(); ?>media/img/loading_g.gif"/>').insertAfter($("#"+tabId));
+		
+		//get the HTML for the next set of kid admin areas
+			$.get("<?php echo url::base() ?>admin/simplegroups/messages/get_table/"+service_id+"/"+cat_id+"/"+tabId,
+			function(data){
+				$('#table_holder').html(data);	
+				$('#tab_wait').remove();
+			});
+		
+		return false;
+		
+	}
 		

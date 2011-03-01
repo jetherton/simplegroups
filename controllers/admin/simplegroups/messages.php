@@ -34,47 +34,7 @@ class Messages_Controller extends Admin_simplegroup_Controller
         $service = ORM::factory('service', $service_id);
         $this->template->content->title = $service->service_name;
 
-        // Is this an Inbox or Outbox Filter?
-        if (!empty($_GET['type']))
-        {
-            $type = $_GET['type'];
 
-            if ($type == '2')
-            { // OUTBOX
-                $filter = 'message_type = 2';
-            }
-            else
-            { // INBOX
-                $type = "1";
-                $filter = 'message_type = 1';
-            }
-        }
-        else
-        {
-            $type = "1";
-            $filter = 'message_type = 1';
-        }
-        
-        // Do we have a reporter ID?
-        if (isset($_GET['rid']) AND !empty($_GET['rid']))
-        {
-            $filter .= ' AND reporter_id=\''.$_GET['rid'].'\'';
-        }
-        
-        // ALL / Trusted / Spam
-        $level = '0';
-        if (isset($_GET['level']) AND !empty($_GET['level']))
-        {
-            $level = $_GET['level'];
-            if ($level == 4)
-            {
-                $filter .= " AND ( reporter.level_id = '4' OR reporter.level_id = '5' ) AND ( message.message_level != '99' ) ";
-            }
-            elseif ($level == 2)
-            {
-                $filter .= " AND ( message.message_level = '99' ) ";
-            }
-        }
 
         // check, has the form been submitted?
         $form_error = FALSE;
@@ -156,65 +116,38 @@ class Messages_Controller extends Admin_simplegroup_Controller
             }
         }//end of  if($_POST)       
         
+        $this->template->content = $this->setup_message_table($this->template->content, $service_id, 0);
         
-        // Pagination
-        $pagination = new Pagination(array(
-            'query_string'   => 'page',
-            'items_per_page' => (int) Kohana::config('settings.items_per_page_admin'),
-            'total_items'    => ORM::factory('message')
-                                            ->join('reporter','message.reporter_id','reporter.id')
-					    ->join('simplegroups_groups_message', 'message.id', 'simplegroups_groups_message.message_id')
-					    ->where("simplegroups_groups_message.simplegroups_groups_id", $this->group->id)
-                                            ->where($filter)
-                                            ->where('service_id', $service_id)
-                                            ->count_all()
-        ));
-
-        $messages = ORM::factory('message')
-                                ->join('reporter','message.reporter_id','reporter.id')
-				->join('simplegroups_groups_message', 'message.id', 'simplegroups_groups_message.message_id')				
-				->where("simplegroups_groups_message.simplegroups_groups_id", $this->group->id)
-                                ->where('service_id', $service_id)
-                                ->where($filter)
-                                ->orderby('message_date','desc')
-                                ->find_all((int) Kohana::config('settings.items_per_page_admin'), $pagination->sql_offset);
-            
-        
-	//create a category to message mapping. This is annoyingly complex and I'm sure there's a better
-	//way to do it. I coudln't rely on ORM all the way because I don't want to touch the Message model
-	//I also didn't want to add Big-O(n) hits to the database, so this way I just add O(1) hit and O(2n) php cycles
-	//but I think database hits are more expensive. Maybe I'm wrong. Anyway... Things stay polynomial with an overal
-	//and reduced O(n)
-	$message_ids = array();
-	foreach($messages as $message)
-	{
-		$message_ids[] = $message->id;
-	}
-
-	$category_mapping = array();
 	
-	//make sure there are some messages
-	if(count($message_ids) > 0)
-	{
-		$message_categories = ORM::factory('simplegroups_category')
-					->select("simplegroups_category.*, simplegroups_message_category.message_id AS message_id")
-					->join('simplegroups_message_category', 'simplegroups_category.id', 'simplegroups_message_category.simplegroups_category_id')
-					->in("simplegroups_message_category.message_id", implode(',', $message_ids))
+	//create category array for drop down filter list
+	$category_array = array(0=>"Show All");
+	$categories = ORM::factory('simplegroups_category')
+					->where('simplegroups_groups_id', $this->group->id)
+					->where('applies_to_message', 1)
+					->where('parent_id', 0)
 					->find_all();
-		
-		foreach($message_categories as $message_category)
+	foreach($categories as $category)
+	{
+		//first, check and see if we're dealing with a kid category
+		if ($category->children->count() > 0)
 		{
-			$category_mapping[$message_category->message_id][] = $message_category;
+			$parent_array = array();
+			foreach ($category->children as $child)
+			{
+				$parent_array[$child->id] = $child->category_title;
+			}
+			$category_array[$category->category_title] = $parent_array;
 		}
-	}
+		else
+		{
+			$category_array[$category->id] = $category->category_title;
+		}		
+	}//end loop
 		
         
 	//populate the view
-	$this->template->content->category_mapping = $category_mapping;
-        $this->template->content->messages = $messages;
-        $this->template->content->service_id = $service_id;
+	$this->template->content->category_array = $category_array;	
         $this->template->content->services = ORM::factory('service')->find_all();
-        $this->template->content->pagination = $pagination;
         $this->template->content->form_error = $form_error;
         $this->template->content->form_saved = $form_saved;
         $this->template->content->form_action = $form_action;
@@ -222,17 +155,159 @@ class Messages_Controller extends Admin_simplegroup_Controller
         
         $levels = ORM::factory('level')->orderby('level_weight')->find_all();
         $this->template->content->levels = $levels;
-
-        // Total Reports
-        $this->template->content->total_items = $pagination->total_items;
-
-        // Message Type Tab - Inbox/Outbox
-        $this->template->content->type = $type;
-        $this->template->content->level = $level;
-        
+       
         // Javascript Header
         $this->template->js = new View('simplegroups/messages_js');
     }
+    
+    
+	//creates the table of messages
+	private function setup_message_table($view, $service_id, $cat_id=0, $tab_id="")
+	{
+	
+		// Is this an Inbox or Outbox Filter?
+		if (!empty($_GET['type']))
+		{
+			$type = $_GET['type'];
+
+			if ($type == '2')
+			{ // OUTBOX
+				$filter = 'message_type = 2';
+			}
+			else
+			{ // INBOX
+				$type = "1";
+				$filter = 'message_type = 1';
+			}
+		}
+		else
+		{
+			$type = "1";
+			$filter = 'message_type = 1';
+		}
+
+		// Do we have a reporter ID?
+		if (isset($_GET['rid']) AND !empty($_GET['rid']))
+		{
+			$filter .= ' AND reporter_id=\''.$_GET['rid'].'\'';
+		}
+
+		// ALL / Trusted / Spam
+		$level = '0';
+		if (isset($_GET['level']) AND !empty($_GET['level']))
+		{
+			$level = $_GET['level'];
+			if ($level == 4)
+			{
+				$filter .= " AND ( reporter.level_id = '4' OR reporter.level_id = '5' ) AND ( message.message_level != '99' ) ";
+			}
+			elseif ($level == 2)
+			{
+				$filter .= " AND ( message.message_level = '99' ) ";
+			}
+		}
+	
+		if($cat_id != 0)
+		{
+			$filter .= " AND (simplegroups_message_category.simplegroups_category_id = ". $cat_id.") ";
+		}
+		
+		if($tab_id == "turned_into_reports_tab")
+		{
+			$filter .= " AND (message.incident_id <> 0) ";
+		}
+		elseif($tab_id == "three_days_tab")
+		{
+			$time_minus_three_days = date("Y-m-d G:i:s",time() - (3 * 24 * 60 * 60));
+			$filter .= " AND (message.message_date > '$time_minus_three_days') ";
+		}
+		
+		//messages count
+		$message_count = ORM::factory('message')
+						    ->join('reporter','message.reporter_id','reporter.id')
+						    ->join('simplegroups_groups_message', 'message.id', 'simplegroups_groups_message.message_id');
+		if($cat_id != 0)
+		{
+			$message_count= $message_count->join('simplegroups_message_category', 'message.id', 'simplegroups_message_category.message_id');
+		}
+		$message_count = $message_count->where("simplegroups_groups_message.simplegroups_groups_id", $this->group->id)
+						    ->where($filter)
+						    ->where('service_id', $service_id)
+						    ->count_all();
+	
+		// Pagination		
+		$pagination = new Pagination(array(
+			'query_string'   => 'page',
+			'items_per_page' => (int) Kohana::config('settings.items_per_page_admin'),
+			'total_items'    => $message_count
+		));
+
+		$messages = ORM::factory('message')
+				->join('reporter','message.reporter_id','reporter.id')
+				->join('simplegroups_groups_message', 'message.id', 'simplegroups_groups_message.message_id');
+		if($cat_id != 0)
+		{
+			$messages = $messages->join('simplegroups_message_category', 'message.id', 'simplegroups_message_category.message_id');
+		}
+		$messages = $messages->where("simplegroups_groups_message.simplegroups_groups_id", $this->group->id)
+				->where('service_id', $service_id)
+				->where($filter)
+				->orderby('message_date','desc')
+				->find_all((int) Kohana::config('settings.items_per_page_admin'), $pagination->sql_offset);
+
+
+		//create a category to message mapping. This is annoyingly complex and I'm sure there's a better
+		//way to do it. I coudln't rely on ORM all the way because I don't want to touch the Message model
+		//I also didn't want to add Big-O(n) hits to the database, so this way I just add O(1) hit and O(2n) php cycles
+		//but I think database hits are more expensive. Maybe I'm wrong. Anyway... Things stay polynomial with an overal
+		//and reduced O(n)
+		$message_ids = array();
+		foreach($messages as $message)
+		{
+		$message_ids[] = $message->id;
+		}
+
+		$category_mapping = array();
+
+		//make sure there are some messages
+		if(count($message_ids) > 0)
+		{
+		$message_categories = ORM::factory('simplegroups_category')
+					->select("simplegroups_category.*, simplegroups_message_category.message_id AS message_id")
+					->join('simplegroups_message_category', 'simplegroups_category.id', 'simplegroups_message_category.simplegroups_category_id')
+					->in("simplegroups_message_category.message_id", implode(',', $message_ids))
+					->find_all();
+
+		foreach($message_categories as $message_category)
+		{
+			$category_mapping[$message_category->message_id][] = $message_category;
+		}
+		}
+		
+		$view->pagination = $pagination;
+		$view->messages = $messages;
+		$view->service_id = $service_id;
+		$view->category_mapping = $category_mapping;
+		$view->total_items = $pagination->total_items;
+		$view->type = $type;
+		$view->level = $level;
+		
+		return $view;
+	}
+    
+    
+	
+	
+	function get_table($service_id, $cat_id = 0, $tab_id="")
+	{
+		$this->template = "";
+		$this->auto_render = FALSE;		
+		$table_view = View::factory('simplegroups/messages/messages_table');
+		
+		$table_view = $this->setup_message_table($table_view, $service_id, $cat_id, $tab_id);
+		
+		$table_view->render(TRUE);
+	}
 
     /**
     * Send A New Message Using Default SMS Provider

@@ -53,12 +53,17 @@
 				<div class="tabs">
 					<!-- tabset -->
 					<ul class="tabset">
-						<li><a href="<?php echo url::site()."admin/simplegroups/messages/index/".$service_id; ?>?type=1" <?php if ($type == '1') echo "class=\"active\""; ?>><?php echo Kohana::lang('ui_main.inbox');?></a></li>
+						<li><a href="#" id="inbox_tab"  onclick="filterTabClick('inbox_tab'); return false;" <?php if ($type == '1') echo "class=\"active\""; ?>><?php echo Kohana::lang('ui_main.inbox');?></a></li>
+						<li><a href="#" id="turned_into_reports_tab" onclick="filterTabClick('turned_into_reports_tab'); return false;">Turned Into Reports</a></li>
+						<li><a href="#" id="three_days_tab" onclick="filterTabClick('three_days_tab'); return false;">Recent</a></li>
 					</ul>
 					<!-- tab -->
 					<div class="tab">
 						<ul>
 							<li><a href="#" onClick="messagesAction('d', 'DELETE', '')"><?php echo strtoupper(Kohana::lang('ui_main.delete'));?></a></li>
+							<li> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
+							<li> Filter by category: <?php print form::dropdown(array('id'=>'cat_filter', 'onChange'=>'filterAction(); return false;'), $category_array); ?> </li>
+							<li id="filter_wait"></li>
 						</ul>
 					</div>
 				</div>
@@ -84,172 +89,25 @@
 				?>
 				<!-- report-table -->
 				<?php print form::open(NULL, array('id' => 'messageMain', 'name' => 'messageMain')); ?>
+					<input type="hidden" name="service_id" id="service_id" value="<?php echo $service_id; ?>">
+					
 					<input type="hidden" name="action" id="action" value="">
 					<input type="hidden" name="level"  id="level"  value="">
 					<input type="hidden" name="message_id[]" id="message_single" value="">
-					<div class="table-holder">
+					<div class="table-holder" id="table_holder">
+
 					
-					<?php
-						$view = View::factory('simplegroups/messages/messages_table');
-						////////////////////////Plug in the correct variables here and then delete this stuff below
-						$view->message_id = $message->id;
-						$view->category_mapping = $category_mapping;
-						$view->render(TRUE);
+					<?php //render the table via a seperate view
+						$table_view = View::factory('simplegroups/messages/messages_table');
+						$table_view->pagination = $pagination;
+						$table_view->messages = $messages;
+						$table_view->service_id = $service_id;
+						$table_view->total_items = $total_items;
+						$table_view->category_mapping = $category_mapping;
+						$table_view->render(TRUE);
+						
 					?>
-						<table class="table">
-							<thead>
-								<tr>
-									<th class="col-1"><input id="checkall" type="checkbox" class="check-box" onclick="CheckAll( this.id, 'message_id[]' )" /></th>
-									<th class="col-2"><?php echo Kohana::lang('ui_main.message_details');?></th>
-									<th class="col-2">Categories</th>
-									<th class="col-3"><?php echo Kohana::lang('ui_main.date');?></th>
-									<th class="col-4"><?php echo Kohana::lang('ui_main.actions');?></th>
-								</tr>
-							</thead>
-							<tfoot>
-								<tr class="foot">
-									<td colspan="5">
-										<?php echo $pagination; ?>
-									</td>
-								</tr>
-							</tfoot>
-							<tbody>
-								<?php
-								if ($total_items == 0)
-								{
-								?>
-									<tr>
-										<td colspan="5" class="col">
-											<h3><?php echo Kohana::lang('ui_main.no_results');?></h3>
-										</td>
-									</tr>
-								<?php	
-								}
-								foreach ($messages as $message)
-								{
-									$message_id = $message->id;
-									$message_from = $message->reporter->service_account;
-									$message_to = $message->message_to;
-									$incident_id = $message->incident_id;
-									$message_description = text::auto_link($message->message);
-									$message_detail = nl2br(text::auto_link($message->message_detail));
-									$message_date = date('Y-m-d', strtotime($message->message_date));
-									$message_type = $message->message_type;
-									$message_level = $message->message_level;																		
-									$level_id = $message->reporter->level_id;
-									
-									?>
-									<tr <?php if ($message_level == "99") {
-										echo " class=\"spam_tr\"";
-									} ?>>
-										<td class="col-1"><input name="message_id[]" id="message" value="<?php echo $message_id; ?>" type="checkbox" class="check-box"/></td>
-										<td class="col-2">
-											<div class="post">
-												<p><?php echo $message_description; ?></p>
-												<?php
-												if ($message_detail)
-												{
-													?>
-													<p><a href="javascript:preview('message_preview_<?php echo $message_id?>')"><?php echo Kohana::lang('ui_main.preview_message');?></a></p>
-													<div id="message_preview_<?php echo $message_id?>" style="display:none;">
-														<?php echo $message_detail; ?>
-														
-														<?php
-				                        				// Retrieve Attachments if any
-				                        				foreach($message->media as $photo) 
-				                        				{
-				                        					if ($photo->media_type == 1)
-				                        					{
-				                        						print "<div class=\"attachment_thumbs\" id=\"photo_". $photo->id ."\">";
-
-				                        						$thumb = $photo->media_thumb;
-				                        						$photo_link = $photo->media_link;
-																$prefix = url::base().Kohana::config('upload.relative_directory');
-				                        						print "<a class='photothumb' rel='lightbox-group".$message_id."' href='$prefix/$photo_link'>";
-				                        						print "<img src=\"$prefix/$thumb\" border=\"0\" >";
-				                        						print "</a>";
-				                        						print "</div>";
-				                        					}
-				                        				}
-									                    ?>
-													</div>
-													<?php
-												}
-												// Action::message_extra_admin  - Message Additional/Extra Stuff
-												Event::run('ushahidi_action.message_extra_admin', $message_id);
-												?>
-												<?php
-												$settings = new Settings_Model(1);
-												if ($service_id == 1 && $message_type == 1)
-												{
-													?>
-													<div id="replies">
-
-													</div>
-													<!--<a href="javascript:showReply('reply_<?php //echo $message_id; ?>')" class="more">+<?php //echo Kohana::lang('ui_main.reply');?></a> -->
-													<div id="reply_<?php echo $message_id; ?>" class="reply">
-														<?php print form::open(url::site() . 'admin/simplegroups/messages/send/',array('id' => 'newreply_' . $message_id,
-														 	'name' => 'newreply_' . $message_id)); ?>
-														<div class="reply_can"><a href="javascript:cannedReply('1', 'message_<?php echo $message_id; ?>')">+<?php echo Kohana::lang('ui_main.request_location');?></a>&nbsp;&nbsp;&nbsp;<a href="javascript:cannedReply('2', 'message_<?php echo $message_id; ?>')">+<?php echo Kohana::lang('ui_main.request_information');?></a></div>
-														<div id="replyerror_<?php echo $message_id; ?>" class="reply_error"></div>
-														<div class="reply_input"><?php print form::input('message_' .  $message_id, '', ' class="text long2" onkeyup="limitChars(this.id, \'160\', \'replyleft_' . $message_id . '\')" '); ?></div>
-														<div class="reply_input"><a href="javascript:sendMessage('<?php echo $message_id; ?>' , 'sending_<?php echo $message_id; ?>')" title="Submit Message"><img src="<?php echo url::base() ?>media/img/admin/btn-send.gif" alt="Submit" border="0" /></a></div>
-														<div class="reply_input" id="sending_<?php echo $message_id; ?>"></div>
-														<div style="clear:both"></div>
-														<?php print form::close(); ?>
-														<div id="replyleft_<?php echo $message_id; ?>" class="replychars"></div>
-													</div>
-													<?php
-												}
-												?>
-											</div>
-											<ul class="info">
-												<?php
-												if ($message_type == 2)
-												{
-													?><li class="none-separator">To: <strong><?php echo $message_to; ?></strong><?php
-												}
-												else
-												{
-													?><li class="none-separator">From: <strong class="reporters_<?php echo $level_id?>"><?php echo $message_from; ?></strong><?php
-												}
-												?>
-											</ul>
-										</td>
-										<td class="col-2" style="padding-right:10px;" >
-											<div > <a  class="cat_edit"  href="#" onclick="editCategory(<?php echo $message->id; ?>,this); return false;">Edit Categories</a><br/></div>
-											<div id="message_cat_info_<?php echo $message->id; ?>">
-											
-											<?php
-												$view = View::factory('simplegroups/messages/message_category_info');					
-												$view->message_id = $message->id;
-												$view->category_mapping = $category_mapping;
-												$view->render(TRUE);
-											?>
-											
-											</div>
-										</td>
-										<td class="col-3"><?php echo $message_date; ?></td>
-										<td class="col-4">
-											<ul>
-												<?php
-												if ($incident_id != 0 && $message_type != 2) {
-													echo "<li class=\"none-separator\"><a href=\"". url::base() . 'admin/simplegroups/reports/edit/' . $incident_id ."\" class=\"status_yes\"><strong>View Report</strong></a></li>";
-												}
-												elseif ($message_type != 2)
-												{
-													echo "<li class=\"none-separator\"><a href=\"". url::base() . 'admin/simplegroups/reports/edit?mid=' . $message_id ."\">Create Report?</a></li>";
-												}
-												?>
-												<li><a href="javascript:messagesAction('d','DELETE','<?php echo(rawurlencode($message_id)); ?>')" class="del"><?php echo Kohana::lang('ui_main.delete');?></a></li>
-											</ul>
-										</td>
-									</tr>
-									<?php
-								}
-								?>
-							</tbody>
-						</table>
+						
 					</div>
 				<?php print form::close(); ?>
 			</div>
