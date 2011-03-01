@@ -15,27 +15,6 @@
 ?>
 
 
-<style type="text/css">
-.table .col-2 {
-	width: 325px;
-}
-
-.table .post {
-	width: 325px;
-}
-
-.table .col-4 {
-	width: 100px;
-}
-
-.cat_edit{
-	float:right;
-	font-size:75%;
-	margin-right:15px;
-}
-
-
-</style>
 
 
 			<div class="bg">
@@ -88,28 +67,33 @@
 				}
 				?>
 				<!-- report-table -->
-				<?php print form::open(NULL, array('id' => 'messageMain', 'name' => 'messageMain')); ?>
-					<input type="hidden" name="service_id" id="service_id" value="<?php echo $service_id; ?>">
+				<?php //print form::open(NULL, array('id' => 'messageMain', 'name' => 'messageMain')); ?>
+					<input type="hidden" name="service_id" id="service_id" value="<?php echo $service_id; ?>"/>
 					
-					<input type="hidden" name="action" id="action" value="">
-					<input type="hidden" name="level"  id="level"  value="">
-					<input type="hidden" name="message_id[]" id="message_single" value="">
+					<input type="hidden" name="action" id="action" value=""/>
+					<input type="hidden" name="level"  id="level"  value=""/>
+					<input type="hidden" name="message_id[]" id="message_single" value=""/>
+					<div> 
+					<!-- add this div just to make internet explorer not freak out. Otherwise the .html() method doesn't
+						correctly replace the contents of the table_holder div. I hate Internet Explorer-->
+					
 					<div class="table-holder" id="table_holder">
 
 					
-					<?php //render the table via a seperate view
-						$table_view = View::factory('simplegroups/messages/messages_table');
-						$table_view->pagination = $pagination;
-						$table_view->messages = $messages;
-						$table_view->service_id = $service_id;
-						$table_view->total_items = $total_items;
-						$table_view->category_mapping = $category_mapping;
-						$table_view->render(TRUE);
-						
-					?>
-						
+						<?php //render the table via a seperate view
+							$table_view = View::factory('simplegroups/messages/messages_table');
+							$table_view->pagination = $pagination;
+							$table_view->messages = $messages;
+							$table_view->service_id = $service_id;
+							$table_view->total_items = $total_items;
+							$table_view->category_mapping = $category_mapping;
+							$table_view->render(TRUE);
+							
+						?>
+							
 					</div>
-				<?php print form::close(); ?>
+					</div>
+				<?php //print form::close(); ?>
 			</div>
 
 <?php

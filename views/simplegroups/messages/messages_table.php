@@ -66,45 +66,45 @@
 											<div class="post">
 												<p><?php echo $message_description; ?></p>
 												<?php
-												if ($message_detail)
+													if ($message_detail)
 												{
-													?>
+												?>
 													<p><a href="javascript:preview('message_preview_<?php echo $message_id?>')"><?php echo Kohana::lang('ui_main.preview_message');?></a></p>
 													<div id="message_preview_<?php echo $message_id?>" style="display:none;">
 														<?php echo $message_detail; ?>
 														
 														<?php
-				                        				// Retrieve Attachments if any
-				                        				foreach($message->media as $photo) 
-				                        				{
-				                        					if ($photo->media_type == 1)
-				                        					{
-				                        						print "<div class=\"attachment_thumbs\" id=\"photo_". $photo->id ."\">";
+														// Retrieve Attachments if any
+														foreach($message->media as $photo) 
+														{
+															if ($photo->media_type == 1)
+															{
+																print "<div class=\"attachment_thumbs\" id=\"photo_". $photo->id ."\">";
 
-				                        						$thumb = $photo->media_thumb;
-				                        						$photo_link = $photo->media_link;
-																$prefix = url::base().Kohana::config('upload.relative_directory');
-				                        						print "<a class='photothumb' rel='lightbox-group".$message_id."' href='$prefix/$photo_link'>";
-				                        						print "<img src=\"$prefix/$thumb\" border=\"0\" >";
-				                        						print "</a>";
-				                        						print "</div>";
-				                        					}
-				                        				}
-									                    ?>
-													</div>
-													<?php
+																$thumb = $photo->media_thumb;
+																$photo_link = $photo->media_link;
+																			$prefix = url::base().Kohana::config('upload.relative_directory');
+																print "<a class='photothumb' rel='lightbox-group".$message_id."' href='$prefix/$photo_link'>";
+																print "<img src=\"$prefix/$thumb\" border=\"0\" >";
+																print "</a>";
+																print "</div>";
+															}
+														}
+														?>
+											</div>
+											<?php
 												}
 												// Action::message_extra_admin  - Message Additional/Extra Stuff
 												Event::run('ushahidi_action.message_extra_admin', $message_id);
-												?>
-												<?php
+											?>
+												
+											<?php
 												$settings = new Settings_Model(1);
 												if ($service_id == 1 && $message_type == 1)
 												{
-													?>
-													<div id="replies">
-
-													</div>
+											?>
+											<div id="replies">
+											</div>
 													<!--<a href="javascript:showReply('reply_<?php //echo $message_id; ?>')" class="more">+<?php //echo Kohana::lang('ui_main.reply');?></a> -->
 													<div id="reply_<?php echo $message_id; ?>" class="reply">
 														<?php print form::open(url::site() . 'admin/simplegroups/messages/send/',array('id' => 'newreply_' . $message_id,
@@ -126,13 +126,18 @@
 												<?php
 												if ($message_type == 2)
 												{
-													?><li class="none-separator">To: <strong><?php echo $message_to; ?></strong><?php
+													?>
+														<li class="none-separator">To: <strong><?php echo $message_to; ?></strong></li>
+													<?php
 												}
 												else
 												{
-													?><li class="none-separator">From: <strong class="reporters_<?php echo $level_id?>"><?php echo $message_from; ?></strong><?php
+													?>
+														<li class="none-separator">From: <strong class="reporters_<?php echo $level_id?>"><?php echo $message_from; ?></strong></li>
+													<?php
 												}
 												?>
+
 											</ul>
 										</td>
 										<td class="col-2" style="padding-right:10px;" >

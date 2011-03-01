@@ -153,6 +153,25 @@
 			text-align:center;
 		}
 		
+		.table .col-2 {
+			width: 325px;
+		}
+
+		.table .post {
+			width: 325px;
+		}
+
+		.table .col-4 {
+			width: 100px;
+		}
+
+		.cat_edit{
+			float:right;
+			font-size:75%;
+			margin-right:15px;
+		}
+		
+		
 	</style>
     
     <script type="text/javascript">
@@ -273,7 +292,7 @@
 		//get the HTML for the next set of kid admin areas
 			$.get("<?php echo url::base() ?>admin/simplegroups/messages/get_table/"+service_id+"/"+cat_id+"/"+tab_id,
 			function(data){
-				$('#table_holder').html(data);	
+				$('#table_holder').html(data);
 				$('#filter_wait').html('');
 			});
 		

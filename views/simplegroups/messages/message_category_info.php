@@ -38,7 +38,7 @@
 				//if we ended on an odd number, which is an even number since we're zero based, then finish out the table
 				if( ($i % 2) == 0 && $i == count($category_mapping[$message_id])-1)
 				{
-					echo "<td class=\"cat\" width=\"22px\"></td><td class=\"cat\"</td>";
+					echo "<td class=\"cat\" width=\"22px\"></td><td class=\"cat\"></td>";
 				}
 				echo "</tr>";
 			}
