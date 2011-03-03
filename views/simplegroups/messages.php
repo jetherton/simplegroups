@@ -39,7 +39,7 @@
 					<!-- tab -->
 					<div class="tab">
 						<ul>
-							<li><a href="#" onClick="messagesAction('d', 'DELETE', '')"><?php echo strtoupper(Kohana::lang('ui_main.delete'));?></a></li>
+							<li><a href="#" id="delete_all_button" onClick="messagesAction('d', 'DELETE', ''); return false;"><?php echo strtoupper(Kohana::lang('ui_main.delete'));?></a></li>
 							<li> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
 							<li> Filter by category: <?php print form::dropdown(array('id'=>'cat_filter', 'onChange'=>'filterAction(); return false;'), $category_array); ?> </li>
 							<li id="filter_wait"></li>
@@ -67,15 +67,14 @@
 				}
 				?>
 				<!-- report-table -->
-				<?php //print form::open(NULL, array('id' => 'messageMain', 'name' => 'messageMain')); ?>
+				<?php print form::open(NULL, array('id' => 'messageMain', 'name' => 'messageMain')); ?>
+				
 					<input type="hidden" name="service_id" id="service_id" value="<?php echo $service_id; ?>"/>
 					
 					<input type="hidden" name="action" id="action" value=""/>
 					<input type="hidden" name="level"  id="level"  value=""/>
 					<input type="hidden" name="message_id[]" id="message_single" value=""/>
-					<div> 
-					<!-- add this div just to make internet explorer not freak out. Otherwise the .html() method doesn't
-						correctly replace the contents of the table_holder div. I hate Internet Explorer-->
+					
 					
 					<div class="table-holder" id="table_holder">
 
@@ -91,8 +90,7 @@
 							
 						?>
 							
-					</div>
-					</div>
+					</div>					
 				<?php //print form::close(); ?>
 			</div>
 

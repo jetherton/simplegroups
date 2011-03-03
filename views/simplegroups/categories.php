@@ -235,7 +235,7 @@ td ul{
 									{
 									?>
 										<tr>
-											<td colspan="4" class="col">
+											<td colspan="5" class="col">
 												<h3><?php echo Kohana::lang('ui_main.no_results');?></h3>
 											</td>
 										</tr>

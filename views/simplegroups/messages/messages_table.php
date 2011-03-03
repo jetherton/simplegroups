@@ -165,7 +165,7 @@
 													echo "<li class=\"none-separator\"><a href=\"". url::base() . 'admin/simplegroups/reports/edit?mid=' . $message_id ."\">Create Report?</a></li>";
 												}
 												?>
-												<li><a href="javascript:messagesAction('d','DELETE','<?php echo(rawurlencode($message_id)); ?>')" class="del"><?php echo Kohana::lang('ui_main.delete');?></a></li>
+												<li><a href="javascript:messagesAction('d','DELETE','<?php echo(rawurlencode($message_id)); ?>')" id="delete_message_<?php echo(rawurlencode($message_id)); ?>" class="del"><?php echo Kohana::lang('ui_main.delete');?></a></li>
 											</ul>
 										</td>
 									</tr>

@@ -15,6 +15,10 @@
  */
 
 <?php require SYSPATH.'../application/views/admin/form_utils_js.php' ?>
+
+	</script>
+	
+	 <script type="text/javascript">
 		
 		function limitChars(textid, limit, infodiv)
 		{
@@ -77,6 +81,13 @@
 			} else {
 				var answer = confirm('Are You Sure You Want To ' + confirmAction + ' items?')
 				if (answer){
+				
+					//if the action is "d" for delete then handle that in some seperate code
+					if(action == "d")
+					{
+						deleteMessages(message_id);
+						return;
+					}
 
 					// Set Submit Type
 					$("#action").attr("value", action);
@@ -101,6 +112,49 @@
 				}
 			}
 		}
+		
+		//delete messages button handler
+		function deleteMessages(message_id)
+		{
+			
+			//get the active category
+			var cat_id = $("#cat_filter").val();
+			//get the serive id
+			var service_id = $("#service_id").val();
+			//figure out which tab is currently selected
+			var tab_id = getSelectedTab();
+			//figure out which page we're on
+			var page = $("#pagination_active_page").attr("value"); //cause it's not really a "value"
+			if (message_id == '')  //if we're deleting lots of stuff at once.
+			{
+				//turn on the wating image
+				$('<img id="delete_all_wait" src="<?php echo url::base(); ?>media/img/loading_g.gif"/>').insertAfter($("#delete_all_button"));
+				$.post("<?php echo url::base() ?>admin/simplegroups/messages/delete_message/"+service_id+"/"+cat_id+"/"+tab_id+"?page="+page,
+					$("#messageMain").serialize(), 
+					function(data){
+						var parent = $('#table_holder').parent();
+						$('#table_holder').remove();
+						parent.append('<div class="table-holder" id="table_holder">'+data+'</div>');
+						$("#delete_all_wait").remove();
+
+				});
+			}
+			else
+			{
+				//turn on the wating image
+				$('<img id="delete_wait" src="<?php echo url::base(); ?>media/img/loading_g.gif"/>').insertAfter($("#delete_message_"+message_id));
+				$.post("<?php echo url::base() ?>admin/simplegroups/messages/delete_message/"+service_id+"/"+cat_id+"/"+tab_id+"?page="+page,
+					 { 'message_id[]': [message_id] },
+					function(data){
+						var parent = $('#table_holder').parent();
+						$('#table_holder').remove();
+						parent.append('<div class="table-holder" id="table_holder">'+data+'</div>');
+
+				});
+			}
+			
+		}
+		
 		
 		// Preview Message
 		function preview ( id ){
@@ -275,14 +329,7 @@
 		var service_id = $("#service_id").val();
 		
 		//figure out which tab is currently selected
-		var tab_id = "";
-		var kids = $(".tabset").find('a');
-		kids.each(function(){
-			if($(this).hasClass("active"))
-			{
-				tab_id = $(this).attr("id");
-			}
-		});
+		var tab_id = getSelectedTab();
 		
 		
 		
@@ -292,7 +339,19 @@
 		//get the HTML for the next set of kid admin areas
 			$.get("<?php echo url::base() ?>admin/simplegroups/messages/get_table/"+service_id+"/"+cat_id+"/"+tab_id,
 			function(data){
+				/* I would have just done this:
+				
 				$('#table_holder').html(data);
+				
+				But IE freakes out for some weird reason because of the <form> (if I commented out the <form> everything worked fine).
+				IE would always append the HTML instead of replacing it. So I came up with the below hack that seems to work
+				in FireFox and Chrome. So I'm just leaving it as is. I know it's not pretty, but just another reason... IE Sucks.
+				*/
+				
+				var parent = $('#table_holder').parent();
+				$('#table_holder').remove();
+				parent.append('<div class="table-holder" id="table_holder">'+data+'</div>');
+				
 				$('#filter_wait').html('');
 			});
 		
@@ -315,11 +374,62 @@
 		//get the HTML for the next set of kid admin areas
 			$.get("<?php echo url::base() ?>admin/simplegroups/messages/get_table/"+service_id+"/"+cat_id+"/"+tabId,
 			function(data){
-				$('#table_holder').html(data);	
+				
+				var parent = $('#table_holder').parent();
+				$('#table_holder').remove();
+				parent.append('<div class="table-holder" id="table_holder">'+data+'</div>');
+				
 				$('#tab_wait').remove();
 			});
 		
 		return false;
 		
 	}
+	
+	/*
+	* This sets the page we're looking at
+	*/
+	function pagination(page)
+	{
+		//get the active category
+		var cat_id = $("#cat_filter").val();
+		//get the serive id
+		var service_id = $("#service_id").val();
+		//figure out which tab is currently selected
+		var tab_id = getSelectedTab();
+		
+		//turn on the wating image
+		$('<img id="page_wait" src="<?php echo url::base(); ?>media/img/loading_g.gif"/>').insertAfter($("#pagination_"+page));
+		
+		//get the HTML for the next set of kid admin areas
+			$.get("<?php echo url::base() ?>admin/simplegroups/messages/get_table/"+service_id+"/"+cat_id+"/"+tab_id+"?page="+page,
+			function(data){
+				
+				var parent = $('#table_holder').parent();
+				$('#table_holder').remove();
+				parent.append('<div class="table-holder" id="table_holder">'+data+'</div>');
+				
+			});
+		
+		return false;
+
+	}
+	
+	
+	function getSelectedTab()
+	{
+		//figure out which tab is currently selected
+		var tab_id = "";
+		var kids = $(".tabset").find('a');
+		kids.each(function(){
+			if($(this).hasClass("active"))
+			{
+				tab_id = $(this).attr("id");
+			}
+		});
+		
+		return tab_id;
+	}
+	
+	
 		

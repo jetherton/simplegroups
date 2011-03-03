@@ -65,7 +65,9 @@ class Messages_Controller extends Admin_simplegroup_Controller
                         $message = ORM::factory('message')->find($item);
                         $message->delete( $item );
 			
-			ORM::factory('simplegroups_groups_message')->where("simplegroups_groups_message.message_id", $item)->delete();
+			ORM::factory('simplegroups_groups_message')->where("simplegroups_groups_message.message_id", $item)->delete_all();
+			//delete the category message maping
+			ORM::factory('simplegroups_message_category')->where("simplegroups_message_category.message_id", $item)->delete_all();
                     }
                     
                     $form_saved = TRUE;
@@ -236,7 +238,10 @@ class Messages_Controller extends Admin_simplegroup_Controller
 						    ->count_all();
 	
 		// Pagination		
+		//$pagination = new Ajax_Pagination(array(
 		$pagination = new Pagination(array(
+			'directory' => 'simplegroups/pagination',
+			'style' => 'ajax_classic',
 			'query_string'   => 'page',
 			'items_per_page' => (int) Kohana::config('settings.items_per_page_admin'),
 			'total_items'    => $message_count
@@ -276,6 +281,7 @@ class Messages_Controller extends Admin_simplegroup_Controller
 					->select("simplegroups_category.*, simplegroups_message_category.message_id AS message_id")
 					->join('simplegroups_message_category', 'simplegroups_category.id', 'simplegroups_message_category.simplegroups_category_id')
 					->in("simplegroups_message_category.message_id", implode(',', $message_ids))
+					->where('simplegroups_category.simplegroups_groups_id', $this->group->id)
 					->find_all();
 
 		foreach($message_categories as $message_category)
@@ -470,7 +476,9 @@ class Messages_Controller extends Admin_simplegroup_Controller
 
 	
 	
-	
+	/*************************************************
+	* This method saves the category info for a message
+	**************************************************/
 	function save_category_info($message_id = false)
 	{
 		//we're not going to use the template
@@ -555,6 +563,52 @@ class Messages_Controller extends Admin_simplegroup_Controller
 		$view->category_mapping = $message_categories;
 		$view->render(TRUE);
 	}
+	
+	
+	
+	
+	
+	/*************************************************
+	* This method saves the category info for a message
+	**************************************************/
+	function delete_message($service_id, $cat_id = 0, $tab_id="")
+	{
+		$this->template = "";
+		$this->auto_render = FALSE;		
+		$table_view = View::factory('simplegroups/messages/messages_table');
+				
+		
+		//check if any categories were even selected
+		if(isset($_POST['message_id']))
+		{
+			//now loop through the new data and add it in there
+			foreach($_POST['message_id'] as $message_id)
+			{
+				if($message_id == "" or $message_id == null)
+				{
+					continue;
+				}
+				$message = ORM::factory('message')->find($message_id);
+				$message->delete( $message_id );
+				
+				ORM::factory('simplegroups_groups_message')->where("simplegroups_groups_message.message_id", $message_id)->delete_all();
+				//delete the category message maping
+				ORM::factory('simplegroups_message_category')->where("simplegroups_message_category.message_id", $message_id)->delete_all();
+			}//end loop
+		}
+		
+		
+		$table_view = $this->setup_message_table($table_view, $service_id, $cat_id, $tab_id);		
+		$table_view->render(TRUE);
+			
+	}//end method
+	
+	
+	
+	
+	
+	
+	
 	
 	//get the javascript for the selecting categories
 	private function _new_category_toggle_js()
