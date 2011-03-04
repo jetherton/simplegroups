@@ -420,6 +420,7 @@ $db = new Database;
             'location_name' => '',
             'country_id' => '',
             'incident_category' => array(),
+	    'incident_group_category' => array(),
             'incident_news' => array(),
             'incident_video' => array(),
             'incident_photo' => array(),
@@ -463,7 +464,10 @@ $db = new Database;
 
         // Create Categories
         $this->template->content->categories = $this->_get_categories();
+	$this->template->content->group_categories = $this->_get_group_categories();
         $this->template->content->new_categories_form = $this->_new_categories_form_arr();
+	
+	$this->template->content->group_name = $this->group->name;
 
         // Time formatting
         $this->template->content->hour_array = $this->_hour_array();
@@ -834,6 +838,17 @@ $db = new Database;
                     $incident_category->category_id = $item;
                     $incident_category->save();
                 }
+		
+                // STEP 3.1: SAVE GROUP CATEGORIES
+                ORM::factory('simplegroups_incident_category')->where('incident_id',$incident->id)->delete_all();        // Delete Previous Entries
+                foreach($post->incident_group_category as $item)
+                {
+                    $incident_group_category = ORM::factory('simplegroups_incident_category');
+                    $incident_group_category->incident_id = $incident->id;
+                    $incident_group_category->simplegroups_category_id = $item;
+                    $incident_group_category->save();
+                }
+
 
 
                 // STEP 4: SAVE MEDIA
@@ -1011,6 +1026,17 @@ $db = new Database;
                     {
                         $incident_category[] = $category->category_id;
                     }
+		    
+		    // Retrieve Group Categories
+                    $incident_group_category = array();
+		    $incident_group_categories = ORM::factory("simplegroups_category")
+			->join("simplegroups_incident_category", "simplegroups_category.id", "simplegroups_incident_category.simplegroups_category_id")
+			->where("simplegroups_incident_category.incident_id", $id)
+			->find_all();
+                    foreach($incident_group_categories as $category)
+                    {
+                        $incident_group_category[] = $category->id;
+                    }
 
                     // Retrieve Media
                     $incident_news = array();
@@ -1049,6 +1075,7 @@ $db = new Database;
                         'location_name' => $incident->location->location_name,
                         'country_id' => $incident->location->country_id,
                         'incident_category' => $incident_category,
+			'incident_group_category' => $incident_group_category,
                         'incident_news' => $incident_news,
                         'incident_video' => $incident_video,
                         'incident_photo' => $incident_photo,
@@ -1071,7 +1098,27 @@ $db = new Database;
                     url::redirect('admin/simplegroups/reports/');
                 }
 
-            }
+            }//end of if($id)
+	    else
+	    { //this is a new report with no id
+		//check to see if we need to add some group categories that default on
+		//first find out what's out there.
+		//check and see if we need to tag this with a catgory
+		//find all the categories for this group with tag by default turned on
+		$categories = ORM::factory("simplegroups_category")
+			->where("simplegroups_groups_id", $this->group->id)
+			->where("selected_by_default", "1")
+			->where("applies_to_report", "1")
+			->find_all();
+		
+		$default_categories = array();
+		foreach($categories as $category)
+		{			
+			$default_categories[] = $category->id;			
+		}
+		$form['incident_group_category'] = $default_categories;
+		
+	    }
         }
 
         $this->template->content->id = $id;
@@ -1193,6 +1240,19 @@ $db = new Database;
 
         return $categories;
     }
+    
+    
+	private function _get_group_categories()
+	{
+		$categories = ORM::factory('simplegroups_category')			
+			->where('parent_id', '0')
+			->where('applies_to_report', 1)
+			->where('simplegroups_groups_id', $this->group->id)
+			->orderby('category_title', 'ASC')
+			->find_all();
+
+		return $categories;
+	}
 
     // Dynamic categories form fields
     private function _new_categories_form_arr()

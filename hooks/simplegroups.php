@@ -408,21 +408,7 @@ class simplegroups {
 					$group_message->number_id = $number->id;
 					$group_message->save();
 					
-					//check and see if we need to tag this with a catgory
-					//find all the categories for this group with tag by default turned on
-					$categories = ORM::factory("simplegroups_category")
-						->where("simplegroups_groups_id", $number->simplegroups_groups_id)
-						->where("selected_by_default", "1")
-						->where("applies_to_message", "1")
-						->find_all();
-
-					foreach($categories as $category)
-					{
-						$mapping = ORM::factory("simplegroups_message_category");
-						$mapping->message_id = $sms->id;
-						$mapping->simplegroups_category_id = $category->id;
-						$mapping->save();
-					}
+			
 					
 					//check and see if it needs to be forwarded
 					groups::forward_message_to_own_instance($sms->message, $sms->message_from, $number->simplegroups_groups_id);

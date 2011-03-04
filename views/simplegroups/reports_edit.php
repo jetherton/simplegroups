@@ -138,44 +138,38 @@
 							<?php Event::run('ushahidi_action.report_form_admin_after_time', $id); ?>
 							<div class="row">
 								<h4>
-									<?php echo Kohana::lang('ui_main.categories');?> 
+									Global <?php echo Kohana::lang('ui_main.categories');?> 
 									<span><?php echo Kohana::lang('ui_main.select_multiple');?>.</span>
 								</h4>
-								<?php //print $new_category_toggle_js; ?>
-								<!--category_add form goes here-->
-			                    <div id="category_add" class="category_add">
-			                        <?php
-			                        print '<p>'.Kohana::lang('ui_main.add_new_category').'<hr/></p>';
-                                    print form::label(array("id"=>"category_name_label", "for"=>"category_name"), Kohana::lang('ui_main.name'));
-                                    print '<br/>';
-                                    print form::input('category_name', $new_categories_form['category_name'], 'class=""');
-                                    print '<br/>';
-                                    print form::label(array("id"=>"description_label", "for"=>"description"), Kohana::lang('ui_main.description'));
-                                    print '<br/>';
-                                    print form::input('category_description', $new_categories_form['category_description'], 'class=""');
-                                    print '<br/>';
-                                    print form::label(array("id"=>"color_label", "for"=>"color"), Kohana::lang('ui_main.color'));
-                                    print '<br/>';
-                                    print form::input('category_color', $new_categories_form['category_color'], 'class=""');
-                                    print $color_picker_js;
-                                    print '<br/>';
-                                    print '<span>';
-                                    print '<a href="#" id="add_new_category">'.Kohana::lang('ui_main.add').'</a>';
-                                    print '</span>';
-                                    ?> 
-                                </div>
-
-			                    <div class="report_category">
-                        	    <?php
-															$selected_categories = array();
-															if (!empty($form['incident_category']) && is_array($form['incident_category'])) {
-																$selected_categories = $form['incident_category'];
-															}
-															$columns = 2;
-															echo category::tree($categories, $selected_categories, 'incident_category', $columns);
-															?>
-			                       								</div>
-							</div>
+								
+								
+				<!--Site wide categories-->
+				<div class="report_category">
+					<?php
+						$selected_categories = array();
+						if (!empty($form['incident_category']) && is_array($form['incident_category'])) {
+							$selected_categories = $form['incident_category'];
+						}
+						$columns = 2;
+						echo category::tree($categories, $selected_categories, 'incident_category', $columns);
+					?>
+				</div>
+				<!--group categories-->
+				<h4>
+					<?php echo $group_name. " ". Kohana::lang('ui_main.categories');?> 
+				</h4>
+				<div class="report_group_category">
+					<?php
+						$selected_group_categories = array();
+						if (!empty($form['incident_group_category']) && is_array($form['incident_group_category'])) {
+							$selected_group_categories = $form['incident_group_category'];
+						}
+						$columns = 2;
+						echo category::tree($group_categories, $selected_group_categories, 'incident_group_category', $columns);
+					?>
+				</div>
+					
+			</div>
 							
 							<div id="custom_forms">
 								<?php
