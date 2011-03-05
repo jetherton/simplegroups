@@ -211,125 +211,37 @@ class groups_Core {
 
 
 	/**************************************************************************************************************
-      * Given all the parameters returns a list of incidents that meet the search criteria
-      */
+	* Given all the parameters returns a list of incidents that meet the search criteria
+	**************************************************************************************************************/
 	public static function get_reports($category_ids, $approved_text, $where_text, $logical_operator, 
 		$order_by = "incident.incident_date",
 		$order_by_direction = "asc",
 		$limit = -1, $offset = -1)
 	{
-		$incidents = null;
-		//check if we're showing all categories, or if no category info was selected then return everything
-		If(count($category_ids) == 0 || $category_ids[0] == '0')
-		{
-			// Retrieve all markers
-			
-			    if($limit != -1 && $offset != -1)
-			    {
-				$incidents = ORM::factory('incident')
-					->select('DISTINCT incident.*')
-					->with('location')
-					->join('media', 'incident.id', 'media.incident_id','LEFT')
-					->join("simplegroups_groups_incident", "incident.id", "simplegroups_groups_incident.incident_id")
-					->where($approved_text.$where_text)
-					->orderby($order_by, $order_by_direction)
-					->find_all($limit, $offset);
-			    }
-			    else
-			    {
-				$incidents = ORM::factory('incident')
-					->select('DISTINCT incident.*')
-					->with('location')
-					->join('media', 'incident.id', 'media.incident_id','LEFT')
-					->join("simplegroups_groups_incident", "incident.id", "simplegroups_groups_incident.incident_id")
-					->where($approved_text.$where_text)
-					->orderby($order_by, $order_by_direction)
-					->find_all();
-			    }
-			    
-			return $incidents;
-		}
+		$category_code_to_column_mapping = array();
 		
-		// or up allthe categories we're interested in
-		$where_category = "";
-		$i = 0;
-		foreach($category_ids as $id)
-		{
-			$i++;
-			$where_category = ($i > 1) ? $where_category . " OR " : $where_category;
-			$where_category = $where_category . groups_Core::$table_prefix.'incident_category.category_id = ' . $id;
-		}
-
+		$current_user = new User_Model($_SESSION['auth_user']->id);
+		$group_id = groups::get_user_group($current_user);
+	
+		$group_where = " AND ( ".self::$table_prefix."simplegroups_groups_incident.simplegroups_groups_id = ".$group_id.") ";			
 		
-		//if we're using OR
-		if($logical_operator == "or")
-		{
-			
-			// Retrieve incidents by category			
-			if($limit != -1 && $offset != -1)
-			{
-				$incidents = ORM::factory('incident')
-					->select('DISTINCT incident.*')
-					->with('location')
-					->join('incident_category', 'incident.id', 'incident_category.incident_id','LEFT')
-					->join('media', 'incident.id', 'media.incident_id','LEFT')
-					->join("simplegroups_groups_incident", "incident.id", "simplegroups_groups_incident.incident_id")
-					->where($approved_text.' AND ('.$where_category. ')' . $where_text)
-					->orderby($order_by, $order_by_direction)
-					->find_all($limit, $offset);
-			}
-			else
-			{
-				$incidents = ORM::factory('incident')
-					->select('DISTINCT incident.*')
-					->with('location')
-					->join('incident_category', 'incident.id', 'incident_category.incident_id','LEFT')
-					->join('media', 'incident.id', 'media.incident_id','LEFT')
-					->join("simplegroups_groups_incident", "incident.id", "simplegroups_groups_incident.incident_id")
-					->where($approved_text.' AND ('.$where_category. ')' . $where_text)
-					->orderby($order_by, $order_by_direction)
-					->find_all();
-			}
-				
-			return $incidents;
-		}
-		else //if we're using AND
-		{
+		$joins = groups::get_joins_for_groups($category_ids);
 		
-			if($limit != -1 && $offset != -1)
-			{
-				// Retrieve incidents by category			
-				$incidents = ORM::factory('incident')
-					->select('incident.*, COUNT(incident.id) as category_count')
-					->with('location')
-					->join('incident_category', 'incident.id', 'incident_category.incident_id','LEFT')
-					->join('media', 'incident.id', 'media.incident_id','LEFT')
-					->join("simplegroups_groups_incident", "incident.id", "simplegroups_groups_incident.incident_id")
-					->where($approved_text.' AND ('.$where_category. ')' . $where_text)
-					->groupby('incident.id')
-					->having('category_count', count($category_ids))
-					->orderby($order_by, $order_by_direction)
-					->find_all($limit, $offset);
-			}
-			else
-			{
-				// Retrieve incidents by category			
-				$incidents = ORM::factory('incident')
-					->select('incident.*, COUNT(incident.id) as category_count')
-					->with('location')
-					->join('incident_category', 'incident.id', 'incident_category.incident_id','LEFT')
-					->join('media', 'incident.id', 'media.incident_id','LEFT')
-					->join("simplegroups_groups_incident", "incident.id", "simplegroups_groups_incident.incident_id")
-					->where($approved_text.' AND ('.$where_category. ')' . $where_text)
-					->groupby('incident.id')
-					->having('category_count', count($category_ids))
-					->orderby($order_by, $order_by_direction)
-					->find_all();
-			}
-					
-			return $incidents;
-		}
-
+		$sg_category_to_table_mapping = array("sg"=>array("child"=>"simplegroups_category", "parent"=>"simplegroups_parent_cat"));
+		
+		
+		$incidents = reports::get_reports($category_ids, 
+			$approved_text, 
+			$where_text. " ". $group_where,
+			$logical_operator,
+			$order_by,
+			$order_by_direction,
+			$limit,
+			$offset,
+			$joins,
+			$sg_category_to_table_mapping);
+		
+		return $incidents;
 	}//end method	
 	
 	
@@ -342,64 +254,66 @@ class groups_Core {
 	{
 		$incidents_count = -1;
 		
-		//check if we're showing all categories, or if no category info was selected then return everything
-		If(count($category_ids) == 0 || $category_ids[0] == '0')
-		{
-			// Retrieve all markers
+		$current_user = new User_Model($_SESSION['auth_user']->id);
+		$group_id = groups::get_user_group($current_user);
+	
+		$group_where = " AND ( ".self::$table_prefix."simplegroups_groups_incident.simplegroups_groups_id = ".$group_id.") ";
+				
+		$joins = groups::get_joins_for_groups($category_ids);
+		
+		$sg_category_to_table_mapping = array("sg"=>array("child"=>"simplegroups_category", "parent"=>"simplegroups_parent_cat"));
+		
+		$incidents_count = reports::get_reports_count($category_ids, 
+			$approved_text, 
+			$where_text. " ". $group_where,
+			$logical_operator,			
+			$joins,
+			$sg_category_to_table_mapping);
 			
-			$incidents_count = ORM::factory('incident')
-				->select('DISTINCT incident.*')
-				->with('location')
-				->join('media', 'incident.id', 'media.incident_id','LEFT')
-				->join("simplegroups_groups_incident", "incident.id", "simplegroups_groups_incident.incident_id")
-				->where($approved_text.$where_text)
-				->count_all();
-			    
-			return $incidents_count;
-		}
-		
-		// or up allthe categories we're interested in
-		$where_category = "";
-		$i = 0;
-		foreach($category_ids as $id)
-		{
-			$i++;
-			$where_category = ($i > 1) ? $where_category . " OR " : $where_category;
-			$where_category = $where_category . groups_Core::$table_prefix.'incident_category.category_id = ' . $id;
-		}
+		return $incidents_count;
 
-		
-		//if we're using OR
-		if($logical_operator == "or")
-		{
-			$incidents_count = ORM::factory('incident')
-				->select('DISTINCT incident.*')
-				->with('location')
-				->join('incident_category', 'incident.id', 'incident_category.incident_id','LEFT')
-				->join('media', 'incident.id', 'media.incident_id','LEFT')
-				->join("simplegroups_groups_incident", "incident.id", "simplegroups_groups_incident.incident_id")
-				->where($approved_text.' AND ('.$where_category. ')' . $where_text)
-				->count_all();
-			return $incidents_count;
-		}
-		else //if we're using AND
-		{
-			// Retrieve incidents by category			
-			$incidents_count = ORM::factory('incident')
-				->select('incident.*, COUNT(incident.id) as category_count')
-				->with('location')
-				->join('incident_category', 'incident.id', 'incident_category.incident_id','LEFT')
-				->join('media', 'incident.id', 'media.incident_id','LEFT')
-				->join("simplegroups_groups_incident", "incident.id", "simplegroups_groups_incident.incident_id")
-				->where($approved_text.' AND ('.$where_category. ')' . $where_text)
-				->groupby('incident.id')
-				->having('category_count', count($category_ids))
-				->count_all();
-			return $incidents_count;
-		}
 
 	}//end method	
 	
+	
+	/************************************************
+	 * This will check to see if there's a group category
+	 * catgory ID in the category_ids list and then 
+	 * create the necessary join arguements for the 
+	 * reports::get_reports/_count methods
+	 **********************************************/
+	 private static function get_joins_for_groups($category_ids)
+	 {
+		$found_group_cats = false;
+
+		//look for our category ID marker "SG" and then if we find it make the appropriate where SQL
+		foreach($category_ids as $cat_id)
+		{
+			
+			$delimiter_pos  = strpos($cat_id, ":");
+			if (substr(strtoupper($cat_id),0,$delimiter_pos) == "SG")
+			{
+				//we're gonna need some joins
+				$found_group_cats = true;
+				break;				
+			}
+		}
+		//tie up that first (
+		
+		
+		//no matter what we need to link an incident to a group, and we need this to come first, so we're putting it here
+		$joins = array(array("simplegroups_groups_incident", "incident.id", "simplegroups_groups_incident.incident_id"));
+		
+		if ($found_group_cats)
+		{
+			
+			$joins[] = array("simplegroups_incident_category", "incident.id", "simplegroups_incident_category.incident_id");
+			$joins[] = array('simplegroups_category', 'simplegroups_incident_category.simplegroups_category_id', 'simplegroups_category.id', 'LEFT');
+			$joins[] = array('simplegroups_category as simplegroups_parent_cat', 'simplegroups_category.parent_id', 'simplegroups_parent_cat.id', 'LEFT');
+
+		}
+		return $joins;
+	 }
 	
 	
 	/*************************************************

@@ -284,10 +284,10 @@ class Messages_Controller extends Admin_simplegroup_Controller
 					->where('simplegroups_category.simplegroups_groups_id', $this->group->id)
 					->find_all();
 
-		foreach($message_categories as $message_category)
-		{
-			$category_mapping[$message_category->message_id][] = $message_category;
-		}
+			foreach($message_categories as $message_category)
+			{
+				$category_mapping[$message_category->message_id][] = $message_category;
+			}
 		}
 		
 		$view->pagination = $pagination;

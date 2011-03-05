@@ -16,6 +16,10 @@
 
 <?php require SYSPATH.'../application/views/admin/form_utils_js.php' ?>
 
+</script>
+	
+ <script type="text/javascript">
+
 		// Ajax Submission
 		function reportAction ( action, confirmAction, incident_id )
 		{
@@ -55,4 +59,36 @@
 		{
 			$('#' + id).toggle(400);
 		}
+		
+		
+		//called when the user changes what category to filter by
+		function changeCategoryFilter()
+		{
+			//turn on the wating image
+			$('#filter_wait').html('<img src="<?php echo url::base(); ?>media/img/loading_g.gif"/>');
+			updateTable('#filter_wait');
+			return false;
+		}
+		
+		
+		//Updates the table
+		function updateTable(waitingID)
+		{
+			//get the category id that we want to use
+			var cat_id = encodeURIComponent($("#cat_filter").val());
+			
+			//get the HTML for the next set of kid admin areas
+			$.get("<?php echo url::base() ?>admin/simplegroups/reports/get_table?c="+cat_id,
+				function(data){								
+					var parent = $('#table_holder').parent();
+					$('#table_holder').remove();
+					parent.append('<div class="table-holder" id="table_holder">'+data+'</div>');
+					
+					$(waitingID).html('');
+				}
+			);
+		
+			return false;
+		}
+		
 
