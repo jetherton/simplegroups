@@ -176,15 +176,16 @@
 											<ul>
 												<li class="none-separator">
 													<?php if($incident_approved) {?>
-														<a title="Click to Unapprove this report" href="#"<?php if ($incident_approved) echo " class=\"status_yes\"" ?> onclick="reportAction('a','APPROVE', '<?php echo $incident_id; ?>');"><?php echo Kohana::lang('ui_main.approve');?></a>
+														<a title="Click to Unapprove this report" href="#"<?php if ($incident_approved) echo " class=\"status_yes\"" ?> onclick="reportAction('a','APPROVE', '<?php echo $incident_id; ?>', 'individual_report_action_<?php echo $incident_id; ?>'); return false;"><?php echo Kohana::lang('ui_main.approve');?></a>
 													<?php } else { ?>
-													Unapproved: <a title="Click to Approve this report" style="font-size:75%;" href="#"<?php if ($incident_approved) echo " class=\"status_yes\"" ?> onclick="reportAction('a','APPROVE', '<?php echo $incident_id; ?>');">Approve</a>
+													Unapproved: <a title="Click to Approve this report" style="font-size:75%;" href="#"<?php if ($incident_approved) echo " class=\"status_yes\"" ?> onclick="reportAction('a','APPROVE', '<?php echo $incident_id; ?>', 'individual_report_action_<?php echo $incident_id; ?>'); return false;">Approve</a>
 													<?php } ?>
 													
 													
 												</li>
-												<li><a href="#"<?php if ($incident_verified) echo " class=\"status_yes\"" ?> onclick="reportAction('v','VERIFY', '<?php echo $incident_id; ?>');"><?php echo Kohana::lang('ui_main.verify');?></a></li>
-												<li><a href="#" class="del" onclick="reportAction('d','DELETE', '<?php echo $incident_id; ?>');"><?php echo Kohana::lang('ui_main.delete');?></a></li>
+												<li><a href="#"<?php if ($incident_verified) echo " class=\"status_yes\"" ?> onclick="reportAction('v','VERIFY', '<?php echo $incident_id; ?>', 'individual_report_action_<?php echo $incident_id; ?>'); return false;"><?php echo Kohana::lang('ui_main.verify');?></a></li>
+												<li><a href="#" class="del" onclick="reportAction('d','DELETE', '<?php echo $incident_id; ?>', 'individual_report_action_<?php echo $incident_id; ?>'); return false;"><?php echo Kohana::lang('ui_main.delete');?></a></li>
+												<li id="individual_report_action_<?php echo $incident_id; ?>"></li>
 											</ul>
 										</td>
 									</tr>

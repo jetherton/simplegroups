@@ -21,17 +21,17 @@
 				<div class="tabs">
 					<!-- tabset -->
 					<ul class="tabset">
-						<li><a href="?status=0" <?php if ($status != 'a' && $status !='v') echo "class=\"active\""; ?>><?php echo Kohana::lang('ui_main.show_all');?></a></li>
-						<li><a href="?status=a" <?php if ($status == 'a') echo "class=\"active\""; ?>><?php echo Kohana::lang('ui_main.awaiting_approval');?></a></li>
-						<li><a href="?status=v" <?php if ($status == 'v') echo "class=\"active\""; ?>><?php echo Kohana::lang('ui_main.awaiting_verification');?></a></li>
+						<li><a id="status_filter_0" href="#" onclick="changeStatus('0'); return false;" <?php if ($status != 'a' && $status !='v') echo "class=\"active\""; ?>><?php echo Kohana::lang('ui_main.show_all');?></a></li>
+						<li><a id="status_filter_a"href="#" onclick="changeStatus('a'); return false;"<?php if ($status == 'a') echo "class=\"active\""; ?>><?php echo Kohana::lang('ui_main.awaiting_approval');?></a></li>
+						<li><a id="status_filter_v"href="#" onclick="changeStatus('v'); return false;"<?php if ($status == 'v') echo "class=\"active\""; ?>><?php echo Kohana::lang('ui_main.awaiting_verification');?></a></li>
 					</ul>
 					<!-- tab -->
 					<div class="tab">
 						<ul>
-							<li><a href="#" onclick="reportAction('a','APPROVE', '');"><?php echo Kohana::lang('ui_main.approve');?></a></li>
-							<li><a href="#" onclick="reportAction('u','UNAPPROVE', '');"><?php echo Kohana::lang('ui_main.disapprove');?></a></li>
-							<li><a href="#" onclick="reportAction('v','VERIFY', '');"><?php echo Kohana::lang('ui_main.verify');?></a></li>
-							<li><a href="#" onclick="reportAction('d','DELETE', '');"><?php echo Kohana::lang('ui_main.delete');?></a></li>
+							<li><a id="approve_button" href="#" onclick="reportAction('a','APPROVE', '', 'approve_button'); return false;"><?php echo Kohana::lang('ui_main.approve');?></a></li>
+							<li><a id="unapprove_button" href="#" onclick="reportAction('u','UNAPPROVE', '', 'unapprove_button'); return false;"><?php echo Kohana::lang('ui_main.disapprove');?></a></li>
+							<li><a id="verify_button" href="#" onclick="reportAction('v','VERIFY', '', 'verify_button'); return false;"><?php echo Kohana::lang('ui_main.verify');?></a></li>
+							<li><a id="delete_button" href="#" onclick="reportAction('d','DELETE', '', 'delete_button'); return false;"><?php echo Kohana::lang('ui_main.delete');?></a></li>
 							<li> Filter by category: <?php print form::dropdown(array('id'=>'cat_filter', 'onChange'=>'changeCategoryFilter(); return false;'), $category_array); ?> </li>
 							<li id="filter_wait"></li>
 						</ul>

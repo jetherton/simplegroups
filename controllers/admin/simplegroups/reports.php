@@ -39,7 +39,347 @@ class Reports_Controller extends Admin_simplegroup_Controller
         $form_saved = FALSE;
         $form_action = "";
         
-        if ($_POST)
+	$this->handle_post_variables();
+
+
+	$db = new Database;
+
+
+	$this->template->content = $this->setup_report_table($this->template->content);
+		
+        $this->template->content->form_error = $form_error;
+        $this->template->content->form_saved = $form_saved;
+        $this->template->content->form_action = $form_action;
+	$this->template->content->category_array = $this->setup_category_dropdown_filter();
+        
+	// Status Tab
+	if (!empty($_GET['status']))
+	{
+		$status = $_GET['status'];
+	}
+	else
+	{
+		$status = "0";
+	}
+        $this->template->content->status = $status;
+
+        // Javascript Header
+        $this->template->js = new View('simplegroups/reports_js');
+    }//end of index()
+
+
+
+
+	//creates the table of messages
+	private function setup_report_table($view)
+	{
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Setup the filters and such.
+		if (!empty($_GET['status']))
+		{
+			$status = $_GET['status'];
+
+			if (strtolower($status) == 'a')
+			{
+			$filter = 'incident_active = 0';
+			}
+			elseif (strtolower($status) == 'v')
+			{
+			$filter = 'incident_verified = 0';
+			}
+			else
+			{
+			$status = "0";
+			$filter = '1=1';
+			}
+		}
+		else
+		{
+			$status = "0";
+			$filter = "1=1";
+		}
+
+		// Get Search Keywords (If Any)
+		if (isset($_GET['k']))
+		{
+			//  Brute force input sanitization
+
+			// Phase 1 - Strip the search string of all non-word characters 
+			$keyword_raw = preg_replace('/[^\w+]\w*/', '', $_GET['k']);
+
+			// Strip any HTML tags that may have been missed in Phase 1
+			$keyword_raw = strip_tags($keyword_raw);
+
+			// Phase 3 - Invoke Kohana's XSS cleaning mechanism just incase an outlier wasn't caught
+			// in the first 2 steps
+			$keyword_raw = $this->input->xss_clean($keyword_raw);
+
+			$filter .= " AND (".$this->_get_searchstring($keyword_raw).")";
+		}
+		else
+		{
+			$keyword_raw = "";
+		}
+
+
+
+		// Category ID
+		$category_ids=array();
+		if( isset($_GET['c']) AND ! empty($_GET['c']) )
+		{
+			$category_ids = explode(",", $_GET['c']); //get rid of that trailing ","
+		}
+		else
+		{
+			$category_ids = array("0");
+		}
+		
+		// logical operator
+		$logical_operator = "or";
+		if( isset($_GET['lo']) AND ! empty($_GET['lo']) )
+		{
+			$logical_operator = $_GET['lo'];
+		}
+
+		$show_unapproved="3"; //1 show only approved, 2 show only unapproved, 3 show all
+		//figure out if we're showing unapproved stuff or what.
+		if (isset($_GET['u']) AND !empty($_GET['u']))
+		{
+		    $show_unapproved = (int) $_GET['u'];
+		}
+		$approved_text = "";
+		if($show_unapproved == 1)
+		{
+			$approved_text = "incident.incident_active = 1 ";
+		}
+		else if ($show_unapproved == 2)
+		{
+			$approved_text = "incident.incident_active = 0 ";
+		}
+		else if ($show_unapproved == 3)
+		{
+			$approved_text = " (incident.incident_active = 0 OR incident.incident_active = 1) ";
+		}
+		
+		
+		
+		$location_where = "";
+		// Break apart location variables, if necessary
+		$southwest = array();
+		if (isset($_GET['sw']))
+		{
+			$southwest = explode(",",$_GET['sw']);
+		}
+
+		$northeast = array();
+		if (isset($_GET['ne']))
+		{
+			$northeast = explode(",",$_GET['ne']);
+		}
+
+		if ( count($southwest) == 2 AND count($northeast) == 2 )
+		{
+			$lon_min = (float) $southwest[0];
+			$lon_max = (float) $northeast[0];
+			$lat_min = (float) $southwest[1];
+			$lat_max = (float) $northeast[1];
+
+			$location_where = ' AND (location.latitude >='.$lat_min.' AND location.latitude <='.$lat_max.' AND location.longitude >='.$lon_min.' AND location.longitude <='.$lon_max.') ';
+
+		}
+		
+		$group_where = " (simplegroups_groups_incident.simplegroups_groups_id = ".$this->group->id.") ";
+		
+		////////////////////////////////////////////////////////////////////////////////////////////
+		//Get the incidents and the number of incidents
+		$reports_count = groups::get_reports_count($category_ids, $approved_text, $location_where. " AND ". $filter. " AND ". $group_where
+			, $logical_operator);
+		
+		
+		// Pagination
+		$pagination = new Pagination(array(
+				'directory' => 'simplegroups/pagination',
+				'style' => 'ajax_classic',
+				'query_string' => 'page',
+				'items_per_page' => (int) Kohana::config('settings.items_per_page_admin'),
+				'total_items' => $reports_count
+				));
+				
+
+		$incidents = groups::get_reports($category_ids,  $approved_text, $location_where. " AND ". $filter. " AND ". $group_where, 
+			$logical_operator, 
+			"incident.incident_date", "DESC",
+			(int) Kohana::config('settings.items_per_page_admin'), $pagination->sql_offset );
+			
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Setup the Location information for each incident
+		$location_ids = array();
+		foreach ($incidents as $incident)
+		{
+		    $location_ids[] = $incident->location_id;
+		}
+		//check if location_ids is not empty
+		if( count($location_ids ) > 0 ) 
+		{
+		    $locations_result = ORM::factory('location')->in('id',implode(',',$location_ids))->find_all();
+		    $locations = array();
+		    foreach ($locations_result as $loc)
+		    {
+			$locations[$loc->id] = $loc->location_name;
+		    }
+		}
+		else
+		{
+		    $locations = array();
+		}
+
+		
+		
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//use this to make a mapping of simplegroup categories to reports	
+		$incidents_ids = array();
+		foreach($incidents as $incident)
+		{
+		$incidents_ids[] = $incident->id;
+		}
+		$category_mapping = array();
+		//make sure there are some messages
+		if(count($incidents_ids) > 0)
+		{
+		$incident_categories = ORM::factory('simplegroups_category')
+					->select("simplegroups_category.*, simplegroups_incident_category.incident_id AS incident_id")
+					->join('simplegroups_incident_category', 'simplegroups_category.id', 'simplegroups_incident_category.simplegroups_category_id')
+					->in("simplegroups_incident_category.incident_id", implode(',', $incidents_ids))
+					->where('simplegroups_category.simplegroups_groups_id', $this->group->id)
+					->find_all();
+
+			foreach($incident_categories as $incident_category)
+			{
+				$category_mapping[$incident_category->incident_id][] = $incident_category;
+			}
+		}
+
+
+
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Gets a list of countries to better specify the location
+		$countries = array();
+		foreach (ORM::factory('country')->orderby('country')->find_all() as $country)
+		{
+		    // Create a list of all categories
+		    $this_country = $country->country;
+		    if (strlen($this_country) > 35)
+		    {
+			$this_country = substr($this_country, 0, 35) . "...";
+		    }
+		    $countries[$country->id] = $this_country;
+		}
+		
+		
+		$view->locations = $locations;	
+		$view->category_mapping = $category_mapping;
+		$view->countries = $countries;
+		$view->incidents = $incidents;
+		$view->pagination = $pagination;
+		$view->total_items = $pagination->total_items;
+		
+		return $view;
+		
+	}//end of setup_report_table
+
+
+
+	
+	private function setup_category_dropdown_filter()
+	{
+		//create category array for drop down filter list
+		$category_array = array(0=>"Show All");
+		$category_array[$this->group->name." Categories"] = array();
+
+		$categories = ORM::factory('simplegroups_category')
+						->where('simplegroups_groups_id', $this->group->id)
+						->where('applies_to_message', 1)
+						->where('parent_id', 0)
+						->find_all();
+		foreach($categories as $category)
+		{
+			//first, check and see if we're dealing with a kid category
+			if ($category->children->count() > 0)
+			{
+				$parent_array = array();
+				foreach ($category->children as $child)
+				{
+					$parent_array["sg:".$child->id] = $child->category_title;
+				}
+				$category_array[$category->category_title] = $parent_array;
+			}
+			else
+			{
+				$category_array["sg:".$category->id] = $category->category_title;
+			}		
+		}//end loop
+
+		$category_array["Site Wide Categories"] = array();
+		$categories = ORM::factory('category')->find_all();
+		foreach($categories as $category)
+		{
+			//first, check and see if we're dealing with a kid category
+			if ($category->children->count() > 0)
+			{
+				$parent_array = array();
+				foreach ($category->children as $child)
+				{
+					$parent_array[$child->id] = $child->category_title;
+				}
+				$category_array[$category->category_title] = $parent_array;
+			}
+			else
+			{
+				$category_array[$category->id] = $category->category_title;
+			}		
+		}//end loop
+		
+		return $category_array;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+    
+	
+	
+	
+	//ajax calls to updated the report list come in here
+	function get_table()
+	{	
+		$this->template = "";
+		$this->auto_render = FALSE;
+		
+		$this->handle_post_variables();
+		
+		$table_view = View::factory('simplegroups/reports/reports_table');
+		$table_view = $this->setup_report_table($table_view);
+		
+		$table_view->render(TRUE);
+	}//end get_table()
+    
+
+    
+    
+    private function handle_post_variables()
+    {
+      if ($_POST)
         {
             $post = Validation::factory($_POST);
 
@@ -199,332 +539,19 @@ class Reports_Controller extends Admin_simplegroup_Controller
             }
 
         }
-
-
-$db = new Database;
-
-
-	$this->template->content = $this->setup_report_table($this->template->content);
-		
-        $this->template->content->form_error = $form_error;
-        $this->template->content->form_saved = $form_saved;
-        $this->template->content->form_action = $form_action;
-	$this->template->content->category_array = $this->setup_category_dropdown_filter();
-        
-	// Status Tab
-	if (!empty($_GET['status']))
-	{
-		$status = $_GET['status'];
-	}
-	else
-	{
-		$status = "0";
-	}
-        $this->template->content->status = $status;
-
-        // Javascript Header
-        $this->template->js = new View('simplegroups/reports_js');
-    }//end of index()
-
-
-
-
-	//creates the table of messages
-	private function setup_report_table($view)
-	{
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Setup the filters and such.
-		if (!empty($_GET['status']))
-		{
-			$status = $_GET['status'];
-
-			if (strtolower($status) == 'a')
-			{
-			$filter = 'incident_active = 0';
-			}
-			elseif (strtolower($status) == 'v')
-			{
-			$filter = 'incident_verified = 0';
-			}
-			else
-			{
-			$status = "0";
-			$filter = '1=1';
-			}
-		}
-		else
-		{
-			$status = "0";
-			$filter = "1=1";
-		}
-
-		// Get Search Keywords (If Any)
-		if (isset($_GET['k']))
-		{
-			//  Brute force input sanitization
-
-			// Phase 1 - Strip the search string of all non-word characters 
-			$keyword_raw = preg_replace('/[^\w+]\w*/', '', $_GET['k']);
-
-			// Strip any HTML tags that may have been missed in Phase 1
-			$keyword_raw = strip_tags($keyword_raw);
-
-			// Phase 3 - Invoke Kohana's XSS cleaning mechanism just incase an outlier wasn't caught
-			// in the first 2 steps
-			$keyword_raw = $this->input->xss_clean($keyword_raw);
-
-			$filter .= " AND (".$this->_get_searchstring($keyword_raw).")";
-		}
-		else
-		{
-			$keyword_raw = "";
-		}
-
-
-
-		// Category ID
-		$category_ids=array();
-		if( isset($_GET['c']) AND ! empty($_GET['c']) )
-		{
-			$category_ids = explode(",", $_GET['c']); //get rid of that trailing ","
-		}
-		else
-		{
-			$category_ids = array("0");
-		}
-		
-		// logical operator
-		$logical_operator = "or";
-		if( isset($_GET['lo']) AND ! empty($_GET['lo']) )
-		{
-			$logical_operator = $_GET['lo'];
-		}
-
-		$show_unapproved="3"; //1 show only approved, 2 show only unapproved, 3 show all
-		//figure out if we're showing unapproved stuff or what.
-		if (isset($_GET['u']) AND !empty($_GET['u']))
-		{
-		    $show_unapproved = (int) $_GET['u'];
-		}
-		$approved_text = "";
-		if($show_unapproved == 1)
-		{
-			$approved_text = "incident.incident_active = 1 ";
-		}
-		else if ($show_unapproved == 2)
-		{
-			$approved_text = "incident.incident_active = 0 ";
-		}
-		else if ($show_unapproved == 3)
-		{
-			$approved_text = " (incident.incident_active = 0 OR incident.incident_active = 1) ";
-		}
-		
-		
-		
-		$location_where = "";
-		// Break apart location variables, if necessary
-		$southwest = array();
-		if (isset($_GET['sw']))
-		{
-			$southwest = explode(",",$_GET['sw']);
-		}
-
-		$northeast = array();
-		if (isset($_GET['ne']))
-		{
-			$northeast = explode(",",$_GET['ne']);
-		}
-
-		if ( count($southwest) == 2 AND count($northeast) == 2 )
-		{
-			$lon_min = (float) $southwest[0];
-			$lon_max = (float) $northeast[0];
-			$lat_min = (float) $southwest[1];
-			$lat_max = (float) $northeast[1];
-
-			$location_where = ' AND (location.latitude >='.$lat_min.' AND location.latitude <='.$lat_max.' AND location.longitude >='.$lon_min.' AND location.longitude <='.$lon_max.') ';
-
-		}
-		
-		$group_where = " (simplegroups_groups_incident.simplegroups_groups_id = ".$this->group->id.") ";
-		
-		////////////////////////////////////////////////////////////////////////////////////////////
-		//Get the incidents and the number of incidents
-		$reports_count = groups::get_reports_count($category_ids, $approved_text, $location_where. " AND ". $filter. " AND ". $group_where
-			, $logical_operator);
-		
-		
-		// Pagination
-		$pagination = new Pagination(array(
-				'query_string' => 'page',
-				'items_per_page' => (int) Kohana::config('settings.items_per_page_admin'),
-				'total_items' => $reports_count
-				));
-				
-
-		$incidents = groups::get_reports($category_ids,  $approved_text, $location_where. " AND ". $filter. " AND ". $group_where, 
-			$logical_operator, 
-			"incident.incident_date", "DESC",
-			(int) Kohana::config('settings.items_per_page_admin'), $pagination->sql_offset );
-			
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Setup the Location information for each incident
-		$location_ids = array();
-		foreach ($incidents as $incident)
-		{
-		    $location_ids[] = $incident->location_id;
-		}
-		//check if location_ids is not empty
-		if( count($location_ids ) > 0 ) 
-		{
-		    $locations_result = ORM::factory('location')->in('id',implode(',',$location_ids))->find_all();
-		    $locations = array();
-		    foreach ($locations_result as $loc)
-		    {
-			$locations[$loc->id] = $loc->location_name;
-		    }
-		}
-		else
-		{
-		    $locations = array();
-		}
-
-		
-		
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//use this to make a mapping of simplegroup categories to reports	
-		$incidents_ids = array();
-		foreach($incidents as $incident)
-		{
-		$incidents_ids[] = $incident->id;
-		}
-		$category_mapping = array();
-		//make sure there are some messages
-		if(count($incidents_ids) > 0)
-		{
-		$incident_categories = ORM::factory('simplegroups_category')
-					->select("simplegroups_category.*, simplegroups_incident_category.incident_id AS incident_id")
-					->join('simplegroups_incident_category', 'simplegroups_category.id', 'simplegroups_incident_category.simplegroups_category_id')
-					->in("simplegroups_incident_category.incident_id", implode(',', $incidents_ids))
-					->where('simplegroups_category.simplegroups_groups_id', $this->group->id)
-					->find_all();
-
-			foreach($incident_categories as $incident_category)
-			{
-				$category_mapping[$incident_category->incident_id][] = $incident_category;
-			}
-		}
-
-
-
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Gets a list of countries to better specify the location
-		$countries = array();
-		foreach (ORM::factory('country')->orderby('country')->find_all() as $country)
-		{
-		    // Create a list of all categories
-		    $this_country = $country->country;
-		    if (strlen($this_country) > 35)
-		    {
-			$this_country = substr($this_country, 0, 35) . "...";
-		    }
-		    $countries[$country->id] = $this_country;
-		}
-		
-		
-		$view->locations = $locations;	
-		$view->category_mapping = $category_mapping;
-		$view->countries = $countries;
-		$view->incidents = $incidents;
-		$view->pagination = $pagination;
-		$view->total_items = $pagination->total_items;
-		
-		return $view;
-		
-	}//end of setup_report_table
-
-
-
-	private function setup_category_dropdown_filter()
-	{
-		//create category array for drop down filter list
-		$category_array = array(0=>"Show All");
-		$category_array[$this->group->name." Categories"] = array();
-
-		$categories = ORM::factory('simplegroups_category')
-						->where('simplegroups_groups_id', $this->group->id)
-						->where('applies_to_message', 1)
-						->where('parent_id', 0)
-						->find_all();
-		foreach($categories as $category)
-		{
-			//first, check and see if we're dealing with a kid category
-			if ($category->children->count() > 0)
-			{
-				$parent_array = array();
-				foreach ($category->children as $child)
-				{
-					$parent_array["sg:".$child->id] = $child->category_title;
-				}
-				$category_array[$category->category_title] = $parent_array;
-			}
-			else
-			{
-				$category_array["sg:".$category->id] = $category->category_title;
-			}		
-		}//end loop
-
-		$category_array["Site Wide Categories"] = array();
-		$categories = ORM::factory('category')->find_all();
-		foreach($categories as $category)
-		{
-			//first, check and see if we're dealing with a kid category
-			if ($category->children->count() > 0)
-			{
-				$parent_array = array();
-				foreach ($category->children as $child)
-				{
-					$parent_array[$child->id] = $child->category_title;
-				}
-				$category_array[$category->category_title] = $parent_array;
-			}
-			else
-			{
-				$category_array[$category->id] = $category->category_title;
-			}		
-		}//end loop
-		
-		return $category_array;
-	}
-
-
-
-
-
-
-
-
-
-
-
-
+    }//end method
     
-
-
     
-	
-	
-	//ajax calls to updated the report list come in here
-	function get_table()
-	{	
-		$this->template = "";
-		$this->auto_render = FALSE;
-		$table_view = View::factory('simplegroups/reports/reports_table');
-		$table_view = $this->setup_report_table($table_view);
-		
-		$table_view->render(TRUE);
-	}//end get_table()
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     
