@@ -227,7 +227,7 @@ class groups_Core {
 		
 		$joins = groups::get_joins_for_groups($category_ids);
 		
-		$sg_category_to_table_mapping = array("sg"=>array("child"=>"simplegroups_category", "parent"=>"simplegroups_parent_cat"));
+		$sg_category_to_table_mapping = groups::get_category_to_table_mapping();
 		
 		
 		$incidents = reports::get_reports($category_ids, 
@@ -261,7 +261,7 @@ class groups_Core {
 				
 		$joins = groups::get_joins_for_groups($category_ids);
 		
-		$sg_category_to_table_mapping = array("sg"=>array("child"=>"simplegroups_category", "parent"=>"simplegroups_parent_cat"));
+		$sg_category_to_table_mapping = groups::get_category_to_table_mapping();
 		
 		$incidents_count = reports::get_reports_count($category_ids, 
 			$approved_text, 
@@ -282,23 +282,25 @@ class groups_Core {
 	 * create the necessary join arguements for the 
 	 * reports::get_reports/_count methods
 	 **********************************************/
-	 private static function get_joins_for_groups($category_ids)
+	 public static function get_joins_for_groups($category_ids)
 	 {
 		$found_group_cats = false;
 
-		//look for our category ID marker "SG" and then if we find it make the appropriate where SQL
-		foreach($category_ids as $cat_id)
+		if(is_array($category_ids)) //sometimes if we're looking at all categories there won't be an array, but just a string of "0"
 		{
-			
-			$delimiter_pos  = strpos($cat_id, ":");
-			if (substr(strtoupper($cat_id),0,$delimiter_pos) == "SG")
+			//look for our category ID marker "SG" and then if we find it make the appropriate where SQL
+			foreach($category_ids as $cat_id)
 			{
-				//we're gonna need some joins
-				$found_group_cats = true;
-				break;				
+				
+				$delimiter_pos  = strpos($cat_id, "_");
+				if (substr(strtoupper($cat_id),0,$delimiter_pos) == "SG")
+				{
+					//we're gonna need some joins
+					$found_group_cats = true;
+					break;				
+				}
 			}
 		}
-		//tie up that first (
 		
 		
 		//no matter what we need to link an incident to a group, and we need this to come first, so we're putting it here
@@ -314,6 +316,14 @@ class groups_Core {
 		}
 		return $joins;
 	 }
+	 
+	 /////////////////////////////////////////////////////////////////////////////////////
+	 //Get the category to table mapping for groups
+	 /////////////////////////////////////////////////////////////////////////////////////
+	 public static function get_category_to_table_mapping()
+	 {
+		return array("sg"=>array("child"=>"simplegroups_category", "parent"=>"simplegroups_parent_cat"));
+	}
 	
 	
 	/*************************************************

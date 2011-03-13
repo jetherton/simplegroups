@@ -25,7 +25,7 @@ class adminmap_Controller extends Admin_simplegroup_Controller
 		adminmap_helper::setup_adminmap($this);
 		
 		//get the categories
-		adminmap_helper::set_categories($this, true);
+		adminmap_helper::set_categories($this, true, $this->group);
 		
 		//setup the map
 		$clustering = Kohana::config('settings.allow_clustering');

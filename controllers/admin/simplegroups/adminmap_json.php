@@ -35,15 +35,30 @@ class Adminmap_json_Controller extends Admin_simplegroup_Controller
 	*/
 	function index()
 	{
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//figure out the category ID situation	
+		$category_ids=array();
+		if( isset($_GET['c']) AND ! empty($_GET['c']) )
+		{
+			$category_ids = explode(",", $_GET['c'],-1); //get rid of that trailing ";"
+		}
+		else
+		{
+			$category_ids = array("0");
+		}
+		
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//setup the group specific stuff
 		$group_where = " AND ( ".$this->table_prefix."simplegroups_groups_incident.simplegroups_groups_id = ".$this->group->id.") ";
-		$joins = array();
-		$joins[] = array("simplegroups_groups_incident", "incident.id", "simplegroups_groups_incident.incident_id");
+		$joins = groups::get_joins_for_groups($category_ids);		
+		$sg_category_to_table_mapping = groups::get_category_to_table_mapping();
 		
 		adminmap_helper::json_index($this, 
 			"admin/simplegroups/reports/edit/", 
 			true,
 			$group_where, 
-			$joins);
+			$joins,
+			$sg_category_to_table_mapping);
 	}
 
 
@@ -52,16 +67,31 @@ class Adminmap_json_Controller extends Admin_simplegroup_Controller
      */
      public function cluster()
     {
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//figure out the category ID situation	
+	$category_ids=array();
+        if( isset($_GET['c']) AND ! empty($_GET['c']) )
+	{
+		$category_ids = explode(",", $_GET['c'],-1); //get rid of that trailing ";"
+	}
+	else
+	{
+		$category_ids = array("0");
+	}
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//setup the group specific stuff
 	$group_where = " AND ( ".$this->table_prefix."simplegroups_groups_incident.simplegroups_groups_id = ".$this->group->id.") ";
-	$group_joins = array();
-	$group_joins[] = array("simplegroups_groups_incident", "incident.id", "simplegroups_groups_incident.incident_id");
+	$joins = groups::get_joins_for_groups($category_ids);		
+	$sg_category_to_table_mapping = groups::get_category_to_table_mapping();
         
 	adminmap_helper::json_cluster($this, 
 		"admin/simplegroups/reports/edit/", 
 		"admin/simplegroups/reports/index", 
 		true,
 		$group_where, 
-		$group_joins);
+		$joins,
+		$sg_category_to_table_mapping);
     }
 
 
@@ -70,15 +100,17 @@ class Adminmap_json_Controller extends Admin_simplegroup_Controller
 	*/
 	public function timeline( $category_ids = "0," )
 	{
-		$group_where = " AND ( ".$this->table_prefix."simplegroups_groups_incident.simplegroups_groups_id = ".$this->group->id.") ";
-			$joins = array();
-			$joins[] = array("simplegroups_groups_incident", "incident.id", "simplegroups_groups_incident.incident_id");
+		$group_where = " AND ( ".$this->table_prefix."simplegroups_groups_incident.simplegroups_groups_id = ".$this->group->id.") ";		
+		$category_ids_array = explode(",", $category_ids,-1); //get rid of that trailing ";"
+		$joins = groups::get_joins_for_groups($category_ids_array);		
+		$sg_category_to_table_mapping = groups::get_category_to_table_mapping();
 
 		adminmap_helper::json_timeline($this, 
 			$category_ids, 
 			true,
 			$group_where, 
-			$joins = $joins);
+			$joins = $joins,
+			$sg_category_to_table_mapping);
 	}
 
 

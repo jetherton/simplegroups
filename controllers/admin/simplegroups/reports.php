@@ -298,7 +298,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
 
 		$categories = ORM::factory('simplegroups_category')
 						->where('simplegroups_groups_id', $this->group->id)
-						->where('applies_to_message', 1)
+						->where('applies_to_report', 1)
 						->where('parent_id', 0)
 						->find_all();
 		foreach($categories as $category)
@@ -309,13 +309,13 @@ class Reports_Controller extends Admin_simplegroup_Controller
 				$parent_array = array();
 				foreach ($category->children as $child)
 				{
-					$parent_array["sg:".$child->id] = $child->category_title;
+					$parent_array["sg_".$child->id] = $child->category_title;
 				}
 				$category_array[$category->category_title] = $parent_array;
 			}
 			else
 			{
-				$category_array["sg:".$category->id] = $category->category_title;
+				$category_array["sg_".$category->id] = $category->category_title;
 			}		
 		}//end loop
 
