@@ -413,6 +413,20 @@ class simplegroups {
 					//check and see if it needs to be forwarded
 					groups::forward_message_to_own_instance($sms->message, $sms->message_from, $number->simplegroups_groups_id);
 					
+					//check and see if we need to assign some categories to this
+					$group_categories = ORM::factory("simplegroups_category")
+						->where("simplegroups_groups_id", $number->simplegroups_groups_id)
+						->where("applies_to_message", "1")
+						->where("selected_by_default", "1")
+						->find_all();
+					foreach($group_categories as $group_category)
+					{
+						$category_instance = ORM::factory("simplegroups_message_category");
+						$category_instance->simplegroups_category_id = $group_category->id;
+						$category_instance->message_id = $sms->id;
+						$category_instance->save();
+					}
+					
 					break;
 				}
 			}
