@@ -2,8 +2,8 @@
 name: Simple Groups
 website: http://www.ushahidi.com
 description: Creates a seperate little backend for members of different groups.
-version: 1.0
-requires: 2.0b10
+version: 2.0
+requires: Ushahidi 2.0b10,  Admin Map plugin 
 tested up to: 2.0
 author: John Etherton
 author website: http://johnetherton.com
