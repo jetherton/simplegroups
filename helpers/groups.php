@@ -304,12 +304,12 @@ class groups_Core {
 		
 		
 		//no matter what we need to link an incident to a group, and we need this to come first, so we're putting it here
-		$joins = array(array("simplegroups_groups_incident", "incident.id", "simplegroups_groups_incident.incident_id"));
+		$joins = array(array("simplegroups_groups_incident", "incident.id", "simplegroups_groups_incident.incident_id", "LEFT"));
 		
 		if ($found_group_cats)
 		{
 			
-			$joins[] = array("simplegroups_incident_category", "incident.id", "simplegroups_incident_category.incident_id");
+			$joins[] = array("simplegroups_incident_category", "incident.id", "simplegroups_incident_category.incident_id", 'LEFT');
 			$joins[] = array('simplegroups_category', 'simplegroups_incident_category.simplegroups_category_id', 'simplegroups_category.id', 'LEFT');
 			$joins[] = array('simplegroups_category as simplegroups_parent_cat', 'simplegroups_category.parent_id', 'simplegroups_parent_cat.id', 'LEFT');
 

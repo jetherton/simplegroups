@@ -18,7 +18,7 @@
 </script>
 <script type="text/javascript">
 		// Map JS
-		
+		var onBackend =  <?php  echo (( substr(url::current(), 0,6) == "admin/") ? "true" : "false"); ?>
 		// Map Object
 		var map;
 		// Selected Category
@@ -37,18 +37,8 @@
 		var proj_900913 = new OpenLayers.Projection('EPSG:900913');
 		// Change to 1 after map loads
 		var mapLoad = 0;
-		// /json or /json/cluster depending on if clustering is on
-		var default_json_url = "<?php 
-								//check and see if we're clustering
-								if( stripos($json_url, "cluster") != false)
-								{
-									echo "admin/simplegroups/adminmap_json/cluster";
-								}
-								else
-								{
-									echo "admin/simplegroups/adminmap_json";
-								}
-						    ?>";
+		
+		var default_json_url = "<?php echo $json_url; ?>";
 		// Current json_url, if map is switched dynamically between json and json_cluster
 		var json_url = default_json_url;
 		
@@ -284,7 +274,7 @@
 			// plot hourly incidents when period is within 2 days
 			if ((endTime - startTime) / (1000 * 60 * 60 * 24) <= 3)
 			{
-				$.getJSON("<?php echo url::site()."admin/simplegroups/adminmap_json/timeline/"?>"+currentCat+"?i=hour&u="+currStatus + 
+				$.getJSON("<?php echo url::site().$json_timeline_url?>"+currentCat+"?i=hour&u="+currStatus + 
 				"&lo="+ currLogicalOperator, function(data) {
 					graphData = data[0];
 
@@ -300,7 +290,7 @@
 			else if ((endTime - startTime) / (1000 * 60 * 60 * 24) <= 124)
 			{
 			    // weekly if period > 2 months
-				$.getJSON("<?php echo url::site()."admin/simplegroups/adminmap_json/timeline/"?>"+currentCat+"?i=day&u="+currStatus+ 
+				$.getJSON("<?php echo url::site().$json_timeline_url?>"+currentCat+"?i=day&u="+currStatus+ 
 				"&lo="+ currLogicalOperator, function(data) {
 					graphData = data[0];
 
@@ -316,7 +306,7 @@
 			else if ((endTime - startTime) / (1000 * 60 * 60 * 24) > 124)
 			{
 				// monthly if period > 4 months
-				$.getJSON("<?php echo url::site()."admin/simplegroups/adminmap_json/timeline/"?>"+currentCat+"?u="+currStatus+ 
+				$.getJSON("<?php echo url::site().$json_timeline_url?>"+currentCat+"?u="+currStatus+ 
 				"&lo="+ currLogicalOperator, function(data) {
 					graphData = data[0];
 
@@ -331,13 +321,13 @@
 			}
 
 			// Get dailyGraphData for All Categories
-			$.getJSON("<?php echo url::site()."admin/simplegroups/adminmap_json/timeline/"?>"+currentCat+"?i=day&u="+currStatus+ 
+			$.getJSON("<?php echo url::site().$json_timeline_url?>"+currentCat+"?i=day&u="+currStatus+ 
 				"&lo="+ currLogicalOperator, function(data) {
 				dailyGraphData = data[0];
 			});
 
 			// Get allGraphData for All Categories
-			$.getJSON("<?php echo url::site()."admin/simplegroups/adminmap_json/timeline/"?>"+currentCat + "?u="+currStatus+ 
+			$.getJSON("<?php echo url::site().$json_timeline_url?>"+currentCat + "?u="+currStatus+ 
 				"&lo="+ currLogicalOperator, function(data) {
 				allGraphData = data[0];
 			});
@@ -688,7 +678,7 @@
 				addMarkers(catID, $("#startDate").val(), $("#endDate").val(), currZoom, currCenter, gMediaType);
 								
 				graphData = "";
-				$.getJSON("<?php echo url::site()."admin/simplegroups/adminmap_json/timeline/"?>"+catID + "?u=" + currentStatus+ 
+				$.getJSON("<?php echo url::site().$json_timeline_url?>"+catID + "?u=" + currentStatus+ 
 				"&lo="+ currLogicalOperator, function(data) {
 					graphData = data[0];
 
@@ -700,11 +690,11 @@
 				});
 				
 				dailyGraphData = "";
-				$.getJSON("<?php echo url::site()."admin/simplegroups/adminmap_json/timeline/"?>"+catID+"?i=day&u=" + currentStatus+ 
+				$.getJSON("<?php echo url::site().$json_timeline_url?>"+catID+"?i=day&u=" + currentStatus+ 
 				"&lo="+ currLogicalOperator, function(data) {dailyGraphData = data[0];});
 		
 				allGraphData = "";
-				$.getJSON("<?php echo url::site()."admin/simplegroups/adminmap_json/timeline/"?>"+currentCat + "?u=" + currentStatus+ 
+				$.getJSON("<?php echo url::site().$json_timeline_url?>"+currentCat + "?u=" + currentStatus+ 
 				"&lo="+ currLogicalOperator, function(data) {
 					allGraphData = data[0];
 				});
@@ -761,7 +751,7 @@
 				addMarkers(catID, $("#startDate").val(), $("#endDate").val(), currZoom, currCenter, gMediaType);
 								
 				graphData = "";
-				$.getJSON("<?php echo url::site()."admin/simplegroups/adminmap_json/timeline/"?>"+catID + "?u=" + currentStatus+ 
+				$.getJSON("<?php echo url::site().$json_timeline_url?>"+catID + "?u=" + currentStatus+ 
 				"&lo="+ currLogicalOperator, function(data) {
 					graphData = data[0];
 
@@ -773,11 +763,11 @@
 				});
 				
 				dailyGraphData = "";
-				$.getJSON("<?php echo url::site()."admin/simplegroups/adminmap_json/timeline/"?>"+catID+"?i=day&u=" + currentStatus+ 
+				$.getJSON("<?php echo url::site().$json_timeline_url?>"+catID+"?i=day&u=" + currentStatus+ 
 				"&lo="+ currLogicalOperator, function(data) {dailyGraphData = data[0];});
 		
 				allGraphData = "";
-				$.getJSON("<?php echo url::site()."admin/simplegroups/adminmap_json/timeline/"?>"+currentCat + "?u=" + currentStatus+ 
+				$.getJSON("<?php echo url::site().$json_timeline_url?>"+currentCat + "?u=" + currentStatus+ 
 				"&lo="+ currLogicalOperator, function(data) {
 					allGraphData = data[0];
 				});
@@ -832,7 +822,7 @@
 				addMarkers(catID, $("#startDate").val(), $("#endDate").val(), currZoom, currCenter, gMediaType);
 								
 				graphData = "";
-				$.getJSON("<?php echo url::site()."admin/simplegroups/adminmap_json/timeline/"?>"+catID + "?u=" + currentStatus+ 
+				$.getJSON("<?php echo url::site().$json_timeline_url?>"+catID + "?u=" + currentStatus+ 
 				"&lo="+ currentLogicalOperator, function(data) {
 					graphData = data[0];
 
@@ -844,11 +834,11 @@
 				});
 				
 				dailyGraphData = "";
-				$.getJSON("<?php echo url::site()."admin/simplegroups/adminmap_json/timeline/"?>"+catID+"?i=day&u=" + currentStatus+ 
+				$.getJSON("<?php echo url::site().$json_timeline_url?>"+catID+"?i=day&u=" + currentStatus+ 
 				"&lo="+ currentLogicalOperator, function(data) {dailyGraphData = data[0];});
 		
 				allGraphData = "";
-				$.getJSON("<?php echo url::site()."admin/simplegroups/adminmap_json/timeline/"?>"+currentCat + "?u=" + currentStatus+ 
+				$.getJSON("<?php echo url::site().$json_timeline_url?>"+currentCat + "?u=" + currentStatus+ 
 				"&lo="+ currentLogicalOperator, function(data) {
 					allGraphData = data[0];
 				});
