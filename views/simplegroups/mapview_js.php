@@ -384,6 +384,7 @@
 
 				// Add New Layer
 				addMarkers('', '', '', currZoom, currCenter, '', layerID, 'layers', layerURL, layerColor);
+				mapMove(null);
 			}
 		}
 
