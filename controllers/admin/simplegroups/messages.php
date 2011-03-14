@@ -232,10 +232,10 @@ class Messages_Controller extends Admin_simplegroup_Controller
 		{
 			$message_count= $message_count->join('simplegroups_message_category', 'message.id', 'simplegroups_message_category.message_id');
 		}
-		$message_count = $message_count->where("simplegroups_groups_message.simplegroups_groups_id", $this->group->id)
-						    ->where($filter)
-						    ->where('service_id', $service_id)
-						    ->count_all();
+		$message_count = $message_count->where("simplegroups_groups_message.simplegroups_groups_id", $this->group->id)										
+										->where($filter)
+										->where('service_id', $service_id)
+										->count_all();
 	
 		// Pagination		
 		//$pagination = new Ajax_Pagination(array(
@@ -248,6 +248,7 @@ class Messages_Controller extends Admin_simplegroup_Controller
 		));
 
 		$messages = ORM::factory('message')
+				->select("message.*, simplegroups_groups_message.comments as comments")
 				->join('reporter','message.reporter_id','reporter.id')
 				->join('simplegroups_groups_message', 'message.id', 'simplegroups_groups_message.message_id');
 		if($cat_id != 0)
@@ -603,8 +604,24 @@ class Messages_Controller extends Admin_simplegroup_Controller
 			
 	}//end method
 	
-	
-	
+	/*****************************************************************
+	* Method for updating the comments associated with a message
+	******************************************************************/
+	function update_comments($message_id)
+	{
+		$this->template = "";
+		$this->auto_render = FALSE;		
+		if(isset($_POST['comments']))
+		{
+			$comments = $_POST['comments'];
+			$simplegroups_msg = ORM::factory("simplegroups_groups_message")
+				->where("message_id", $message_id)
+				->find();
+			
+			$simplegroups_msg->comments = $comments;
+			$simplegroups_msg->save();			
+		}	
+	}
 	
 	
 	

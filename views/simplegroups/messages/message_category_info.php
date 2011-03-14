@@ -16,7 +16,7 @@
 				{
 					$category = $category_mapping[$message_id][$j];
 					
-					echo "<td class=\"cat\" width=\"22px\">";				
+					//echo "<td class=\"cat\" width=\"22px\">";				
 					if (!empty($category->category_image))
 					{
 						echo " <img style=\"width:16px;height:16px;\" src=\"".url::base().Kohana::config('upload.relative_directory')."/".$category->category_image."\">";

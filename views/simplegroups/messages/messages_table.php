@@ -20,8 +20,7 @@
 								<tr>
 									<th class="col-1"><input id="checkall" type="checkbox" class="check-box" onclick="CheckAll( this.id, 'message_id[]' )" /></th>
 									<th class="col-2"><?php echo Kohana::lang('ui_main.message_details');?></th>
-									<th class="col-2">Categories</th>
-									<th class="col-3"><?php echo Kohana::lang('ui_main.date');?></th>
+									<th class="col-3">Categories</th>
 									<th class="col-4"><?php echo Kohana::lang('ui_main.actions');?></th>
 								</tr>
 							</thead>
@@ -52,7 +51,7 @@
 									$incident_id = $message->incident_id;
 									$message_description = text::auto_link($message->message);
 									$message_detail = nl2br(text::auto_link($message->message_detail));
-									$message_date = date('Y-m-d', strtotime($message->message_date));
+									$message_date = date('Y-m-d H:i', strtotime($message->message_date));
 									$message_type = $message->message_type;
 									$message_level = $message->message_level;																		
 									$level_id = $message->reporter->level_id;
@@ -137,11 +136,15 @@
 													<?php
 												}
 												?>
-
+												<li class="none-separator">Date: <strong class="reporters_0"><?php echo $message_date; ?></strong></li>
+												
 											</ul>
+											<div>
+												Message Comments: 
+												<textarea rows="3" cols="38" id="comments_<?php echo $message->id; ?>"><?php echo $message->comments; ?></textarea>
+											</div>
 										</td>
-										<td class="col-2" style="padding-right:10px;" >
-											<div > <a  class="cat_edit"  href="#" onclick="editCategory(<?php echo $message->id; ?>,this); return false;">Edit Categories</a><br/></div>
+										<td class="col-3" style="padding-right:10px;" >
 											<div id="message_cat_info_<?php echo $message->id; ?>">
 											
 											<?php
@@ -152,21 +155,22 @@
 											?>
 											
 											</div>
-										</td>
-										<td class="col-3"><?php echo $message_date; ?></td>
+										</td>										
 										<td class="col-4">
-											<ul>
 												<?php
 												if ($incident_id != 0 && $message_type != 2) {
-													echo "<li class=\"none-separator\"><a href=\"". url::base() . 'admin/simplegroups/reports/edit/' . $incident_id ."\" class=\"status_yes\"><strong>View Report</strong></a></li>";
+													echo "<a class=\"comments_button\" href=\"". url::base() . 'admin/simplegroups/reports/edit/' . $incident_id ."\" >View Report</a>";
 												}
 												elseif ($message_type != 2)
 												{
-													echo "<li class=\"none-separator\"><a href=\"". url::base() . 'admin/simplegroups/reports/edit?mid=' . $message_id ."\">Create Report?</a></li>";
+													echo "<a class=\"comments_button\" href=\"". url::base() . 'admin/simplegroups/reports/edit?mid=' . $message_id ."\">Create Report?</a>";
 												}
 												?>
-												<li><a href="javascript:messagesAction('d','DELETE','<?php echo(rawurlencode($message_id)); ?>')" id="delete_message_<?php echo(rawurlencode($message_id)); ?>" class="del"><?php echo Kohana::lang('ui_main.delete');?></a></li>
-											</ul>
+												
+												<a class="comments_button" id="commentsButton_<?php echo(rawurlencode($message_id)); ?>"  href="#" onclick="editComments('<?php echo(rawurlencode($message_id)); ?>'); return false;">Update Comments</a>
+												<a  class="comments_button"  href="#" onclick="editCategory(<?php echo $message->id; ?>,this); return false;">Edit Categories</a>
+												<br/>
+												<a class="delete_button" href="javascript:messagesAction('d','DELETE','<?php echo(rawurlencode($message_id)); ?>')" id="delete_message_<?php echo(rawurlencode($message_id)); ?>" class="del"><?php echo Kohana::lang('ui_main.delete');?></a>
 										</td>
 									</tr>
 									<?php

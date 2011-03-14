@@ -75,6 +75,7 @@ class Simplegroups_Install {
 				  `simplegroups_groups_id` int(10) unsigned NOT NULL,
 				  `message_id` int(10) unsigned NOT NULL,
 				  `number_id` int(10) unsigned NOT NULL,
+				  `comments` longtext,
 				  PRIMARY KEY (`id`)
 				) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
 				
@@ -156,6 +157,24 @@ class Simplegroups_Install {
 		if(!$has_own_instance)
 		{
 			$this->db->query('ALTER TABLE `'.Kohana::config('database.default.table_prefix').'simplegroups_groups` ADD `own_instance` VARCHAR(1000) NULL DEFAULT NULL');
+		}
+		
+		
+		//check and see if the simplegroups_groups_messages table already has a comments field
+		$result = $this->db->query('DESCRIBE `'.Kohana::config('database.default.table_prefix').'simplegroups_groups_messages`');
+		$has_comments = false;
+		foreach($result as $row)
+		{
+			if($row->Field == "comments")
+			{
+				$has_comments = true;
+				break;
+			}
+		}
+		
+		if(!$has_comments )
+		{
+			$this->db->query('ALTER TABLE `'.Kohana::config('database.default.table_prefix').'simplegroups_groups_messages` ADD `comments` longtext');
 		}
 		
 		

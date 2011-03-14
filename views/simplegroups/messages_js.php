@@ -210,13 +210,21 @@
 		.table .col-2 {
 			width: 325px;
 		}
+		.table .col-3 {
+			width: 375px;
+		}
 
 		.table .post {
 			width: 325px;
 		}
 
 		.table .col-4 {
-			width: 100px;
+			width: 150px;			
+		}
+		
+		.table th.col-4 {
+		
+			text-align:left;
 		}
 
 		.cat_edit{
@@ -225,6 +233,42 @@
 			margin-right:15px;
 		}
 		
+		.comments_button{
+			margin: 3px 0px;
+			padding:0 9px; 
+			font-size: 75%;
+			background:#f2f7fa; 
+			text-decoration:none; 
+			border:1px solid #d1d1d1;
+			width: 90%;
+			float:left;
+		}
+		
+		.comments_button:hover{
+			
+			background:#c2c7fa; 
+			text-decoration:underline; 
+			
+		}
+		
+		.delete_button{
+			width: 90%;
+			float:left;
+			margin: 3px 0px;
+			padding:0 9px; 
+			font-size: 75%;
+			background:#fad7da; 
+			text-decoration:none; 
+			border:1px solid #c11;
+			color: #c00;
+		}
+		
+		.delete_button:hover{
+			
+			background:#fac7ca; 
+			text-decoration:underline; 
+			
+		}
 		
 	</style>
     
@@ -429,6 +473,22 @@
 		});
 		
 		return tab_id;
+	}
+	
+	/*********************************
+	* Used to update the comments
+	* of a message
+	**********************************/
+	function editComments(id)
+	{
+		//turn on the wating image		
+		$("#commentsButton_"+id).html('Update Comments <img src="<?php echo url::base() . "media/img/loading_g.gif"; ?>">');
+		
+			$.post("<?php echo url::site() . 'admin/simplegroups/messages/update_comments/' ?>"+id, { to_id: id, comments: $("#comments_"+id).val() },
+				function(data){
+					//remove image
+					$("#commentsButton_"+id).html('Update Comments');
+			  	});
 	}
 	
 	
