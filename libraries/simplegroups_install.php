@@ -160,8 +160,8 @@ class Simplegroups_Install {
 		}
 		
 		
-		//check and see if the simplegroups_groups_messages table already has a comments field
-		$result = $this->db->query('DESCRIBE `'.Kohana::config('database.default.table_prefix').'simplegroups_groups_messages`');
+		//check and see if the simplegroups_groups_message table already has a comments field
+		$result = $this->db->query('DESCRIBE `'.Kohana::config('database.default.table_prefix').'simplegroups_groups_message`');
 		$has_comments = false;
 		foreach($result as $row)
 		{
@@ -174,7 +174,7 @@ class Simplegroups_Install {
 		
 		if(!$has_comments )
 		{
-			$this->db->query('ALTER TABLE `'.Kohana::config('database.default.table_prefix').'simplegroups_groups_messages` ADD `comments` longtext');
+			$this->db->query('ALTER TABLE `'.Kohana::config('database.default.table_prefix').'simplegroups_groups_message` ADD `comments` longtext');
 		}
 		
 		
