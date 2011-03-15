@@ -225,15 +225,15 @@ class Simplegroups_settings_Controller extends Admin_Controller
 					$number_item = ORM::factory('simplegroups_groups_number', $new_id);
 				
 					$number = trim($_POST["white_list_number_old_$new_id"]);
-					if(!$this->_check_length($number, 30, "Can't have a phone number with more than 30 characters")){return;}
+					if(!$this->_check_length($number, 6, 30, "Can't have a phone number with more than 30 characters or less than 6",$form, $post,$id)){return;}
 					$number_item->number = $number;
 					
 					$name = trim($_POST["white_list_name_old_$new_id"]);
-					if(!$this->_check_length($value, 100, "Can't have a phone number name with more than 100 characters")){return;}
+					if(!$this->_check_length($value, 0, 100, "Can't have a phone number name with more than 100 characters", $form, $post,$id)){return;}
 					$number_item->name = $name;
 					
 					$org = trim($_POST["white_list_org_old_$new_id"]);
-					if(!$this->_check_length($org, 100, "Can't have a phone number organization with more than 100 characters")){return;}
+					if(!$this->_check_length($org, 0, 100, "Can't have a phone number organization with more than 100 characters", $form, $post, $id)){return;}
 					$number_item->org = $org;
 					
 					$number_item->simplegroups_groups_id = $id;
@@ -264,15 +264,15 @@ class Simplegroups_settings_Controller extends Admin_Controller
 					$number_item = ORM::factory('simplegroups_groups_number');
 				
 					$number = trim($_POST["white_list_number_new_$new_id"]);
-					if(!$this->_check_length($number, 30, "Can't have a phone number with more than 30 characters")){return;}
+					if(!$this->_check_length($number, 6, 30, "Can't have a phone number with more than 30 characters or less than 6", $form, $post, $id)){return;}
 					$number_item->number = $number;
 					
 					$name = trim($_POST["white_list_name_new_$new_id"]);
-					if(!$this->_check_length($value, 100, "Can't have a phone number name with more than 100 characters")){return;}
+					if(!$this->_check_length($value, 0, 100, "Can't have a phone number name with more than 100 characters", $form, $post, $id)){return;}
 					$number_item->name = $name;
 					
 					$org = trim($_POST["white_list_org_new_$new_id"]);
-					if(!$this->_check_length($org, 100, "Can't have a phone number organization with more than 100 characters")){return;}
+					if(!$this->_check_length($org, 0, 100, "Can't have a phone number organization with more than 100 characters", $form, $post, $id)){return;}
 					$number_item->org = $org;
 					
 					$number_item->simplegroups_groups_id = $id;
@@ -409,10 +409,10 @@ class Simplegroups_settings_Controller extends Admin_Controller
 
 
 	
-	private function _check_length($variable, $max_length, $message)
+	private function _check_length($variable, $min_length, $max_length, $message, $form, $post, $id)
 	{
-		if(strlen($variable) >$max_length)
-		{
+		if(strlen($variable) >$max_length  || strlen($variable) < $min_length )
+		{			
 			// repopulate the form fields
 			$form = arr::overwrite($form, $post->as_array());
 			// populate the error fields, if any
@@ -422,10 +422,29 @@ class Simplegroups_settings_Controller extends Admin_Controller
 			$this->template->content->form = $form;
 			$this->template->content->errors = $errors;
 			$this->template->content->form_error = $form_error;
-			$this->template->content->form_saved = $form_saved;
+			$this->template->content->form_saved = FALSE;
 			// Javascript Header
 			$this->template->editor_enabled = TRUE;
 			$this->template->js = new View('simplegroups/simplegroups_editgroups_js');
+			
+			$group = ORM::factory('simplegroups_groups', $id);
+			if ($group->loaded == true)
+			{
+				// Combine Everything
+				$group_arr = array
+				(
+					'name' => $group->name,
+					'description' => $group->description,
+					'own_instance' => $group->own_instance
+				);
+				$this->template->content->logo_file = $group->logo;
+
+				// Merge To Form Array For Display
+				$form = arr::overwrite($form, $group_arr);
+				
+				$listers = ORM::factory('simplegroups_groups_number')->where("simplegroups_groups_id", $id)->find_all();
+				$this->template->content->whitelist = $listers;
+			}
 			return false;
 		}
 		return true;
