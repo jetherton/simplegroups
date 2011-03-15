@@ -22,11 +22,11 @@
 		// Action on Save Only
 		$('.btn_addNumber').live('click', function () {
 			var id = $("#white_list_id").val();
-			$("#white_list_table").append("<tr id=\"white_list_item_"+id+"\">"
-				+"<td style=\"width:150px;\"><input type=\"text\" id=\"white_list_number_"+id+"\" name=\"white_list_number_"+id+"\" value=\"\"></td>"
-				+"<td style=\"width:150px;\"><input type=\"text\" id=\"white_list_name_"+id+"\" name=\"white_list_name_"+id+"\" value=\"\"></td>"
-				+"<td style=\"width:150px;\"><input type=\"text\" id=\"white_list_org_"+id+"\" name=\"white_list_org_"+id+"\" value=\"\"></td>"
-				+"<td style=\"width:50px;\"><a href=\"#\" id=\"whitelistdelete_"+id+"\">delete</a></td></tr>");
+			$("#white_list_table").append("<tr id=\"white_list_item_new_"+id+"\">"
+				+"<td style=\"width:150px;\"><input type=\"text\" id=\"white_list_number_new_"+id+"\" name=\"white_list_number_new_"+id+"\" value=\"\"></td>"
+				+"<td style=\"width:150px;\"><input type=\"text\" id=\"white_list_name_new_"+id+"\" name=\"white_list_name_new_"+id+"\" value=\"\"></td>"
+				+"<td style=\"width:150px;\"><input type=\"text\" id=\"white_list_org_new_"+id+"\" name=\"white_list_org_new_"+id+"\" value=\"\"></td>"
+				+"<td style=\"width:50px;\"><a href=\"#\" id=\"whitelistdelete_new_"+id+"\">delete</a></td></tr>");
 			id = (id - 1) + 2;
 			$("#white_list_id").val(id);
 			return false;

@@ -155,11 +155,11 @@
 					$last_id = 1;
 					foreach($whitelist as $item)
 					{
-						echo "<tr id=\"white_list_item_".$last_id."\">";
-						echo '<td style="width:150px;"><input type="text" id="white_list_number_'.$last_id.'" name="white_list_number_'.$last_id.'" value="'.$item->number.'"></td>';
-						echo '<td style="width:150px;"><input type="text" id="white_list_name_'.$last_id.'" name="white_list_name_'.$last_id.'" value="'.$item->name.'"></td>';
-						echo '<td style="width:150px;"><input type="text" id="white_list_org_'.$last_id.'" name="white_list_org_'.$last_id.'" value="'.$item->org.'"></td>';
-						echo '<td style="width:50px;"><a href="#" id="whitelistdelete_'.$last_id.'">delete</a></tr>';
+						echo "<tr id=\"white_list_item_old_".$item->id."\">";
+						echo '<td style="width:150px;"><input type="text" id="white_list_number_old_'.$item->id.'" name="white_list_number_old_'.$item->id.'" value="'.$item->number.'"></td>';
+						echo '<td style="width:150px;"><input type="text" id="white_list_name_old_'.$item->id.'" name="white_list_name_old_'.$item->id.'" value="'.$item->name.'"></td>';
+						echo '<td style="width:150px;"><input type="text" id="white_list_old_org_'.$item->id.'" name="white_list_org_old_'.$item->id.'" value="'.$item->org.'"></td>';
+						echo '<td style="width:50px;"><a href="#" id="whitelistdelete_old_'.$item->id.'">delete</a></tr>';
 						$last_id++;
 					}
 				?>

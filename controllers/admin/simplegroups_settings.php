@@ -212,39 +212,76 @@ class Simplegroups_settings_Controller extends Admin_Controller
 			$id = $group->id;
 			
 			
-			//do the white list of numbers for this group
-
-			//delete everything in the white list db to make room for the new ones
-			ORM::factory('simplegroups_groups_number')->where("simplegroups_groups_id", $id)->delete_all();
-			
-			
-			$white_list_size = $post->white_list_id;
-			for($i = 1; $i < $white_list_size; $i++)
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			//now loop over the existing values
+			$ids_still_there = array();
+			foreach($_POST as $key=>$value)
 			{
-				//check to make sure this is a valid number
-				if(!isset($_POST["white_list_number_$i"]))
+				if(substr($key,0,22) == "white_list_number_old_")
 				{
-					continue;
+					$new_id = substr($key,22);
+					$ids_still_there[] = $new_id;
+					
+					$number_item = ORM::factory('simplegroups_groups_number', $new_id);
+				
+					$number = trim($_POST["white_list_number_old_$new_id"]);
+					if(!$this->_check_length($number, 30, "Can't have a phone number with more than 30 characters")){return;}
+					$number_item->number = $number;
+					
+					$name = trim($_POST["white_list_name_old_$new_id"]);
+					if(!$this->_check_length($value, 100, "Can't have a phone number name with more than 100 characters")){return;}
+					$number_item->name = $name;
+					
+					$org = trim($_POST["white_list_org_old_$new_id"]);
+					if(!$this->_check_length($org, 100, "Can't have a phone number organization with more than 100 characters")){return;}
+					$number_item->org = $org;
+					
+					$number_item->simplegroups_groups_id = $id;
+					
+					$number_item->save();
 				}
+			}//end loop
+			
+			
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			//Find what IDs weren't included above and delete them
+			$number_items = ORM::factory('simplegroups_groups_number')
+				->where("simplegroups_groups_id", $id)
+				->where("NOT ( `id` IN (".implode(',', $ids_still_there)."))")
+				->delete_all();
+			
+			
+			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			//do the white list of numbers for this group
+			//loop through the post variables and find all the ones that start with white_list_number_new_
+			//We'll make new entries for each one of these
+			foreach($_POST as $key=>$value)
+			{
+				if(substr($key,0,22) == "white_list_number_new_")
+				{
+					$new_id = substr($key,22);
+					
+					$number_item = ORM::factory('simplegroups_groups_number');
 				
-				$number_item = ORM::factory('simplegroups_groups_number');
-				
-				$value = trim($_POST["white_list_number_$i"]);
-				if(!$this->_check_length($value, 30, "Can't have a phone number with more than 30 characters")){return;}
-				$number_item->number = $value;
-				
-				$value = trim($_POST["white_list_name_$i"]);
-				if(!$this->_check_length($value, 100, "Can't have a phone number name with more than 100 characters")){return;}
-				$number_item->name = $value;
-				
-				$value = trim($_POST["white_list_org_$i"]);
-				if(!$this->_check_length($value, 100, "Can't have a phone number organization with more than 100 characters")){return;}
-				$number_item->org = $value;
-				
-				$number_item->simplegroups_groups_id = $id;
-				
-				$number_item->save();
-			}
+					$number = trim($_POST["white_list_number_new_$new_id"]);
+					if(!$this->_check_length($number, 30, "Can't have a phone number with more than 30 characters")){return;}
+					$number_item->number = $number;
+					
+					$name = trim($_POST["white_list_name_new_$new_id"]);
+					if(!$this->_check_length($value, 100, "Can't have a phone number name with more than 100 characters")){return;}
+					$number_item->name = $name;
+					
+					$org = trim($_POST["white_list_org_new_$new_id"]);
+					if(!$this->_check_length($org, 100, "Can't have a phone number organization with more than 100 characters")){return;}
+					$number_item->org = $org;
+					
+					$number_item->simplegroups_groups_id = $id;
+					
+					$number_item->save();
+				}
+			}//end loop
+			
+
 	
 			//update the users
 			//delete everything
