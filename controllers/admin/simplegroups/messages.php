@@ -270,7 +270,7 @@ class Messages_Controller extends Admin_simplegroup_Controller
 		$message_ids = array();
 		foreach($messages as $message)
 		{
-		$message_ids[] = $message->id;
+			$message_ids[] = $message->id;
 		}
 
 		$category_mapping = array();
@@ -315,6 +315,39 @@ class Messages_Controller extends Admin_simplegroup_Controller
 		
 		$table_view->render(TRUE);
 	}
+	
+	/*********  At some point delete all of this, i just needed to test every thing***********************
+	function test()
+	{
+		$this->template = "";
+		$this->auto_render = FALSE;
+		
+		$test = array ("counties"=>
+					array(
+							array("name"=>"bomi", "points"=>array(
+								array("lat"=>10,"lon"=>-5),
+								array("lat"=>10,"lon"=>-5),
+								array("lat"=>10,"lon"=>-5),
+								array("lat"=>10,"lon"=>-5),
+								)
+							),
+						
+						array("name"=>"bong", "points"=>array(
+								array("lat"=>11,"lon"=>-3),
+								array("lat"=>11,"lon"=>-3),
+								array("lat"=>11,"lon"=>-3),
+								array("lat"=>11,"lon"=>-3),
+								)
+							)
+						)
+					);
+					
+		$output  = json_encode($test);
+		
+		echo $output;
+						
+	}
+	*/
 
     /**
     * Send A New Message Using Default SMS Provider

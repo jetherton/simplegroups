@@ -65,7 +65,7 @@ class Simplegroupmap_json_Controller extends Template_Controller
 		$sg_category_to_table_mapping = groups::get_category_to_table_mapping();
 		
 		adminmap_helper::json_index($this, 
-			"admin/simplegroups/reports/edit/", 
+			"reports/view/".$group_id, 
 			true,
 			$group_where, 
 			$joins,
@@ -108,8 +108,8 @@ class Simplegroupmap_json_Controller extends Template_Controller
 	$sg_category_to_table_mapping = groups::get_category_to_table_mapping();
         
 	adminmap_helper::json_cluster($this, 
-		"admin/simplegroups/reports/edit/", 
-		"admin/simplegroups/reports/index", 
+		"reports/view/", 
+		"simplegroups/reports/index/1/".$group_id, 
 		true,
 		$group_where, 
 		$joins,

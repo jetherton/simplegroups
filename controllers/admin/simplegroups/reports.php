@@ -1008,14 +1008,16 @@ class Reports_Controller extends Admin_simplegroup_Controller
 		
                 // STEP 3.1: SAVE GROUP CATEGORIES
                 ORM::factory('simplegroups_incident_category')->where('incident_id',$incident->id)->delete_all();        // Delete Previous Entries
-                foreach($post->incident_group_category as $item)
-                {
-                    $incident_group_category = ORM::factory('simplegroups_incident_category');
-                    $incident_group_category->incident_id = $incident->id;
-                    $incident_group_category->simplegroups_category_id = $item;
-                    $incident_group_category->save();
-                }
-
+		if(isset($post->incident_group_category))
+		{
+			foreach($post->incident_group_category as $item)
+			{
+			    $incident_group_category = ORM::factory('simplegroups_incident_category');
+			    $incident_group_category->incident_id = $incident->id;
+			    $incident_group_category->simplegroups_category_id = $item;
+			    $incident_group_category->save();
+			}
+		}
 
 
                 // STEP 4: SAVE MEDIA
