@@ -16,9 +16,7 @@
 
 <?php require SYSPATH.'../application/views/admin/form_utils_js.php' ?>
 
-</script>
-	
- <script type="text/javascript">
+
  
 		var currentPage = "1";
 		var currentStatus = "O";

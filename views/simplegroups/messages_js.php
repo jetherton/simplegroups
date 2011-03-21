@@ -16,9 +16,6 @@
 
 <?php require SYSPATH.'../application/views/admin/form_utils_js.php' ?>
 
-	</script>
-	
-	 <script type="text/javascript">
 		
 		function limitChars(textid, limit, infodiv)
 		{

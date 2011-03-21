@@ -15,8 +15,7 @@
  * @license    http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License (LGPL) 
  */
 ?>
-</script>
-<script type="text/javascript">
+
 		// Map JS
 		var onBackend =  <?php  echo (( substr(url::current(), 0,6) == "admin/") ? "true" : "false"); ?>
 		// Map Object
