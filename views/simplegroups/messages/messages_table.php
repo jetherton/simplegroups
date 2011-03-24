@@ -57,13 +57,25 @@
 									$level_id = $message->reporter->level_id;
 									
 									?>
+									
+									<tr>
+									<td colspan="4" style="border:none; height:20px;">
+									</td>
+									</tr>
+									
+									<tr>
+									<td colspan="4" style="border:3px solid #999; font-size:15pt; line-height:normal;">
+									<input style="margin: 0 10px;" name="message_id[]" id="message" value="<?php echo $message_id; ?>" type="checkbox" class="check-box"/>
+									Message: <?php echo $message_description; ?>
+									</td>
+									</tr>
+									
 									<tr <?php if ($message_level == "99") {
 										echo " class=\"spam_tr\"";
-									} ?>>
-										<td class="col-1"><input name="message_id[]" id="message" value="<?php echo $message_id; ?>" type="checkbox" class="check-box"/></td>
-										<td class="col-2">
-											<div class="post">
-												<p><?php echo $message_description; ?></p>
+									} ?> >
+										<td class="col-2" colspan="2" style="border-left:2px solid #BBB; ">
+											<div class="post" style="display:none;">
+												
 												<?php
 													if ($message_detail)
 												{
@@ -139,8 +151,7 @@
 												<li class="none-separator">Date: <strong class="reporters_0"><?php echo $message_date; ?></strong></li>
 												
 											</ul>
-											<div>
-												Message Comments: 
+											<div><span style="font-size:10px; color:#636363;">Message Comments:</span> 
 												<textarea rows="3" cols="38" id="comments_<?php echo $message->id; ?>"><?php echo $message->comments; ?></textarea>
 											</div>
 										</td>
@@ -169,7 +180,6 @@
 												
 												<a class="comments_button" id="commentsButton_<?php echo(rawurlencode($message_id)); ?>"  href="#" onclick="editComments('<?php echo(rawurlencode($message_id)); ?>'); return false;">Update Comments</a>
 												<a  class="comments_button"  href="#" onclick="editCategory(<?php echo $message->id; ?>,this); return false;">Edit Categories</a>
-												<br/>
 												<a class="delete_button" href="javascript:messagesAction('d','DELETE','<?php echo(rawurlencode($message_id)); ?>')" id="delete_message_<?php echo(rawurlencode($message_id)); ?>" class="del"><?php echo Kohana::lang('ui_main.delete');?></a>
 										</td>
 									</tr>

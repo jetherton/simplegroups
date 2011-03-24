@@ -7,7 +7,7 @@
 		else
 		{
 			
-			echo "<table class=\"cat_table\">";
+			echo "<table class=\"cat_table\"><tbody>";
 			//foreach($category_mapping[$message_id] as $category)
 			for($i = 0; $i<count($category_mapping[$message_id]); $i++)
 			{
@@ -16,12 +16,13 @@
 				{
 					$category = $category_mapping[$message_id][$j];
 					
+					echo "<td class=\"cat\">";				
 					//echo "<td class=\"cat\" width=\"22px\">";				
 					if (!empty($category->category_image))
 					{
-						echo " <img style=\"width:16px;height:16px;\" src=\"".url::base().Kohana::config('upload.relative_directory')."/".$category->category_image."\">";
+						echo " <img style=\"margin-right:5px;width:16px;height:16px;\" src=\"".url::base().Kohana::config('upload.relative_directory')."/".$category->category_image."\">";
 					}
-					echo "</td><td class=\"cat\">";				
+					
 					//make a dull version of the color for the background
 					$colors = array("FFFFFF", $category->category_color);
 					$washed_out_color = groups::changeBrightness(groups::merge_colors($colors), 500);
@@ -44,6 +45,6 @@
 			}
 			
 			
-			echo "</table>";
+			echo "</tbody></table>";
 		}
 	?>

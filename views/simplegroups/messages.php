@@ -32,7 +32,7 @@
 				<div class="tabs">
 					<!-- tabset -->
 					<ul class="tabset">
-						<li><a href="#" id="inbox_tab"  onclick="filterTabClick('inbox_tab'); return false;" <?php if ($type == '1') echo "class=\"active\""; ?>><?php echo Kohana::lang('ui_main.inbox');?></a></li>
+						<li><a href="#" id="inbox_tab"  onclick="filterTabClick('inbox_tab'); return false;" <?php if ($type == '1') echo "class=\"active\""; ?>><?php echo Kohana::lang('ui_main.all');?></a></li>
 						<li><a href="#" id="turned_into_reports_tab" onclick="filterTabClick('turned_into_reports_tab'); return false;">Turned Into Reports</a></li>
 						<li><a href="#" id="three_days_tab" onclick="filterTabClick('three_days_tab'); return false;">Recent</a></li>
 					</ul>

@@ -198,6 +198,7 @@
 			border:none;
 			padding:5px 3px 3px 3px; 			
 			vertical-align:middle;
+			
 		}
 		
 		.no_cat{
@@ -205,18 +206,19 @@
 		}
 		
 		.table .col-2 {
-			width: 325px;
+			width: 315px;
+			padding-left:5px;
 		}
 		.table .col-3 {
-			width: 375px;
+			width: 365px;
 		}
 
 		.table .post {
-			width: 325px;
+			width: 335px;
 		}
 
 		.table .col-4 {
-			width: 150px;			
+			width: 140px;			
 		}
 		
 		.table th.col-4 {
@@ -239,6 +241,10 @@
 			border:1px solid #d1d1d1;
 			width: 90%;
 			float:left;
+		}
+		
+		.comments_button img{			
+			border:none;			
 		}
 		
 		.comments_button:hover{

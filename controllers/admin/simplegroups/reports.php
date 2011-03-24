@@ -294,7 +294,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
 	{
 		//create category array for drop down filter list
 		$category_array = array(0=>"Show All");
-		$category_array[$this->group->name." Categories"] = array();
+		$category_array[strtoupper("---".$this->group->name." Categories---")] = array();
 
 		$categories = ORM::factory('simplegroups_category')
 						->where('simplegroups_groups_id', $this->group->id)
@@ -319,7 +319,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
 			}		
 		}//end loop
 
-		$category_array["Site Wide Categories"] = array();
+		$category_array["---GLOBAL CATEGORIES---"] = array();
 		$categories = ORM::factory('category')->find_all();
 		foreach($categories as $category)
 		{
