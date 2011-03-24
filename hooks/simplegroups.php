@@ -427,7 +427,7 @@ class simplegroups {
 						$category_instance->save();
 					}
 					
-					break;
+					//break; //more than one number can match? good or bad?
 				}
 			}
 		}

@@ -191,15 +191,16 @@
 			font-size:10pt;
 			color:black;
 			padding-left:3px;
-			padding-right:3px;
+			padding-right:3px;			
 		}
 		
 		td.cat{
 			border:none;
 			padding:5px 3px 3px 3px; 			
 			vertical-align:middle;
-			
+			width:300px;
 		}
+		
 		
 		.no_cat{
 			text-align:center;
