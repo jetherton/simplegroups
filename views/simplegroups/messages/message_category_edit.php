@@ -5,7 +5,7 @@
 	<div class="row" style="text-align:left;">
 		<h4>
 			<br/>
-			<?php echo "Available ".Kohana::lang('ui_main.categories');?>: 
+			<?php echo $group_name ." ".  Kohana::lang('simplegroups.group')." ".Kohana::lang('ui_main.categories');?> : 
 		</h4>
 		<?php print $new_category_toggle_js; ?>
 		<!--category_add form goes here-->
@@ -16,7 +16,7 @@
 				$selected_categories = array();
 				$selected_categories = $message_category;
 				$columns = 2;
-				echo category::tree($categories, $selected_categories, 'incident_category', $columns);
+				echo groups_category::tree($categories, $selected_categories, 'incident_category', $columns);
 				
 				print form::close();
 			?>

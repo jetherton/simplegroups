@@ -19,7 +19,7 @@
 	width: 150px;
 }
 .table .col-3 {
-	width: 130px;
+	width: 160px;
 }
 .table .col-4 {
 	width: 120px;
@@ -167,28 +167,36 @@ td ul{
 						</div>
 						
 						<div class="tab_form_item">
-							<strong>Visible To Public:</strong><br />
+							<strong>
+								<span style="cursor:help;text-transform:none;color:#bb0000;" title=" <?php echo Kohana::lang("simplegroups.explain_visible"); ?> ">?</span>
+								Visible To Public:</strong><br />
 							<?php
 								print form::checkbox('category_visible', 'true', true);
 							?>
 						</div>
 						
-						<div class="tab_form_item">
-							<strong>Applies to Reports:</strong><br />
-							<?php
-								print form::checkbox('applies_to_report', 'true', TRUE);
-							?>
-						</div>
+						<div class="tab_form_item">								
+								<strong>
+								<span style="cursor:help;text-transform:none;color:#bb0000;" title=" <?php echo Kohana::lang("simplegroups.explain_applies_to_reports"); ?> ">?</span>
+								Applies to Reports:</strong><br />								
+								<?php
+									print form::checkbox('applies_to_report', 'true', TRUE);
+								?>
+							</div>
 						
 						<div class="tab_form_item">
-							<strong>Applies to Messages:</strong><br />
+							<strong>
+							<span style="cursor:help;text-transform:none;color:#bb0000;" title=" <?php echo Kohana::lang("simplegroups.explain_applies_to_messages"); ?> ">?</span>
+							Applies to Messages:</strong><br />
 							<?php
 								print form::checkbox('applies_to_message', 'true', true);
 							?>
 						</div>
 						
-						<div class="tab_form_item">
-							<strong>This category is assigned by default to all new messages/reports:</strong><br />
+						<div class="tab_form_item">							
+							<strong>
+							<span style="cursor:help;text-transform:none;color:#bb0000;" title=" <?php echo Kohana::lang("simplegroups.explain_selected_by_default"); ?> ">?</span>
+							This category is assigned by default to all new messages/reports:</strong><br />							
 							<?php
 								print form::checkbox('selected_by_default', '', false);
 							?>
@@ -266,7 +274,7 @@ td ul{
 											<td class="col-3">
 												
 												<?php
-													echo "<p> Applies to Reports: ";
+													echo '<p>  <span style="cursor:help;text-transform:none;color:#bb0000;" title="'.Kohana::lang("simplegroups.explain_applies_to_reports").'">?</span> Applies to Reports: ';													
 													if ($category->applies_to_report)
 													{
 														echo "Yes</p>";
@@ -274,8 +282,9 @@ td ul{
 													else
 													{
 														echo "No</p>";
-													}
-													echo "<p> Applies to Messages: ";
+													}													
+													
+													echo '<p><span style="cursor:help;text-transform:none;color:#bb0000;" title="'.Kohana::lang("simplegroups.explain_applies_to_messages").'">?</span> Applies to Messages: ';
 													if ($category->applies_to_message)
 													{
 														echo "Yes</p>";
@@ -284,8 +293,17 @@ td ul{
 													{
 														echo "No</p>";
 													}
-													echo "<p>Selected by default: ";
+													echo '<p><span style="cursor:help;text-transform:none;color:#bb0000;" title="'.Kohana::lang("simplegroups.explain_selected_by_default").'">?</span> Selected by default: ';
 													if ($category->selected_by_default)
+													{
+														echo "Yes</p>";
+													}
+													else
+													{
+														echo "No</p>";
+													}
+													echo '<p><span style="cursor:help;text-transform:none;color:#bb0000;" title="'.Kohana::lang("simplegroups.explain_visible").'">?</span> Is Visible: ';
+													if ($category->category_visible)
 													{
 														echo "Yes</p>";
 													}
@@ -364,7 +382,7 @@ td ul{
 												<td class="col-3">
 												
 												<?php
-													echo "<p> Applies to Reports: ";
+													echo '<p>  <span style="cursor:help;text-transform:none;color:#bb0000;" title="'.Kohana::lang("simplegroups.explain_applies_to_reports").'">?</span> Applies to Reports: ';													
 													if ($child->applies_to_report)
 													{
 														echo "Yes</p>";
@@ -373,7 +391,7 @@ td ul{
 													{
 														echo "No</p>";
 													}
-													echo "<p> Applies to Messages: ";
+													echo '<p><span style="cursor:help;text-transform:none;color:#bb0000;" title="'.Kohana::lang("simplegroups.explain_applies_to_messages").'">?</span> Applies to Messages: ';
 													if ($child->applies_to_message)
 													{
 														echo "Yes</p>";
@@ -382,7 +400,7 @@ td ul{
 													{
 														echo "No</p>";
 													}
-													echo "<p>Selected by default: ";
+													echo '<p><span style="cursor:help;text-transform:none;color:#bb0000;" title="'.Kohana::lang("simplegroups.explain_selected_by_default").'">?</span> Selected by default: ';
 													if ($child->selected_by_default)
 													{
 														echo "Yes</p>";

@@ -316,38 +316,7 @@ class Messages_Controller extends Admin_simplegroup_Controller
 		$table_view->render(TRUE);
 	}
 	
-	/*********  At some point delete all of this, i just needed to test every thing***********************
-	function test()
-	{
-		$this->template = "";
-		$this->auto_render = FALSE;
-		
-		$test = array ("counties"=>
-					array(
-							array("name"=>"bomi", "points"=>array(
-								array("lat"=>10,"lon"=>-5),
-								array("lat"=>10,"lon"=>-5),
-								array("lat"=>10,"lon"=>-5),
-								array("lat"=>10,"lon"=>-5),
-								)
-							),
-						
-						array("name"=>"bong", "points"=>array(
-								array("lat"=>11,"lon"=>-3),
-								array("lat"=>11,"lon"=>-3),
-								array("lat"=>11,"lon"=>-3),
-								array("lat"=>11,"lon"=>-3),
-								)
-							)
-						)
-					);
-					
-		$output  = json_encode($test);
-		
-		echo $output;
-						
-	}
-	*/
+	
 
     /**
     * Send A New Message Using Default SMS Provider
@@ -502,6 +471,7 @@ class Messages_Controller extends Admin_simplegroup_Controller
 		// Load the View		
 		$view = View::factory('simplegroups/messages/message_category_edit');					
 		$view->message = $message;		
+		$view->group_name = $this->group->name;
 		$view->message_category = $message_category;
 		$view->new_category_toggle_js = $this->_new_category_toggle_js();
 		$view->categories = $this->_get_categories();

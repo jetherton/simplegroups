@@ -42,11 +42,14 @@ class Dashboard_Controller extends Admin_simplegroup_Controller
 		->where("simplegroups_groups_incident.simplegroups_groups_id", $this->group->id)
 		->where('incident.incident_active', 0)
 		->count_all();
+		
 
     
 
         // Total Categories
-        $this->template->content->categories = ORM::factory('category')->count_all();
+        $this->template->content->categories = ORM::factory('simplegroups_category')
+		->where("simplegroups_groups_id", $this->group->id)
+		->count_all();
 
         // Messages By Service
 	$this->template->content->message_count = ORM::factory('message')

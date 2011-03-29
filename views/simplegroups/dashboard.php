@@ -69,6 +69,10 @@
 								<a href="<?php echo url::site() . 'admin/simplegroups/messages' ?>" class="messages"><?php echo Kohana::lang('ui_main.messages');?></a>
 								<strong><?php echo number_format($message_count); ?></strong>
 							</li>
+							<li>
+								<a href="<?php echo url::site() . 'admin/simplegroups/settings/categories' ?>" class="categories"><?php echo Kohana::lang('ui_main.categories');?></a>
+								<strong><?php echo number_format($categories); ?></strong>
+							</li>
 						</ul>
 					</div>
 					<!-- info-container -->

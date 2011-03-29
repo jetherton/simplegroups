@@ -80,7 +80,9 @@
 							</div>
 							<div class="row">
 								<h4><?php echo Kohana::lang('ui_main.title');?></h4>
-								<?php print form::input('incident_title', $form['incident_title'], ' class="text title"'); ?>
+
+								<input type="text" id="incident_title" name="incident_title" class="text title"
+									value ="<?php echo htmlentities($form['incident_title']);  ?>"/>
 							</div>
 							<div class="row">
 								<h4><?php echo Kohana::lang('ui_main.description');?> <span><?php echo Kohana::lang('ui_main.include_detail');?>.</span></h4>
@@ -151,12 +153,13 @@
 							$selected_categories = $form['incident_category'];
 						}
 						$columns = 2;
-						echo category::tree($categories, $selected_categories, 'incident_category', $columns);
+						echo groups_category::tree($categories, $selected_categories, 'incident_category', $columns);
 					?>
 				</div>
 				<!--group categories-->
 				<h4>
 					<?php echo $group_name. " ". Kohana::lang('ui_main.categories');?> 
+					<span><?php echo Kohana::lang('ui_main.select_multiple');?>.</span>
 				</h4>
 				<div class="report_group_category">
 					<?php
@@ -165,7 +168,7 @@
 							$selected_group_categories = $form['incident_group_category'];
 						}
 						$columns = 2;
-						echo category::tree($group_categories, $selected_group_categories, 'incident_group_category', $columns);
+						echo groups_category::tree($group_categories, $selected_group_categories, 'incident_group_category', $columns);
 					?>
 				</div>
 					

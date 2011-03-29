@@ -76,5 +76,5 @@
 		function CheckAll( id )
 		{
 			$("INPUT[name='data_point'][type='checkbox']").attr('checked', $('#' + id).is(':checked'));
-			$("INPUT[name='data_include'][type='checkbox']").attr('checked', $('#' + id).is(':checked'));
+			$("INPUT[name='data_include'][type='checkbox']").attr('checked', $('#' + id).is(':checked'));			
 		}

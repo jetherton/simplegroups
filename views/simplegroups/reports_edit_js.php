@@ -344,3 +344,4 @@
 		theme_advanced_toolbar_location : "top",
 		theme_advanced_toolbar_align : "left"
 		});
+		

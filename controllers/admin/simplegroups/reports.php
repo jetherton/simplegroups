@@ -1800,7 +1800,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
 
             // Add some rules, the input field, followed by a list of checks, carried out in order
             $post->add_rules('data_point.*','required','numeric','between[1,4]');
-            $post->add_rules('data_include.*','numeric','between[1,5]');
+            $post->add_rules('data_include.*','numeric','between[1,6]');
             $post->add_rules('from_date','date_mmddyyyy');
             $post->add_rules('to_date','date_mmddyyyy');
 
@@ -1883,7 +1883,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
                     }
                     
                     if ($item == 3) {
-                        $report_csv .= ",CATEGORY";
+                        $report_csv .= ",CATEGORY";			
                     }
                     
                     if ($item == 4) {
@@ -1893,6 +1893,10 @@ class Reports_Controller extends Admin_simplegroup_Controller
                     if($item == 5) {
                         $report_csv .= ",LONGITUDE";
                     }
+		    if($item == 6)
+		    {
+			$report_csv .= ",GROUP CATEGORY";
+		    }
                 }
                 $report_csv .= ",APPROVED,VERIFIED";
                 $report_csv .= "\n";
@@ -1923,6 +1927,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
                             break;
 
                             case 3:
+				//first do the site wide categories
                                 $report_csv .= ',"';
                             
                                 foreach($incident->incident_category as $category)
@@ -1933,6 +1938,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
                                     }
                                 }
                                 $report_csv .= '"';
+				
                             break;
                         
                             case 4:
@@ -1942,6 +1948,24 @@ class Reports_Controller extends Admin_simplegroup_Controller
                             case 5:
                                 $report_csv .= ',"'.$this->_csv_text($incident->location->longitude).'"';
                             break;
+			    
+			    case 6:
+				//the do the group specific categories
+				$report_csv .= ',"';
+				//get the categories
+				$group_categories = ORM::factory("simplegroups_category")
+					->join("simplegroups_incident_category", "simplegroups_incident_category.simplegroups_category_id", "simplegroups_category.id")
+					->where("simplegroups_incident_category.incident_id", $incident->id)
+					->find_all();
+                                foreach($group_categories as $category)
+                                {
+                                    if ($category->category_title)
+                                    {
+                                        $report_csv .= $this->_csv_text($category->category_title) . ", ";
+                                    }
+                                }
+                                $report_csv .= '"';
+			    break;
                         }
                     }
                     

@@ -13,6 +13,10 @@
  * @copyright  Ushahidi - http://www.ushahidi.com
  * @license    http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License (LGPL) 
  */
+ 
+             $(function() {
+                $('span[title]').hovertip();
+            });
 
 // Categories JS
 function fillFields(id, parent_id, category_title, category_description, category_color, locale<?php foreach($locale_array as $lang_key => $lang_name) echo ', '.$lang_key; ?>, category_visible, applies_to_report, applies_to_message, selected_by_default)

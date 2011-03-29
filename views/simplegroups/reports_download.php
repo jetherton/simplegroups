@@ -46,7 +46,7 @@
 			<table class="data_points">
 				<tr>
 					<td colspan="2">
-						<input type="checkbox" id="data_all" name="data_all" checked="checked" onclick="CheckAll(this.id)" /><strong><?php echo strtoupper(Kohana::lang('ui_main.select_all'));?></strong>
+						<!--<input type="checkbox" id="data_all" name="data_all" checked="checked" onclick="CheckAll(this.id)" /><strong><?php //echo strtoupper(Kohana::lang('ui_main.select_all'));?></strong>-->
 						<div id="form_error1"></div>
 					</td>
 				</tr>
@@ -59,17 +59,22 @@
 					<td><?php print form::checkbox('data_include[]', '2', TRUE); ?><?php echo Kohana::lang('ui_main.include_description');?></td>
 				</tr>
 				<tr>
-					<td><?php print form::checkbox('data_point[]', '3', TRUE); ?><?php echo Kohana::lang('ui_main.reports');?> <?php echo Kohana::lang('ui_main.awaiting_approval');?></td>
 					<td><?php print form::checkbox('data_include[]', '3', TRUE); ?><?php echo Kohana::lang('ui_main.include_categories');?></td>
+					<td><?php print form::checkbox('data_include[]', '6', TRUE); ?><?php echo Kohana::lang('simplegroups.include_group_categories');?></td>
 				</tr>
                                 <tr>
                                         <td><?php print form::checkbox('data_point[]', '4', TRUE); ?><?php echo Kohana::lang('ui_main.reports');?> <?php echo Kohana::lang('ui_main.awaiting_verification');?></td>
-                                        <td><?php print form::checkbox('data_include[]','4',TRUE); ?><?php echo Kohana::lang('ui_main.include_latitude');?></td>
+					<td><?php print form::checkbox('data_point[]', '3', TRUE); ?><?php echo Kohana::lang('ui_main.reports');?> <?php echo Kohana::lang('ui_main.awaiting_approval');?></td>
                                 </tr>
                                 <tr>
                                         <td><?php print form::checkbox('data_include[]','5',TRUE); ?><?php echo Kohana::lang('ui_main.include_longitude');?></td>
-					<td><?php print form::checkbox('strip_html','true', TRUE); ?>Remove HTML tags</td>
+					<td><?php print form::checkbox('data_include[]','4',TRUE); ?><?php echo Kohana::lang('ui_main.include_latitude');?></td>
+
                                 </tr>
+				<tr>					
+					<td><?php print form::checkbox('strip_html','true', TRUE); ?>Remove HTML tags</td>
+					<td></td>
+				</tr>
 				<tr>
 					<td colspan="2">
 						<div class="date-box">
