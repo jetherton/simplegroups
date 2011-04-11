@@ -245,10 +245,16 @@ class Simplegroups_settings_Controller extends Admin_Controller
 			
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			//Find what IDs weren't included above and delete them
+			//but first check and see if there are any ids in the $ids_still_there variable
+			
 			$number_items = ORM::factory('simplegroups_groups_number')
-				->where("simplegroups_groups_id", $id)
-				->where("NOT ( `id` IN (".implode(',', $ids_still_there)."))")
-				->delete_all();
+				->where("simplegroups_groups_id", $id);
+			if(count($ids_still_there) > 0)
+			{		
+				$number_items = $number_items->where("NOT ( `id` IN (".implode(',', $ids_still_there)."))");
+			}
+			$number_items->delete_all();
+			
 			
 			
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
