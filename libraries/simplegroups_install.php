@@ -87,7 +87,7 @@ class Simplegroups_Install {
 				`reports_edit` ,`reports_evaluation` ,`reports_comments` ,`reports_download` ,`reports_upload` ,
 				`messages` ,`messages_reporters` ,`stats` ,`settings` ,`manage` ,`users`)
 				VALUES (NULL ,  'simplegroups',  'All group members of the Simple Groups plugin should have this role',  
-				'0',  '0',  '0',  '0',  '0',  '0',  '0',  '0',  '0',  '0',  '0', '0');");
+				'1',  '0',  '0',  '0',  '0',  '0',  '0',  '0',  '0',  '0',  '0', '0');");
 		}
 		
 		//create roles table for simple groups
