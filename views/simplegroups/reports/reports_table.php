@@ -47,7 +47,7 @@
 									$incident_title = $incident->incident_title;
 									$incident_description = text::limit_chars(strip_tags($incident->incident_description), 150, "...", true);
 									$incident_date = $incident->incident_date;
-									$incident_date = date('Y-m-d', strtotime($incident->incident_date));
+									$incident_date = date('Y-m-d H:i' , strtotime($incident->incident_date));
 									$incident_mode = $incident->incident_mode;	// Mode of submission... WEB/SMS/EMAIL?
 
 									//XXX incident_Mode will be discontinued in favour of $service_id

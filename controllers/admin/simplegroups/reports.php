@@ -566,8 +566,9 @@ class Reports_Controller extends Admin_simplegroup_Controller
     function edit( $id = false, $saved = false )
     {
 
-
-        $this->template->content = new View('simplegroups/reports_edit');
+	$db = new Database();
+	
+        $this->template->content = new View('admin/reports_edit');
         $this->template->content->title = Kohana::lang('ui_admin.create_report');
 
         // setup and initialize form field names
@@ -584,6 +585,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
             'incident_ampm' => '',
             'latitude' => '',
             'longitude' => '',
+	    'geometry' => array(),
             'location_name' => '',
             'country_id' => '',
             'incident_category' => array(),
@@ -598,7 +600,8 @@ class Reports_Controller extends Admin_simplegroup_Controller
             'incident_active' => '',
             'incident_verified' => '',
             'incident_source' => '',
-            'incident_information' => ''
+            'incident_information' => '',
+	    'incident_zoom' => ''
         );
 
         //  copy the form as errors, so the errors will be stored with keys corresponding to the form field names
@@ -640,6 +643,8 @@ class Reports_Controller extends Admin_simplegroup_Controller
         $this->template->content->hour_array = $this->_hour_array();
         $this->template->content->minute_array = $this->_minute_array();
         $this->template->content->ampm_array = $this->_ampm_array();
+	
+	$this->template->content->stroke_width_array = $this->_stroke_width_array();
 
         // Get Countries
         $countries = array();
@@ -942,6 +947,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
                 $incident->incident_verified = $post->incident_verified;
                 $incident->incident_source = $post->incident_source;
                 $incident->incident_information = $post->incident_information;
+		$incident->incident_zoom = (int) $post->incident_zoom;
                 //Save
                 $incident->save();
 
@@ -994,6 +1000,36 @@ class Reports_Controller extends Admin_simplegroup_Controller
 				$group_incident->number_id = $number_of_message_sender->id;
 			}
 			$group_incident->save();
+		}
+		
+		
+		// STEP 2b: SAVE INCIDENT GEOMETRIES
+		ORM::factory('geometry')->where('incident_id',$incident->id)->delete_all();
+		if (isset($post->geometry)) 
+		{
+			foreach($post->geometry as $item)
+			{
+				if(!empty($item))
+				{
+					//Decode JSON
+					$item = json_decode($item);
+					//++ TODO - validate geometry
+					$geometry = (isset($item->geometry)) ? mysql_escape_string($item->geometry) : "";
+					$label = (isset($item->label)) ? mysql_escape_string(substr($item->label, 0, 150)) : "";
+					$comment = (isset($item->comment)) ? mysql_escape_string(substr($item->comment, 0, 255)) : "";
+					$color = (isset($item->color)) ? mysql_escape_string(substr($item->color, 0, 6)) : "";
+					$strokewidth = (isset($item->strokewidth) AND (float) $item->strokewidth) ? (float) $item->strokewidth : "2.5";
+					if ($geometry)
+					{
+						//++ Can't Use ORM for this
+						$sql = "INSERT INTO ".Kohana::config('database.default.table_prefix')."geometry (
+							incident_id, geometry, geometry_label, geometry_comment, geometry_color, geometry_strokewidth ) 
+							VALUES( ".$incident->id.",
+							GeomFromText( '".$geometry."' ),'".$label."','".$comment."','".$color."','".$strokewidth."')";
+						$db->query($sql);
+					}
+				}
+			}
 		}
 
                 // STEP 3: SAVE CATEGORIES
@@ -1226,6 +1262,18 @@ class Reports_Controller extends Admin_simplegroup_Controller
                             $incident_photo[] = $media->media_link;
                         }
                     }
+		    
+		    
+		    // Get Geometries via SQL query as ORM can't handle Spatial Data
+			$sql = "SELECT AsText(geometry) as geometry, geometry_label, 
+				geometry_comment, geometry_color, geometry_strokewidth 
+				FROM ".Kohana::config('database.default.table_prefix')."geometry 
+				WHERE incident_id=".$id;
+			$query = $db->query($sql);
+			foreach ( $query as $item )
+			{
+				$form['geometry'][] = $item;
+			}
 
                     // Combine Everything
                     $incident_arr = array
@@ -1255,7 +1303,8 @@ class Reports_Controller extends Admin_simplegroup_Controller
                         'incident_active' => $incident->incident_active,
                         'incident_verified' => $incident->incident_verified,
                         'incident_source' => $incident->incident_source,
-                        'incident_information' => $incident->incident_information
+                        'incident_information' => $incident->incident_information,
+			'incident_zoom' => $incident->incident_zoom
                     );
 
                     // Merge To Form Array For Display
@@ -1351,7 +1400,8 @@ class Reports_Controller extends Admin_simplegroup_Controller
         $this->template->colorpicker_enabled = TRUE;
         $this->template->treeview_enabled = TRUE;
 	$this->template->editor_enabled = TRUE;
-        $this->template->js = new View('simplegroups/reports_edit_js');
+        //$this->template->js = new View('simplegroups/reports_edit_js');
+	$this->template->js = new View('admin/reports_edit_js');
         $this->template->js->default_map = Kohana::config('settings.default_map');
         $this->template->js->default_zoom = Kohana::config('settings.default_zoom');
 
@@ -1365,6 +1415,9 @@ class Reports_Controller extends Admin_simplegroup_Controller
             $this->template->js->latitude = $form['latitude'];
             $this->template->js->longitude = $form['longitude'];
         }
+	
+	$this->template->js->incident_zoom = $form['incident_zoom'];
+	$this->template->js->geometries = $form['geometry'];
 
         // Inline Javascript
         $this->template->content->date_picker_js = $this->_date_picker_js();
@@ -2026,4 +2079,15 @@ class Reports_Controller extends Admin_simplegroup_Controller
         $text = stripslashes(htmlspecialchars($text));
         return $text;
     }
+    
+    private function _stroke_width_array()
+	{
+		for ($i = 0.5; $i <= 8 ; $i += 0.5)
+		{
+			$stroke_width_array["$i"] = $i;
+		}
+		
+		return $stroke_width_array;
+	}
+    
 }//end class

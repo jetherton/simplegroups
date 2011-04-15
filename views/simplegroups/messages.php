@@ -86,8 +86,8 @@
 							$table_view->service_id = $service_id;
 							$table_view->total_items = $total_items;
 							$table_view->category_mapping = $category_mapping;
-							$table_view->render(TRUE);
-							
+							$table_view->reply_to = $reply_to;
+							$table_view->render(TRUE);														
 						?>
 							
 					</div>					

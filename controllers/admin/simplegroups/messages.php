@@ -18,6 +18,14 @@ class Messages_Controller extends Admin_simplegroup_Controller
     function __construct()
     {
         parent::__construct();
+	
+	// Display Reply to Option?
+        $this->reply_to = TRUE;
+        if ( ! Kohana::config("settings.sms_provider"))
+        {
+            // Hide Reply to option
+			$this->reply_to = FALSE;
+        }
 
         $this->template->this_page = 'messages';
     }
@@ -28,11 +36,15 @@ class Messages_Controller extends Admin_simplegroup_Controller
     */
     function index($service_id = 1)
     {
+	
         $this->template->content = new View('simplegroups/messages');
 
         // Get Title
         $service = ORM::factory('service', $service_id);
         $this->template->content->title = $service->service_name;
+
+
+        
 
 
 
@@ -117,7 +129,6 @@ class Messages_Controller extends Admin_simplegroup_Controller
                 $form_error = TRUE;
             }
         }//end of  if($_POST)       
-        
         $this->template->content = $this->setup_message_table($this->template->content, $service_id, 0);
         
 	
@@ -290,7 +301,6 @@ class Messages_Controller extends Admin_simplegroup_Controller
 				$category_mapping[$message_category->message_id][] = $message_category;
 			}
 		}
-		
 		$view->pagination = $pagination;
 		$view->messages = $messages;
 		$view->service_id = $service_id;
@@ -298,7 +308,7 @@ class Messages_Controller extends Admin_simplegroup_Controller
 		$view->total_items = $pagination->total_items;
 		$view->type = $type;
 		$view->level = $level;
-		
+		$view->reply_to = $this->reply_to;
 		return $view;
 	}
     
@@ -310,7 +320,7 @@ class Messages_Controller extends Admin_simplegroup_Controller
 		$this->template = "";
 		$this->auto_render = FALSE;		
 		$table_view = View::factory('simplegroups/messages/messages_table');
-		
+
 		$table_view = $this->setup_message_table($table_view, $service_id, $cat_id, $tab_id);
 		
 		$table_view->render(TRUE);
@@ -318,7 +328,7 @@ class Messages_Controller extends Admin_simplegroup_Controller
 	
 	
 
-    /**
+/**
     * Send A New Message Using Default SMS Provider
     */
     function send()
@@ -431,6 +441,7 @@ class Messages_Controller extends Admin_simplegroup_Controller
     }
 
 
+    
 
 
 	/*******************************************
@@ -600,6 +611,8 @@ class Messages_Controller extends Admin_simplegroup_Controller
 				ORM::factory('simplegroups_message_category')->where("simplegroups_message_category.message_id", $message_id)->delete_all();
 			}//end loop
 		}
+		
+		
 		
 		
 		$table_view = $this->setup_message_table($table_view, $service_id, $cat_id, $tab_id);		

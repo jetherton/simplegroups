@@ -66,7 +66,7 @@
 									<tr>
 									<td colspan="4" style="border:3px solid #999; font-size:15pt; line-height:normal;">
 									<input style="margin: 0 10px;" name="message_id[]" id="message" value="<?php echo $message_id; ?>" type="checkbox" class="check-box"/>
-									Message: <?php echo $message_description; ?>
+									Message: <?php echo $message_description; ?> 
 									</td>
 									</tr>
 									
@@ -74,10 +74,9 @@
 										echo " class=\"spam_tr\"";
 									} ?> >
 										<td class="col-2" colspan="2" style="border-left:2px solid #BBB; ">
-											<div class="post" style="display:none;">
-												
+											<div class="post" >
 												<?php
-													if ($message_detail)
+												if ($message_detail)
 												{
 												?>
 													<p><a href="javascript:preview('message_preview_<?php echo $message_id?>')"><?php echo Kohana::lang('ui_main.preview_message');?></a></p>
@@ -104,21 +103,24 @@
 														?>
 											</div>
 											<?php
-												}
-												// Action::message_extra_admin  - Message Additional/Extra Stuff
-												Event::run('ushahidi_action.message_extra_admin', $message_id);
+												}												
 											?>
-												
-											<?php
-												$settings = new Settings_Model(1);
+											
+											<?php Event::run('ushahidi_action.message_extra_admin', $message_id); ?>
+											
+											<!--start reply_to-->
+											<?php if($reply_to == TRUE) { ?>
+
+												<?php
 												if ($service_id == 1 && $message_type == 1)
 												{
-											?>
-											<div id="replies">
-											</div>
-													<!--<a href="javascript:showReply('reply_<?php //echo $message_id; ?>')" class="more">+<?php //echo Kohana::lang('ui_main.reply');?></a> -->
+													?>
+													<div id="replies">
+
+													</div>
+													<a href="javascript:showReply('reply_<?php echo $message_id; ?>')" class="more">+<?php echo Kohana::lang('ui_main.reply');?></a>
 													<div id="reply_<?php echo $message_id; ?>" class="reply">
-														<?php print form::open(url::site() . 'admin/simplegroups/messages/send/',array('id' => 'newreply_' . $message_id,
+														<?php print form::open(url::site() . 'admin/messages/send/',array('id' => 'newreply_' . $message_id,
 														 	'name' => 'newreply_' . $message_id)); ?>
 														<div class="reply_can"><a href="javascript:cannedReply('1', 'message_<?php echo $message_id; ?>')">+<?php echo Kohana::lang('ui_main.request_location');?></a>&nbsp;&nbsp;&nbsp;<a href="javascript:cannedReply('2', 'message_<?php echo $message_id; ?>')">+<?php echo Kohana::lang('ui_main.request_information');?></a></div>
 														<div id="replyerror_<?php echo $message_id; ?>" class="reply_error"></div>
@@ -132,7 +134,12 @@
 													<?php
 												}
 												?>
+
+											<?php } ?>
+											<!--/end reply_to-->
+
 											</div>
+											
 											<ul class="info">
 												<?php
 												if ($message_type == 2)
@@ -141,13 +148,9 @@
 														<li class="none-separator">To: <strong><?php echo $message_to; ?></strong></li>
 													<?php
 												}
-												else
-												{
 													?>
-														<li class="none-separator">From: <strong class="reporters_<?php echo $level_id?>"><?php echo $message_from; ?></strong></li>
-													<?php
-												}
-												?>
+												<li class="none-separator">From: <strong class="reporters_<?php echo $level_id?>"><?php echo $message_from; ?></strong></li>
+												
 												<li class="none-separator">Date: <strong class="reporters_0"><?php echo $message_date; ?></strong></li>
 												
 											</ul>
