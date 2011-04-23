@@ -568,7 +568,8 @@ class Reports_Controller extends Admin_simplegroup_Controller
 
 	$db = new Database();
 	
-        $this->template->content = new View('admin/reports_edit');
+        //$this->template->content = new View('admin/reports_edit');
+	$this->template->content = View::factory('simplegroups/reports_edit');	
         $this->template->content->title = Kohana::lang('ui_admin.create_report');
 
         // setup and initialize form field names
