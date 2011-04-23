@@ -153,31 +153,10 @@
 							</div>
 							<?php Event::run('ushahidi_action.report_form_admin_after_time', $id); ?>
 							<div class="row">
-								<h4><a href="#" id="category_toggle" class="new-cat"><?php echo Kohana::lang('ui_main.new_category');?></a><?php echo Kohana::lang('ui_main.categories');?> 
+								<h4><?php echo Kohana::lang('ui_main.categories');?> 
 								<span><?php echo Kohana::lang('ui_main.select_multiple');?>.</span></h4>
 								<?php print $new_category_toggle_js; ?>
 								<!--category_add form goes here-->
-			                    <div id="category_add" class="category_add">
-			                        <?php
-			                        print '<p>'.Kohana::lang('ui_main.add_new_category').'<hr/></p>';
-                                    print form::label(array("id"=>"category_name_label", "for"=>"category_name"), Kohana::lang('ui_main.name'));
-                                    print '<br/>';
-                                    print form::input('category_name', $new_categories_form['category_name'], 'class=""');
-                                    print '<br/>';
-                                    print form::label(array("id"=>"description_label", "for"=>"description"), Kohana::lang('ui_main.description'));
-                                    print '<br/>';
-                                    print form::input('category_description', $new_categories_form['category_description'], 'class=""');
-                                    print '<br/>';
-                                    print form::label(array("id"=>"color_label", "for"=>"color"), Kohana::lang('ui_main.color'));
-                                    print '<br/>';
-                                    print form::input('category_color', $new_categories_form['category_color'], 'class=""');
-                                    print $color_picker_js;
-                                    print '<br/>';
-                                    print '<span>';
-                                    print '<a href="#" id="add_new_category">'.Kohana::lang('ui_main.add').'</a>';
-                                    print '</span>';
-                                    ?> 
-                                </div>
 
 				<!--Site wide categories-->
 				<div class="report_category">
