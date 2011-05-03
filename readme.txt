@@ -30,7 +30,7 @@ This plugin is designed to give just the bare minimium of functionalty to users 
 
 
 
-TKS
+KTS
 JPE
 John a third time
 john2
