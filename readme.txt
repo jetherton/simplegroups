@@ -28,17 +28,5 @@ This plugin is designed to give just the bare minimium of functionalty to users 
 
 == Changelog ==
 
-CJD
-
-
-Kpetermeni
-JPE
-
-John a third time
-john2
-
-CJD
-
-LDJ
 
 
