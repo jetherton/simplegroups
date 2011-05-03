@@ -27,3 +27,4 @@ This plugin is designed to give just the bare minimium of functionalty to users 
 6. Then use the plugin settings page to create groups and assign members to them. Note, for a user to be a member they must be given the role of "groupuser"
 
 == Changelog ==
+CJD
