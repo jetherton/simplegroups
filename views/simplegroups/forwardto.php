@@ -3,8 +3,7 @@ function forwardMessage<?php echo $message_id; ?>()
 {
 	$("#forwarded_<?php echo $message_id; ?>").fadeIn("slow");
 	var groupId = $("#input_forwardto_<?php echo $message_id; ?>").val();
-	
-	$.get("<?php echo url::site()."admin/simplegroups/forwardto/index/".$message_id."/"; ?>" + groupId,
+	$.get("<?php echo url::site()."admin/simplegroups/forwardto/index/".$message_id."/".$item_type."/"; ?>" + groupId,
 		function(data) {
 			var forwardSpan = $("#msg_fwrd_to_<?php echo $message_id; ?>");
 			forwardSpan.html(data);

@@ -55,6 +55,9 @@ class simplegroups {
 		//hook into the message action hook so we can add the "forward too" action
 		Event::add('ushahidi_action.message_extra_admin',array($this, '_add_forward_to'));
 		
+		//hook into the generation of the list of reports and add a "forward too" button, just like what messages has
+		Event::add('ushahidi_action.report_extra_admin',array($this, '_add_forward_to')); 
+		
 		//hook into the user edit page so we can choose which group a user is in when they are created
 		Event::add('ushahidi_action.users_form_admin',array($this, '_edit_user_form'));
 		
@@ -214,28 +217,48 @@ class simplegroups {
 			return;
 		}
 		
-		$message_id = Event::$data;
+		//get a list of groups that this item could be sent to:
 		
 		$groups = ORM::factory("simplegroups_groups")->find_all();
-		$groups_array = array();
-		foreach($groups as $group)
-		{
-			$groups_array[$group->id] = $group->name;
-		}
+			$groups_array = array();
+			foreach($groups as $group)
+			{
+				$groups_array[$group->id] = $group->name;
+			}
 		
-		//figure out if the current message has already been assigned to a group
+		//get the id of the item in question
+		$id = Event::$data;
+		
+		//if we're looking at a message...
+		if (Router::$controller == 'messages')
+		{
+			$item_type = "message";
+		}
+		elseif (Router::$controller == 'reports')
+		{
+			$item_type = "incident";
+		}
+		else //something when wrong so get out of here
+		{
+			return; 
+		}
+			
+		//figure out if the current message/incident has already been assigned to a group
 		
 		$assigned_groups = ORM::factory("simplegroups_groups")
-			->join("simplegroups_groups_message", "simplegroups_groups_message.simplegroups_groups_id", "simplegroups_groups.id")
-			->where("simplegroups_groups_message.message_id", $message_id)
+			->join("simplegroups_groups_$item_type", "simplegroups_groups_$item_type.simplegroups_groups_id", "simplegroups_groups.id")
+			->where("simplegroups_groups_$item_type.".$item_type."_id", $id)
 			->find_all();
+		
 	
 		$view = new View('simplegroups/forwardto');
-		$view->message_id = $message_id;
+		$view->message_id = $id;
 		$view->assigned_groups = $assigned_groups;
 		$view->groups_array = $groups_array;
+		$view->item_type = $item_type;
 		$view->render(TRUE);
 	}
+
 	
 	
 	/**************************************

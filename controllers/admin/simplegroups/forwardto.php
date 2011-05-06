@@ -22,7 +22,7 @@ class Forwardto_Controller extends Admin_Controller
 
 
 
-	function index($message_id, $group_id)
+	function index($id, $item_type, $group_id)
 	{
 		//if the person is a group user don't show them this:
 		$user = new User_Model($_SESSION['auth_user']->id);
@@ -39,9 +39,10 @@ class Forwardto_Controller extends Admin_Controller
 	$this->template = "";
 	
 	$dont_add = false;
-	//check if this link already exists
-	$group_messages = ORM::factory("simplegroups_groups_message")
-		->where("message_id", $message_id)
+	
+	//check if this link bewteen item and group already exists
+	$group_messages = ORM::factory("simplegroups_groups_".$item_type)
+		->where($item_type."_id", $id)
 		->where("simplegroups_groups_id", $group_id)
 		->find_all();
 	foreach($group_messages as $group_message)
@@ -49,31 +50,54 @@ class Forwardto_Controller extends Admin_Controller
 		$dont_add = true;
 		break;
 	}
-	
+
 	if(!$dont_add)
 	{
-		$group_message = ORM::factory("simplegroups_groups_message");
-		$group_message->message_id = $message_id;
-		$group_message->simplegroups_groups_id = $group_id;
-		$group_message->save();
+		$group_item = ORM::factory("simplegroups_groups_".$item_type);
+		if($item_type == "message")
+		{
+			$group_item->message_id = $id;
+		}
+		elseif($item_type == "incident")
+		{
+			$group_item->incident_id = $id;
+		}
+		$group_item->simplegroups_groups_id = $group_id;
+		$group_item->save();
 		
-		//get the message so we can forward it to the groups own site
-		$message = ORM::factory("message", $message_id);
-		
-		groups::forward_message_to_own_instance($message->message, $message->message_from, $group_id);
-		
+		if($item_type == "message") //send the message to the groups site, if they have their own site
+		{
+			//get the message so we can forward it to the groups own site
+			$message = ORM::factory("message", $id);		
+			groups::forward_message_to_own_instance($message->message, $message->message_from, $group_id);
+		}
+		echo "and here";
 		
 		//check and see if we need to assign some categories to this
 		$group_categories = ORM::factory("simplegroups_category")
-			->where("simplegroups_groups_id", $group_id)
-			->where("applies_to_message", "1")
-			->where("selected_by_default", "1")
-			->find_all();
+			->where("simplegroups_groups_id", $group_id);
+		if($item_type == "message")
+		{
+			$group_categories = $group_categories->where("applies_to_message", "1");
+		}
+		elseif($item_type == "incident")
+		{
+			$group_categories = $group_categories->where("applies_to_report", "1");
+		}
+		$group_categories->where("selected_by_default", "1")->find_all();
+		
 		foreach($group_categories as $group_category)
 		{
-			$category_instance = ORM::factory("simplegroups_message_category");
+			$category_instance = ORM::factory("simplegroups_".$item_type."_category");
 			$category_instance->simplegroups_category_id = $group_category->id;
-			$category_instance->message_id = $message_id;
+			if($item_type == "message")
+			{
+				$category_instance->message_id = $id;
+			}
+			elseif($item_type == "incident")
+			{
+				$category_instance->incident_id = $id;
+			}
 			$category_instance->save();
 		}
 	}
@@ -81,8 +105,8 @@ class Forwardto_Controller extends Admin_Controller
 
 
 	$assigned_groups = ORM::factory("simplegroups_groups")
-		->join("simplegroups_groups_message", "simplegroups_groups_message.simplegroups_groups_id", "simplegroups_groups.id")
-		->where("simplegroups_groups_message.message_id", $message_id)
+		->join("simplegroups_groups_".$item_type, "simplegroups_groups_".$item_type.".simplegroups_groups_id", "simplegroups_groups.id")
+		->where("simplegroups_groups_".$item_type.".".$item_type."_id", $id)
 		->find_all();
 
 	$assigned_groups_text = "";
