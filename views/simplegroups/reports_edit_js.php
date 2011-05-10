@@ -171,16 +171,24 @@
 		****************************************/
 		function placeLocation(lat, lon, name)
 		{
-		
-			var lonlat = new OpenLayers.LonLat(lon, lat);
+			// Clear the map first
+			vlayer.removeFeatures(vlayer.features);
+			$('input[name="geometry[]"]').remove();
 			
-			lonlat.transform(proj_4326,proj_900913);
-					
-			m = new OpenLayers.Marker(lonlat);
-			markers.clearMarkers();
-			markers.addMarker(m);
-			map.setCenter(lonlat, <?php echo $default_zoom; ?>);
+			point = new OpenLayers.Geometry.Point(lon, lat);
+			OpenLayers.Projection.transform(point, proj_4326,proj_900913);
+			
+			
+			f = new OpenLayers.Feature.Vector(point);
+			vlayer.addFeatures(f);
+			
+			// create a new lat/lon object
+			myPoint = new OpenLayers.LonLat(lon, lat);
+			myPoint.transform(proj_4326, map.getProjectionObject());
 
+			// display the map centered on a latitude and longitude
+			map.setCenter(myPoint, <?php echo $default_zoom; ?>);
+			
 			// Update form values
 			$("#latitude").attr("value", lat);
 			$("#longitude").attr("value", lon);
@@ -188,6 +196,7 @@
 
 			return false;
 		}
+
 		
 		var map;
 		var thisLayer;

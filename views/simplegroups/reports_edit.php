@@ -278,6 +278,7 @@
 								<div id="find_loading" class="incident-find-loading"></div>
 								<div style="clear:both;"><?php echo Kohana::lang('ui_main.pinpoint_location');?>.</div>
 							</div>
+							<div id="find_location_results"></div>
 							<?php Event::run('ushahidi_action.report_form_admin_location', $id); ?>
 							<div class="row">
 								<div class="town">
