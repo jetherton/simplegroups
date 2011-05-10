@@ -71,7 +71,6 @@ class Forwardto_Controller extends Admin_Controller
 			$message = ORM::factory("message", $id);		
 			groups::forward_message_to_own_instance($message->message, $message->message_from, $group_id);
 		}
-		echo "and here";
 		
 		//check and see if we need to assign some categories to this
 		$group_categories = ORM::factory("simplegroups_category")
