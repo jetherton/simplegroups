@@ -2,6 +2,8 @@
 /**
  * simplegroups helper class.
  */
+
+
 class groups_Core {
 
 
@@ -12,6 +14,48 @@ class groups_Core {
 	{
 		// Set Table Prefix
 		self::$table_prefix = Kohana::config('database.default.table_prefix');
+	}
+	
+	
+	/**
+	 * Use this to forward the incident corresponding to the given incident ID to the
+	 * site that belows to the specified group
+	 * Enter description here ...
+	 * @param unknown_type $incident_id - ID of the incident we want to forward
+	 * @param unknown_type $group_id - ID ofr the group that's doing the forwarding
+	 */
+	public static function forward_incident_to_own_instance($incident_id, $group_id)
+	{
+		//first get the group in question and see if they've specified a site
+		$group = ORM::factory("simplegroups_groups", $group_id);
+		if($group->own_instance == null || strlen($group->own_instance) < 4)
+		{
+			return; // they don't have an instance
+		}
+		
+		$incident = ORM::factory("incident", $incident_id);
+		
+		$cat_str = "This report was categorized under the following when on ". Kohana::config('settings.site_name').":\r\n<br/>"; //set up for the category string
+	 	foreach($incident->incident_category as $category)
+		{
+			if ($category->category->category_title)
+			{
+			$cat_str .= $category->category->category_title. "\r\n<br/>";
+			}
+		}
+		
+		$incident->incident_description .= "<br/><br/>\r\n\r\n".$cat_str;
+		
+		$api_url = substr($group->own_instance, 0, strpos($group->own_instance, "frontlinesms")). "api";
+		
+		$siteInfo = new \Ushahidi_API_Library\Site_Info($api_url);
+		
+		$reportParams = \Ushahidi_API_Library\Report_Task_Parameter::fromORM($incident);
+		
+		$reportTask = new \Ushahidi_API_Library\Report_Task($reportParams, $siteInfo);
+		$reportResponse = $reportTask->execute();
+		
+	
 	}
 	
 	

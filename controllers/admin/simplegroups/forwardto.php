@@ -57,20 +57,21 @@ class Forwardto_Controller extends Admin_Controller
 		if($item_type == "message")
 		{
 			$group_item->message_id = $id;
-		}
-		elseif($item_type == "incident")
-		{
-			$group_item->incident_id = $id;
-		}
-		$group_item->simplegroups_groups_id = $group_id;
-		$group_item->save();
-		
-		if($item_type == "message") //send the message to the groups site, if they have their own site
-		{
+			
 			//get the message so we can forward it to the groups own site
 			$message = ORM::factory("message", $id);		
 			groups::forward_message_to_own_instance($message->message, $message->message_from, $group_id);
 		}
+		elseif($item_type == "incident")
+		{
+			$group_item->incident_id = $id;
+			//forward the incident to the groups own site
+				groups::forward_incident_to_own_instance($id, $group_id);
+		}
+		$group_item->simplegroups_groups_id = $group_id;
+		$group_item->save();
+		
+		
 		
 		//check and see if we need to assign some categories to this
 		$group_categories = ORM::factory("simplegroups_category")

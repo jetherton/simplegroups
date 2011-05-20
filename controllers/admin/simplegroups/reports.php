@@ -586,11 +586,11 @@ class Reports_Controller extends Admin_simplegroup_Controller
             'incident_ampm' => '',
             'latitude' => '',
             'longitude' => '',
-	    'geometry' => array(),
+	    	'geometry' => array(),
             'location_name' => '',
             'country_id' => '',
             'incident_category' => array(),
-	    'incident_group_category' => array(),
+	    	'incident_group_category' => array(),
             'incident_news' => array(),
             'incident_video' => array(),
             'incident_photo' => array(),
@@ -602,7 +602,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
             'incident_verified' => '',
             'incident_source' => '',
             'incident_information' => '',
-	    'incident_zoom' => ''
+	    	'incident_zoom' => ''
         );
 
         //  copy the form as errors, so the errors will be stored with keys corresponding to the form field names
@@ -909,7 +909,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
                 $incident_time = $post->incident_hour . ":" . $post->incident_minute . ":00 " . $post->incident_ampm;
                 $incident->incident_date = date( "Y-m-d H:i:s", strtotime($incident_date . " " . $incident_time) );
                 
-		$is_new = false;
+				$is_new = false;
                 // Is this new or edit?
                 if ($id)    // edit
                 {
@@ -918,7 +918,8 @@ class Reports_Controller extends Admin_simplegroup_Controller
                 else        // new
                 {
                     $incident->incident_dateadd = date("Y-m-d H:i:s",time());
-		    $is_new = true;
+		    		$is_new = true;
+		    		
                 }
 
                 // Is this an Email, SMS, Twitter submitted report?
@@ -1032,6 +1033,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
 				}
 			}
 		}
+		
 
                 // STEP 3: SAVE CATEGORIES
                 ORM::factory('Incident_Category')->where('incident_id',$incident->id)->delete_all();        // Delete Previous Entries
@@ -1045,16 +1047,16 @@ class Reports_Controller extends Admin_simplegroup_Controller
 		
                 // STEP 3.1: SAVE GROUP CATEGORIES
                 ORM::factory('simplegroups_incident_category')->where('incident_id',$incident->id)->delete_all();        // Delete Previous Entries
-		if(isset($post->incident_group_category))
-		{
-			foreach($post->incident_group_category as $item)
-			{
-			    $incident_group_category = ORM::factory('simplegroups_incident_category');
-			    $incident_group_category->incident_id = $incident->id;
-			    $incident_group_category->simplegroups_category_id = $item;
-			    $incident_group_category->save();
-			}
-		}
+				if(isset($post->incident_group_category))
+				{
+					foreach($post->incident_group_category as $item)
+					{
+					    $incident_group_category = ORM::factory('simplegroups_incident_category');
+					    $incident_group_category->incident_id = $incident->id;
+					    $incident_group_category->simplegroups_category_id = $item;
+					    $incident_group_category->save();
+					}
+				}
 
 
                 // STEP 4: SAVE MEDIA
@@ -1128,6 +1130,11 @@ class Reports_Controller extends Admin_simplegroup_Controller
                 $person->person_email = $post->person_email;
                 $person->person_date = date("Y-m-d H:i:s",time());
                 $person->save();
+                
+                if($is_new) //if it's new forward this to the groups main site, if they have one
+                {
+                	groups::forward_incident_to_own_instance($incident->id, $this->group->id);
+                }
 
 
                 // STEP 6a: SAVE LINK TO REPORTER MESSAGE
