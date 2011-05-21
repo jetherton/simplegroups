@@ -48,11 +48,11 @@ class groups_Core {
 		
 		$api_url = substr($group->own_instance, 0, strpos($group->own_instance, "frontlinesms")). "api";
 		
-		$siteInfo = new \Ushahidi_API_Library\Site_Info($api_url);
+		$siteInfo = new Site_Info($api_url);
 		
-		$reportParams = \Ushahidi_API_Library\Report_Task_Parameter::fromORM($incident);
+		$reportParams = Report_Task_Parameter::fromORM($incident);
 		
-		$reportTask = new \Ushahidi_API_Library\Report_Task($reportParams, $siteInfo);
+		$reportTask = new Report_Task($reportParams, $siteInfo);
 		$reportResponse = $reportTask->execute();
 		
 	
