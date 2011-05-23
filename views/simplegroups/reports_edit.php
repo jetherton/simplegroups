@@ -73,8 +73,7 @@
 							<?php if ($show_messages) { ?>
 							<div class="row">
 								<h4 style="margin:0;padding:0;">
-									<a href="#" class="tooltip" style="float:right;" title="This shows the last five messages from the same source that this report is based off of.">&nbsp;</a>
-									<a href="#" id="messages_toggle" class="show-messages"><?php echo Kohana::lang('ui_main.show_messages');?></a>
+									<a href="#" class="tooltip show-messages" style="cursor:default;" id="messages_toggle" title="This shows the last five messages from the same source that this report is based off of." ><?php echo Kohana::lang('ui_main.show_messages');?></a>
 								</h4>
 								<!--messages table goes here-->
 			                    <div id="show_messages">
