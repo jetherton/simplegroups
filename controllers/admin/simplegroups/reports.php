@@ -491,41 +491,13 @@ class Reports_Controller extends Admin_simplegroup_Controller
                         if ($update->loaded == true)
                         {
                             $incident_id = $update->id;
-                            $location_id = $update->location_id;
-                            $update->delete();
-
-                            // Delete Location
-                            ORM::factory('location')->where('id',$location_id)->delete_all();
-
-                            // Delete Categories
-                            ORM::factory('incident_category')->where('incident_id',$incident_id)->delete_all();
-
-                            // Delete Translations
-                            ORM::factory('incident_lang')->where('incident_id',$incident_id)->delete_all();
-
-                            // Delete Photos From Directory
-                            foreach (ORM::factory('media')->where('incident_id',$incident_id)->where('media_type', 1) as $photo) {
-                                deletePhoto($photo->id);
-                            }
-
-                            // Delete Media
-                            ORM::factory('media')->where('incident_id',$incident_id)->delete_all();
-
-                            // Delete Sender
-                            ORM::factory('incident_person')->where('incident_id',$incident_id)->delete_all();
-
-                            // Delete relationship to SMS message
-                            $updatemessage = ORM::factory('message')->where('incident_id',$incident_id)->find();
-                            if ($updatemessage->loaded == true) {
-                                $updatemessage->incident_id = 0;
-                                $updatemessage->save();
-                            }
-
-                            // Delete Comments
-                            ORM::factory('comment')->where('incident_id',$incident_id)->delete_all();
-			    
-			    //Delete Group
-			    ORM::factory("simplegroups_groups_incident")->where('incident_id',$incident_id)->delete_all();
+                            
+						    //Just delete the association with the group and the incident, don't delete the
+						    //incident itself. You never know when you might need it.
+						    ORM::factory("simplegroups_groups_incident")
+						    	->where('incident_id',$incident_id)
+						    	->where('simplegroups_groups_id', $this->group->id)
+						    	->delete_all();
 
                         }
                     }

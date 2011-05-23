@@ -524,7 +524,7 @@
 				if($id)
 				{
 					// Hidden Form to Perform the Delete function
-					print form::open(url::site().'admin/reports/', array('id' => 'reportMain', 'name' => 'reportMain'));
+					print form::open(url::site().'admin/simplegroups/reports/', array('id' => 'reportMain', 'name' => 'reportMain'));
 					$array=array('action'=>'d','incident_id[]'=>$id);
 					print form::hidden($array);
 					print form::close();
