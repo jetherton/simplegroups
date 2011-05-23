@@ -44,7 +44,28 @@ class groups_Core {
 			}
 		}
 		
-		$incident->incident_description .= "<br/><br/>\r\n\r\n".$cat_str;
+		//get the group cateogires that were applied to this message
+		$group_cat_str = "";
+		$group_categories = ORM::factory("simplegroups_category")
+			->join("simplegroups_incident_category", "simplegroups_incident_category.simplegroups_category_id", "simplegroups_category.id")
+			->where("simplegroups_incident_category.incident_id", $incident_id)
+			->find_all();
+
+		foreach($group_categories as $category)
+		{
+			if ($category->category_title)
+			{
+			$group_cat_str .= $category->category_title. "\r\n<br/>";
+			}
+		}
+		if(!empty($group_cat_str))
+		{
+			$group_cat_str = "\r\n\r\n<br/><br/>Categories assigned to this report from the group: ".$group->name." \r\n\r\n<br/><br/>".$group_cat_str;
+		}
+		
+		
+		
+		$incident->incident_description .= "<br/><br/>\r\n\r\n".$cat_str.$group_cat_str;
 		
 		$api_url = substr($group->own_instance, 0, strpos($group->own_instance, "frontlinesms")). "api";
 		
