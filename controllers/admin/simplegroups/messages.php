@@ -77,9 +77,12 @@ class Messages_Controller extends Admin_simplegroup_Controller
                         $message = ORM::factory('message')->find($item);
                         $message->delete( $item );
 			
-			ORM::factory('simplegroups_groups_message')->where("simplegroups_groups_message.message_id", $item)->delete_all();
-			//delete the category message maping
-			ORM::factory('simplegroups_message_category')->where("simplegroups_message_category.message_id", $item)->delete_all();
+						ORM::factory('simplegroups_groups_message')
+							->where("simplegroups_groups_message.message_id", $item)
+							->where("simplegroups_groups_message.simplegroups_groups_id", $this->group->id)
+							->delete_all();
+						//delete the category message maping
+			
                     }
                     
                     $form_saved = TRUE;
@@ -603,12 +606,10 @@ class Messages_Controller extends Admin_simplegroup_Controller
 				{
 					continue;
 				}
-				$message = ORM::factory('message')->find($message_id);
-				$message->delete( $message_id );
-				
-				ORM::factory('simplegroups_groups_message')->where("simplegroups_groups_message.message_id", $message_id)->delete_all();
-				//delete the category message maping
-				ORM::factory('simplegroups_message_category')->where("simplegroups_message_category.message_id", $message_id)->delete_all();
+				ORM::factory('simplegroups_groups_message')
+					->where("simplegroups_groups_message.message_id", $message_id)
+					->where("simplegroups_groups_message.simplegroups_groups_id", $this->group->id)
+					->delete_all();
 			}//end loop
 		}
 		
