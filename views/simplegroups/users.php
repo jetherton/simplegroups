@@ -91,7 +91,7 @@
 											</td>
 											<td class="col-4">
 												<ul>
-													<li class="none-separator"><a href="<?php echo url::site() . 'admin/users/edit/' . $user_id; ?>">
+													<li class="none-separator"><a href="<?php echo url::site() . 'admin/simplegroups/users/edit/' . $user_id; ?>">
 														<?php echo Kohana::lang('ui_admin.edit_action');?>
 														</a></li>
 												</ul>
