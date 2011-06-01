@@ -30,7 +30,15 @@
 		"not_visible" => "<span style=\"font-size:10px;font-weight:normal;color:#a1a1a1;\">Not Visible</span>",
 		"group" => "Group",
 		"include_group_categories"=>"Include Group Categories",
-							
+		
+		'name'=>array('default'=>'Group Name cannot be blank'),
+		'description'=>array('default'=>'Group Description cannot be blank'),
+		'logo'=>array('default'=>'The logo file must be a .gif, .jpg, .png and less than 8mb'),
+		'own_instance'=>array('default'=>'The Own Instance field must be at least 3 characters long'),	
+		'group_site'=>array('default'=>'The Group Site must be a valid URL, or it must be blank.'),
+		'contact_person'=>array('default'=>'The contact person\'s name cannot be longer than 100 characters.'),							
+		'contact_phone'=>array('default'=>'The contact phone cannot be longer than 100 characters, or left blank.'),
+		'contact_email'=>array('default'=>'The contact email cannot be longer than 100 characters and must be a valid email address, or left blank.'),
 		
 	);
 ?>

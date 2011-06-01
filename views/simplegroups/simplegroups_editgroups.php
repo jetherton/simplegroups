@@ -3,7 +3,7 @@
 		<?php  echo groups::manage_subtabs("edit"); ?>
 	</h2>
 </div>
-	<?php print form::open(NULL, array('enctype' => 'multipart/form-data', 'id' => 'reportForm', 'name' => 'reportForm')); ?>
+	<?php print form::open(NULL, array('enctype' => 'multipart/form-data', 'id' => 'simplegroupForm', 'name' => 'simplegroupForm')); ?>
 		<input type="hidden" name="save" id="save" value="">
 		<!-- report-form -->
 		<div class="report-form">
@@ -65,7 +65,28 @@
 				<div class="row">
 					<h4>Group's Own Ushahidi FrontlineSMS URL<span><br/>Optional. Must be in the format http://myhost/frontlinesms/?key=*MY_KEY*&s=${sender_number}&m=${message_content}</span></h4>
 					<?php print form::input('own_instance', $form['own_instance'], ' class="text title"'); ?>
+				</div>				
+				<div class="row">
+					<h4>Group's Contact Person<span><br/>Optional</span></h4>
+					<?php print form::input('contact_person', $form['contact_person'], ' class="text title"'); ?>
 				</div>
+				<div class="row">
+					<h4>Group's Contact Phone Number<span><br/>Optional</span></h4>
+					<?php print form::input('contact_phone', $form['contact_phone'], ' class="text title"'); ?>
+				</div>
+				<div class="row">
+					<h4>Group's Contact Email Address<span><br/>Optional</span></h4>
+					<?php print form::input('contact_email', $form['contact_email'], ' class="text title"'); ?>
+				</div>
+				<div class="row">
+					<h4>Group's Physical Address<span><br/>Optional</span></h4>
+					<?php print form::textarea('contact_address', $form['contact_address'], ' rows="4" cols="40" style="width:300px; height:100px;"'); ?>
+				</div>
+				<div class="row">
+					<h4>Group's Website<span><br/>Optional</span></h4>
+					<?php print form::input('group_site', $form['group_site'], ' class="text title"'); ?>
+				</div>
+				
 				<!-- Photo Fields -->
 				<div class="row link-row">
 					<h4>Logo</h4>

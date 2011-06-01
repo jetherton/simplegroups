@@ -138,7 +138,12 @@ class Simplegroups_settings_Controller extends Admin_Controller
             'name'      => '',
             'description'      => '',
             'logo'           => '',
-	    'own_instance' => ''
+	    	'own_instance' => '',
+	    	'contact_person' => '',
+        	'contact_email' => '',
+	        'contact_phone' => '',
+	        'contact_address' => '',
+	        'group_site' => ''
         );
 	
 	//initialize this stuff
@@ -160,203 +165,215 @@ class Simplegroups_settings_Controller extends Admin_Controller
         // check, has the form been submitted, if so, setup validation
         if ($_POST)
         {
-		// Instantiate Validation, use $post, so we don't overwrite $_POST fields with our own things
-		$post = Validation::factory(array_merge($_POST,$_FILES));
-		//  Add some filters
-		$post->pre_filter('trim', TRUE);
-
-		// Add some rules, the input field, followed by a list of checks, carried out in order
-		// $post->add_rules('locale','required','alpha_dash','length[5]');
-		$post->add_rules('name','required', 'length[1,100]');
-		$post->add_rules('description','required');
-		$post->add_rules('own_instance','length[3,1000]');
-
-		// Validate photo uploads
-		$post->add_rules('logo', 'upload::valid', 'upload::type[gif,jpg,png]', 'upload::size[8M]');
-			
-		// Test to see if things passed the rule checks
-		if ($post->validate())
-		{
-			
-			// Save the Group
-			$group = new simplegroups_groups_Model($id);
-			$group->name = $post->name;
-			$group->description = $post->description;
-			$group->own_instance = $post->own_instance;
-			$group->save();
-			
-			//logo
-			$filename = upload::save('logo');
-			if($filename)
-			{
-				if (!is_dir(Kohana::config('upload.directory', TRUE)."groups"))
-				{
-					mkdir(Kohana::config('upload.directory', TRUE)."groups", 0770, true);
-				}
-				
-				$new_filename = $group->id . "_simple_group_logo";
-
-				//Resize original file... make sure its max 408px wide
-				Image::factory($filename)->save(Kohana::config('upload.directory', TRUE)."groups/" . $new_filename . ".jpg");
-				
-				// Create thumbnail
-				Image::factory($filename)->resize(140,82,Image::HEIGHT)
-				->save(Kohana::config('upload.directory', TRUE)."groups/" . $new_filename . "_t.jpg");
-
-				// Remove the temporary file
-				unlink($filename);
-				$group->logo = $new_filename;
-			}
-			
-			$group->save();
-			$id = $group->id;
-			
-			
-			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			//now loop over the existing values
-			$ids_still_there = array();
-			foreach($_POST as $key=>$value)
-			{
-				if(substr($key,0,22) == "white_list_number_old_")
-				{
-					$new_id = substr($key,22);
-					$ids_still_there[] = $new_id;
-					
-					$number_item = ORM::factory('simplegroups_groups_number', $new_id);
-				
-					$number = trim($_POST["white_list_number_old_$new_id"]);
-					if(!$this->_check_length($number, 6, 30, "Can't have a phone number with more than 30 characters or less than 6",$form, $post,$id)){return;}
-					$number_item->number = $number;
-					
-					$name = trim($_POST["white_list_name_old_$new_id"]);
-					if(!$this->_check_length($value, 0, 100, "Can't have a phone number name with more than 100 characters", $form, $post,$id)){return;}
-					$number_item->name = $name;
-					
-					$org = trim($_POST["white_list_org_old_$new_id"]);
-					if(!$this->_check_length($org, 0, 100, "Can't have a phone number organization with more than 100 characters", $form, $post, $id)){return;}
-					$number_item->org = $org;
-					
-					$number_item->simplegroups_groups_id = $id;
-					
-					$number_item->save();
-				}
-			}//end loop
-			
-			
-			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			//Find what IDs weren't included above and delete them
-			//but first check and see if there are any ids in the $ids_still_there variable
-			
-			$number_items = ORM::factory('simplegroups_groups_number')
-				->where("simplegroups_groups_id", $id);
-			if(count($ids_still_there) > 0)
-			{		
-				$number_items = $number_items->where("NOT ( `id` IN (".implode(',', $ids_still_there)."))");
-			}
-			$number_items->delete_all();
-			
-			
-			
-			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			//do the white list of numbers for this group
-			//loop through the post variables and find all the ones that start with white_list_number_new_
-			//We'll make new entries for each one of these
-			foreach($_POST as $key=>$value)
-			{
-				if(substr($key,0,22) == "white_list_number_new_")
-				{
-					$new_id = substr($key,22);
-					
-					$number_item = ORM::factory('simplegroups_groups_number');
-				
-					$number = trim($_POST["white_list_number_new_$new_id"]);
-					if(!$this->_check_length($number, 6, 30, "Can't have a phone number with more than 30 characters or less than 6", $form, $post, $id)){return;}
-					$number_item->number = $number;
-					
-					$name = trim($_POST["white_list_name_new_$new_id"]);
-					if(!$this->_check_length($value, 0, 100, "Can't have a phone number name with more than 100 characters", $form, $post, $id)){return;}
-					$number_item->name = $name;
-					
-					$org = trim($_POST["white_list_org_new_$new_id"]);
-					if(!$this->_check_length($org, 0, 100, "Can't have a phone number organization with more than 100 characters", $form, $post, $id)){return;}
-					$number_item->org = $org;
-					
-					$number_item->simplegroups_groups_id = $id;
-					
-					$number_item->save();
-				}
-			}//end loop
-			
-
+			// Instantiate Validation, use $post, so we don't overwrite $_POST fields with our own things
+			$post = Validation::factory(array_merge($_POST,$_FILES));
+			//  Add some filters
+			$post->pre_filter('trim', TRUE);
 	
-			//update the users
-			//delete everything
-			ORM::factory('simplegroups_groups_users')->where("simplegroups_groups_id", $id)->delete_all();
-			//put it all backtogether
-			foreach($_POST as $post_id => $data)
-			{
-				if( substr($post_id, 0,8) == "user_id_")
-				{
-					//get the user ID number
-					$user_id = substr($post_id, 8);
-					$user_item = ORM::factory('simplegroups_groups_users');
-					$user_item->simplegroups_groups_id = $id;
-					$user_item->users_id = $user_id;
-					$user_item->save();
-				}
-			}//end for each 
+			// Add some rules, the input field, followed by a list of checks, carried out in order
+			// $post->add_rules('locale','required','alpha_dash','length[5]');
+			$post->add_rules('name','required', 'length[1,100]');
+			$post->add_rules('description','required');
+			$post->add_rules('own_instance','length[3,1000]');
+	
+			// Validate photo uploads
+			$post->add_rules('logo', 'upload::valid', 'upload::type[gif,jpg,png]', 'upload::size[8M]');
 			
-			
-			//update the users to roles mapping
-			//delete everything
-			$roles = ORM::factory('simplegroups_users_roles')
-				->join('simplegroups_groups_users', 'simplegroups_users_roles.users_id', 'simplegroups_groups_users.users_id','LEFT')
-				->where("simplegroups_groups_users.simplegroups_groups_id", $id)
-				->find_all();
-			foreach($roles as $role)
-			{
-				$role->delete();
-			}
+			//add validation rules as needed for the contact info stuff		
+			$post->add_rules('contact_person', 'length[1,99]');
+			$post->add_rules('contact_email', 'length[1,99]', 'valid::email');
+			$post->add_rules('contact_phone', 'length[1,99]');
+			$post->add_rules('group_site', 'valid::url');
+		
 				
-			//put it all backtogether
-			foreach($_POST as $post_id => $data)
+			// Test to see if things passed the rule checks
+			if ($post->validate())
 			{
 				
-				if( substr($post_id, 0,8) == "role_id_")
+				// Save the Group
+				$group = new simplegroups_groups_Model($id);
+				$group->name = $post->name;
+				$group->description = $post->description;
+				$group->own_instance = $post->own_instance;
+				$group->contact_person = $post->contact_person;
+				$group->contact_email = $post->contact_email;
+				$group->contact_phone = $post->contact_phone;
+				$group->contact_address = $post->contact_address;
+				$group->group_site = $post->group_site;
+				$group->save();
+				
+				//logo
+				$filename = upload::save('logo');
+				if($filename)
 				{
-					//get the user ID number
-					$ids_str = substr($post_id, 8);
-					$position_of_ = strpos($ids_str, "_");
-					$user_id = substr($ids_str, 0, $position_of_);
-					$role_id = substr($ids_str, $position_of_ + 1);
+					if (!is_dir(Kohana::config('upload.directory', TRUE)."groups"))
+					{
+						mkdir(Kohana::config('upload.directory', TRUE)."groups", 0770, true);
+					}
 					
-					$user_role = ORM::factory('simplegroups_users_roles');
-					$user_role->roles_id = $role_id;
-					$user_role->users_id = $user_id;
-					$user_role->save();
+					$new_filename = $group->id . "_simple_group_logo";
+	
+					//Resize original file... make sure its max 408px wide
+					Image::factory($filename)->save(Kohana::config('upload.directory', TRUE)."groups/" . $new_filename . ".jpg");
+					
+					// Create thumbnail
+					Image::factory($filename)->resize(140,82,Image::HEIGHT)
+					->save(Kohana::config('upload.directory', TRUE)."groups/" . $new_filename . "_t.jpg");
+	
+					// Remove the temporary file
+					unlink($filename);
+					$group->logo = $new_filename;
 				}
-			}//end for each 
-
-
-			// SAVE AND CLOSE?
-			if ($post->save == 1)       // Save but don't close
-			{
-				url::redirect('admin/simplegroups_settings/edit/'. $group->id .'/saved');
+				
+				$group->save();
+				$id = $group->id;
+				
+				
+				////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				//now loop over the existing values
+				$ids_still_there = array();
+				foreach($_POST as $key=>$value)
+				{
+					if(substr($key,0,22) == "white_list_number_old_")
+					{
+						$new_id = substr($key,22);
+						$ids_still_there[] = $new_id;
+						
+						$number_item = ORM::factory('simplegroups_groups_number', $new_id);
+					
+						$number = trim($_POST["white_list_number_old_$new_id"]);
+						if(!$this->_check_length($number, 6, 30, "Can't have a phone number with more than 30 characters or less than 6",$form, $post,$id)){return;}
+						$number_item->number = $number;
+						
+						$name = trim($_POST["white_list_name_old_$new_id"]);
+						if(!$this->_check_length($value, 0, 100, "Can't have a phone number name with more than 100 characters", $form, $post,$id)){return;}
+						$number_item->name = $name;
+						
+						$org = trim($_POST["white_list_org_old_$new_id"]);
+						if(!$this->_check_length($org, 0, 100, "Can't have a phone number organization with more than 100 characters", $form, $post, $id)){return;}
+						$number_item->org = $org;
+						
+						$number_item->simplegroups_groups_id = $id;
+						
+						$number_item->save();
+					}
+				}//end loop
+				
+				
+				////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				//Find what IDs weren't included above and delete them
+				//but first check and see if there are any ids in the $ids_still_there variable
+				
+				$number_items = ORM::factory('simplegroups_groups_number')
+					->where("simplegroups_groups_id", $id);
+				if(count($ids_still_there) > 0)
+				{		
+					$number_items = $number_items->where("NOT ( `id` IN (".implode(',', $ids_still_there)."))");
+				}
+				$number_items->delete_all();
+				
+				
+				
+				//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				//do the white list of numbers for this group
+				//loop through the post variables and find all the ones that start with white_list_number_new_
+				//We'll make new entries for each one of these
+				foreach($_POST as $key=>$value)
+				{
+					if(substr($key,0,22) == "white_list_number_new_")
+					{
+						$new_id = substr($key,22);
+						
+						$number_item = ORM::factory('simplegroups_groups_number');
+					
+						$number = trim($_POST["white_list_number_new_$new_id"]);
+						if(!$this->_check_length($number, 6, 30, "Can't have a phone number with more than 30 characters or less than 6", $form, $post, $id)){return;}
+						$number_item->number = $number;
+						
+						$name = trim($_POST["white_list_name_new_$new_id"]);
+						if(!$this->_check_length($value, 0, 100, "Can't have a phone number name with more than 100 characters", $form, $post, $id)){return;}
+						$number_item->name = $name;
+						
+						$org = trim($_POST["white_list_org_new_$new_id"]);
+						if(!$this->_check_length($org, 0, 100, "Can't have a phone number organization with more than 100 characters", $form, $post, $id)){return;}
+						$number_item->org = $org;
+						
+						$number_item->simplegroups_groups_id = $id;
+						
+						$number_item->save();
+					}
+				}//end loop
+				
+	
+		
+				//update the users
+				//delete everything
+				ORM::factory('simplegroups_groups_users')->where("simplegroups_groups_id", $id)->delete_all();
+				//put it all backtogether
+				foreach($_POST as $post_id => $data)
+				{
+					if( substr($post_id, 0,8) == "user_id_")
+					{
+						//get the user ID number
+						$user_id = substr($post_id, 8);
+						$user_item = ORM::factory('simplegroups_groups_users');
+						$user_item->simplegroups_groups_id = $id;
+						$user_item->users_id = $user_id;
+						$user_item->save();
+					}
+				}//end for each 
+				
+				
+				//update the users to roles mapping
+				//delete everything
+				$roles = ORM::factory('simplegroups_users_roles')
+					->join('simplegroups_groups_users', 'simplegroups_users_roles.users_id', 'simplegroups_groups_users.users_id','LEFT')
+					->where("simplegroups_groups_users.simplegroups_groups_id", $id)
+					->find_all();
+				foreach($roles as $role)
+				{
+					$role->delete();
+				}
+					
+				//put it all backtogether
+				foreach($_POST as $post_id => $data)
+				{
+					
+					if( substr($post_id, 0,8) == "role_id_")
+					{
+						//get the user ID number
+						$ids_str = substr($post_id, 8);
+						$position_of_ = strpos($ids_str, "_");
+						$user_id = substr($ids_str, 0, $position_of_);
+						$role_id = substr($ids_str, $position_of_ + 1);
+						
+						$user_role = ORM::factory('simplegroups_users_roles');
+						$user_role->roles_id = $role_id;
+						$user_role->users_id = $user_id;
+						$user_role->save();
+					}
+				}//end for each 
+	
+	
+				// SAVE AND CLOSE?
+				if ($post->save == 1)       // Save but don't close
+				{
+					url::redirect('admin/simplegroups_settings/edit/'. $group->id .'/saved');
+				}
+				else                        // Save and close
+				{
+					url::redirect('admin/simplegroups_settings/');
+				}
 			}
-			else                        // Save and close
+			// No! We have validation errors, we need to show the form again, with the errors
+			else
 			{
-				url::redirect('admin/simplegroups_settings/');
+				// repopulate the form fields
+				$form = arr::overwrite($form, $post->as_array());
+				// populate the error fields, if any
+				$errors = arr::overwrite($errors, $post->errors('simplegroups'));
+				$form_error = TRUE;
 			}
-		}
-		// No! We have validation errors, we need to show the form again, with the errors
-		else
-		{
-			// repopulate the form fields
-			$form = arr::overwrite($form, $post->as_array());
-			// populate the error fields, if any
-			$errors = arr::overwrite($errors, $post->errors('report'));
-			$form_error = TRUE;
-		}
         } //end if($_POST)
         else
         {
@@ -372,7 +389,12 @@ class Simplegroups_settings_Controller extends Admin_Controller
 				(
 					'name' => $group->name,
 					'description' => $group->description,
-					'own_instance' => $group->own_instance
+					'own_instance' => $group->own_instance,
+					'contact_person' => $group->contact_person,
+					'contact_email' => $group->contact_email,
+					'contact_phone' => $group->contact_phone,
+					'contact_address' => $group->contact_address,
+					'group_site' => $group->group_site
 				);
 				$this->template->content->logo_file = $group->logo;
 
