@@ -100,8 +100,7 @@ class Settings_Controller extends Admin_simplegroup_Controller
 				Image::factory($filename)->save(Kohana::config('upload.directory', TRUE)."groups/" . $new_filename . ".jpg");
 				
 				// Create thumbnail
-				Image::factory($filename)->resize(140,82,Image::HEIGHT)
-				->save(Kohana::config('upload.directory', TRUE)."groups/" . $new_filename . "_t.jpg");
+				Image::factory($filename)->save(Kohana::config('upload.directory', TRUE)."groups/" . $new_filename . "_t.jpg");
 
 				// Remove the temporary file
 				unlink($filename);
