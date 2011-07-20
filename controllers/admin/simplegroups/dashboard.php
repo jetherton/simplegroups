@@ -55,6 +55,7 @@ class Dashboard_Controller extends Admin_simplegroup_Controller
 	$this->template->content->message_count = ORM::factory('message')
 		->join("simplegroups_groups_message", "simplegroups_groups_message.message_id", "message.id")
 		->where('simplegroups_groups_message.simplegroups_groups_id', $this->group->id)
+		->where('message.message_type', "1")
 		->count_all();
 
 
