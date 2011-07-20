@@ -57,13 +57,13 @@
 
 	
 	<div class="row group_settings">
-			<h4>Group User should belong to:<span> <br/>For user to be assigned to a group, the user must have the "SIMPLEGROUPS" role.</span></h4>
+			<h4><?php echo Kohana::lang('explain_applies_to_reports.belong');?><span> <br/><?php echo Kohana::lang('explain_applies_to_reports.user');?></span></h4>
 			<?php print form::dropdown('group', $groups, $user_group_id, ' onchange="checkRole(); return false;"'); ?>
 
 	</div>
 	
 	<div class="row group_settings">
-			<h4>Group Roles:<span> <br/>If the user is a group user, these are the group roles the user could have.</span></h4>
+			<h4><?php echo Kohana::lang('explain_applies_to_reports.roles');?><span> <br/><?php echo Kohana::lang('explain_applies_to_reports.group_user');?></span></h4>
 			<?php 
 				foreach($roles as $role)
 				{

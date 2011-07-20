@@ -1,6 +1,6 @@
 <div class="content-bg">
 	<div class="big-block"> 
-		<h1> Groups: </h1>
+		<h1><?php echo Kohana::lang('explain_applies_to_reports.grouplist_groups');?></h1>
 			<table style="padding-left: 20px;">
 				<?php
 					foreach($groups as $group)
