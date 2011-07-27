@@ -51,12 +51,40 @@ class Dashboard_Controller extends Admin_simplegroup_Controller
 		->where("simplegroups_groups_id", $this->group->id)
 		->count_all();
 
-        // Messages By Service
+        // Total Messages
+        /*
 	$this->template->content->message_count = ORM::factory('message')
 		->join("simplegroups_groups_message", "simplegroups_groups_message.message_id", "message.id")
 		->where('simplegroups_groups_message.simplegroups_groups_id', $this->group->id)
 		->where('message.message_type', "1")
 		->count_all();
+		*/
+		
+        // Messages By Service
+        $total_message_count = 0;
+        $message_services = array();
+        $services = ORM::factory('service')->find_all();
+        foreach ($services as $service)
+        {
+            $message_count = ORM::factory('message')
+                                    ->join('reporter','message.reporter_id','reporter.id')
+                                    ->join("simplegroups_groups_message", "simplegroups_groups_message.message_id", "message.id")
+									->where('simplegroups_groups_message.simplegroups_groups_id', $this->group->id)
+                                    ->where('service_id', $service->id)
+                                    ->where('message_type', '1')
+                                    ->count_all();
+                                    
+            $message_services[] = array(
+                'id'    => $service->id,
+                'name'  => $service->service_name,
+                'count' => $message_count
+            );
+            
+            $total_message_count += $message_count;
+        }
+        
+        $this->template->content->message_services = $message_services;
+        $this->template->content->message_count = $total_message_count;
 
 
         // Get reports for display
