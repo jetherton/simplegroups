@@ -68,6 +68,13 @@
 							<li>
 								<a href="<?php echo url::site() . 'admin/simplegroups/messages' ?>" class="messages"><?php echo Kohana::lang('ui_main.messages');?></a>
 								<strong><?php echo number_format($message_count); ?></strong>
+								<ul style="overflow:visible;">
+									<?php
+									foreach ($message_services as $service) {
+										echo "<li><a href=\"".url::site() . 'admin/simplegroups/messages/index/'.$service['id']."\">".$service['name']."</a><strong>(".$service['count'].")</strong></li>";
+									}
+									?>
+								</ul>
 							</li>
 							<li>
 								<a href="<?php echo url::site() . 'admin/simplegroups/settings/categories' ?>" class="categories"><?php echo Kohana::lang('ui_main.categories');?></a>

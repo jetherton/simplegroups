@@ -155,22 +155,8 @@
 							</div>
 							<?php Event::run('ushahidi_action.report_form_admin_after_time', $id); ?>
 							<div class="row">
-								<h4><?php echo Kohana::lang('ui_main.categories');?> 
-								<span><?php echo Kohana::lang('ui_main.select_multiple');?>.</span></h4>
-								<?php print $new_category_toggle_js; ?>
-								<!--category_add form goes here-->
-
-				<!--Site wide categories-->
-				<div class="report_category">
-					<?php
-						$selected_categories = array();
-						if (!empty($form['incident_category']) && is_array($form['incident_category'])) {
-							$selected_categories = $form['incident_category'];
-						}
-						$columns = 2;
-						echo groups_category::tree($categories, $selected_categories, 'incident_category', $columns);
-					?>
-				</div>
+							
+							
 				<!--group categories-->
 				<h4>
 					<?php echo $group_name. " ". Kohana::lang('ui_main.categories');?> 
@@ -184,6 +170,23 @@
 						}
 						$columns = 2;
 						echo groups_category::tree($group_categories, $selected_group_categories, 'incident_group_category', $columns);
+					?>
+				</div>
+							
+							
+				<!--Site wide categories-->
+				<h4>
+					<?php echo Kohana::lang('ui_main.categories');?> 
+					<span><?php echo Kohana::lang('ui_main.select_multiple');?>.</span>
+				</h4>
+				<div class="report_category">
+					<?php
+						$selected_categories = array();
+						if (!empty($form['incident_category']) && is_array($form['incident_category'])) {
+							$selected_categories = $form['incident_category'];
+						}
+						$columns = 2;
+						echo groups_category::tree($categories, $selected_categories, 'incident_category', $columns);
 					?>
 				</div>
 							
