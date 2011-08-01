@@ -20,9 +20,9 @@
 	<table class="table">
 		<thead>
 			<tr>
-				<th><?php echo Kohana::lang('explain_applies_to_reports.group_name');?></th>
-				<th><?php echo Kohana::lang('explain_applies_to_reports.group_members');?></th>
-				<th><?php echo Kohana::lang('explain_applies_to_reports.group_reports');?></th>
+				<th><?php echo Kohana::lang('simplegroups.group_name');?></th>
+				<th><?php echo Kohana::lang('simplegroups.group_members');?></th>
+				<th><?php echo Kohana::lang('simplegroups.group_reports');?></th>
 			</tr>
 		</thead>
 		<tfoot>		

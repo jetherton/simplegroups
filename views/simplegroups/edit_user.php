@@ -57,13 +57,13 @@
 
 	
 	<div class="row group_settings">
-			<h4><?php echo Kohana::lang('explain_applies_to_reports.belong');?><span> <br/><?php echo Kohana::lang('explain_applies_to_reports.user');?></span></h4>
+			<h4><?php echo Kohana::lang('simplegroups.belong');?><span> <br/><?php echo Kohana::lang('simplegroups.user');?></span></h4>
 			<?php print form::dropdown('group', $groups, $user_group_id, ' onchange="checkRole(); return false;"'); ?>
 
 	</div>
 	
 	<div class="row group_settings">
-			<h4><?php echo Kohana::lang('explain_applies_to_reports.roles');?><span> <br/><?php echo Kohana::lang('explain_applies_to_reports.group_user');?></span></h4>
+			<h4><?php echo Kohana::lang('simplegroups.roles');?><span> <br/><?php echo Kohana::lang('simplegroups.group_user');?></span></h4>
 			<?php 
 				foreach($roles as $role)
 				{

@@ -1,16 +1,16 @@
 <!-- main body -->
 <div id="main" class="clearingfix" style="padding: 15px 0px;">
 	<div style="padding: 0px 29px;">
-		<h1><?php echo Kohana::lang('explain_applies_to_reports.about');?><?php echo $group_name ?>:</h1>
+		<h1><?php echo Kohana::lang('simplegroups.about');?><?php echo $group_name ?>:</h1>
 		<?php
 			$thumb = $group_logo.".jpg";
-				$prefix = url::base().Kohana::config('upload.relative_directory')."/groups";
+				$prefix = url::base().Kohana::config('simplegroups.relative_directory')."/groups";
 				print "<img src=\"$prefix/$thumb\" >";
 		?>
 		<div class="page_text"><?php echo $group_description ?></div>
 		
 		<div style="border-top: 2px solid black; margin-top:20px; padding-top:20px;">
-			<h1><?php echo Kohana::lang('explain_applies_to_reports.map');?><?php echo $group_name ?>:</h1>
+			<h1><?php echo Kohana::lang('simplegroups.map');?><?php echo $group_name ?>:</h1>
 		</div>
 	</div>
 	<div id="mainmiddle" class="floatbox withright">
@@ -31,7 +31,7 @@
 
 		       <!-- logic filters -->
 			<div class="stat-filters clearingfix">
-				<strong><?php echo Kohana::lang('explain_applies_to_reports.logical');?></strong>
+				<strong><?php echo Kohana::lang('simplegroups.logical');?></strong>
 				<!-- keep track of what status we're looking at -->
 				<form action="">
 					<input type = "hidden" value="or" name="currentLogicalOperator" id="currentLogicalOperator">
@@ -39,12 +39,12 @@
 				<ul id="status_switch" class="status-filters">
 					<li>
 						<a class="active" id="logicalOperator_1" href="#">							
-							<div class="status-title"><?php echo Kohana::lang('explain_applies_to_reports.or');?> - <span style="text-transform:none; font-size:85%;"><?php echo Kohana::lang('explain_applies_to_reports.one');?></span> </div>
+							<div class="status-title"><?php echo Kohana::lang('simplegroups.or');?> - <span style="text-transform:none; font-size:85%;"><?php echo Kohana::lang('simplegroups.one');?></span> </div>
 						</a>
 					</li>
 					<li>
 						<a  id="logicalOperator_2" href="#">
-							<div class="status-title"><?php echo Kohana::lang('explain_applies_to_reports.and');?> - <span style="text-transform:none; font-size:85%;"><?php echo Kohana::lang('explain_applies_to_reports.all');?></span></div>
+							<div class="status-title"><?php echo Kohana::lang('simplegroups.and');?> - <span style="text-transform:none; font-size:85%;"><?php echo Kohana::lang('simplegroups.all');?></span></div>
 						</a>
 					</li>
 				</ul>
@@ -57,7 +57,7 @@
 				<strong><?php echo strtoupper(Kohana::lang('ui_main.category_filter'));?>: </strong>
 		
 			<ul id="category_switch" class="category-filters">
-				<li><a class="active" id="cat_0" href="#"><div class="swatch" style="background-color:#<?php echo $default_map_all;?>"></div><div class="category-title"><?php echo Kohana::lang('explain_applies_to_reports.reports');?></div></a></li>
+				<li><a class="active" id="cat_0" href="#"><div class="swatch" style="background-color:#<?php echo $default_map_all;?>"></div><div class="category-title"><?php echo Kohana::lang('simplegroups.reports');?></div></a></li>
 				<?php
 					foreach ($categories as $category => $category_info)
 					{

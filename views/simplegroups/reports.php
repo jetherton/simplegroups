@@ -32,7 +32,7 @@
 							<li><a id="unapprove_button" href="#" onclick="reportAction('u','UNAPPROVE', '', 'unapprove_button'); return false;"><?php echo Kohana::lang('ui_main.disapprove');?></a></li>
 							<li><a id="verify_button" href="#" onclick="reportAction('v','VERIFY', '', 'verify_button'); return false;"><?php echo Kohana::lang('ui_main.verify');?></a></li>
 							<li><a id="delete_button" href="#" onclick="reportAction('d','DELETE', '', 'delete_button'); return false;"><?php echo Kohana::lang('ui_main.delete');?></a></li>
-							<li> Filter by category: <?php print form::dropdown(array('id'=>'cat_filter', 'onChange'=>'changeCategoryFilter(); return false;'), $category_array); ?> </li>
+							<li> <?php echo Kohana::lang('simplegroups.filter');?> <?php print form::dropdown(array('id'=>'cat_filter', 'onChange'=>'changeCategoryFilter(); return false;'), $category_array); ?> </li>
 							<li id="filter_wait"></li>
 						</ul>
 					</div>
@@ -52,7 +52,7 @@
 				?>
 					<!-- green-box -->
 					<div class="green-box" id="submitStatus">
-						<h3><?php echo Kohana::lang('ui_main.reports');?> <?php echo $form_action; ?> <a href="#" id="hideMessage" class="hide">hide this message</a></h3>
+						<h3><?php echo Kohana::lang('ui_main.reports');?> <?php echo $form_action; ?> <a href="#" id="hideMessage" class="hide"><?php echo Kohana::lang('simplegroups.hide');?></a></h3>
 					</div>
 				<?php
 				}

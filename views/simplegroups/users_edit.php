@@ -60,7 +60,7 @@
 											// Submit Form
 											$('#mainForm').submit();			
 										}
-						" style="border:solid 1px #995555; padding:5px; float:right; margin-right:20px; color:#000; background-color:#cc9999; text-decoration:none;" > DELETE</a>
+						" style="border:solid 1px #995555; padding:5px; float:right; margin-right:20px; color:#000; background-color:#cc9999; text-decoration:none;" ><?php echo Kohana::lang('simplegroups.del');?></a>
 						<?php 
 							}
 						?>

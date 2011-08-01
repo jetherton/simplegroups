@@ -33,15 +33,15 @@
 					<!-- tabset -->
 					<ul class="tabset">
 						<li><a href="#" id="inbox_tab"  onclick="filterTabClick('inbox_tab'); return false;" <?php if ($type == '1') echo "class=\"active\""; ?>><?php echo Kohana::lang('ui_main.all');?></a></li>
-						<li><a href="#" id="turned_into_reports_tab" onclick="filterTabClick('turned_into_reports_tab'); return false;">Turned Into Reports</a></li>
-						<li><a href="#" id="three_days_tab" onclick="filterTabClick('three_days_tab'); return false;">Recent</a></li>
+						<li><a href="#" id="turned_into_reports_tab" onclick="filterTabClick('turned_into_reports_tab'); return false;"><?php echo Kohana::lang('simplegroups.turn');?> </a></li>
+						<li><a href="#" id="three_days_tab" onclick="filterTabClick('three_days_tab'); return false;"><?php echo Kohana::lang('simplegroups.recent');?> </a></li>
 					</ul>
 					<!-- tab -->
 					<div class="tab">
 						<ul>
 							<li><a href="#" id="delete_all_button" onClick="messagesAction('d', 'DELETE', ''); return false;"><?php echo strtoupper(Kohana::lang('ui_main.delete'));?></a></li>
 							<li> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
-							<li> Filter by category: <?php print form::dropdown(array('id'=>'cat_filter', 'onChange'=>'filterAction(); return false;'), $category_array); ?> </li>
+							<li><?php echo Kohana::lang('simplegroups.filter');?> <?php print form::dropdown(array('id'=>'cat_filter', 'onChange'=>'filterAction(); return false;'), $category_array); ?> </li>
 							<li id="filter_wait"></li>
 						</ul>
 					</div>
@@ -61,7 +61,7 @@
 				?>
 					<!-- green-box -->
 					<div class="green-box" id="submitStatus">
-						<h3><?php echo Kohana::lang('ui_main.messages');?> <?php echo $form_action; ?> <a href="#" id="hideMessage" class="hide">hide this message</a></h3>
+						<h3><?php echo Kohana::lang('ui_main.messages');?> <?php echo $form_action; ?> <a href="#" id="hideMessage" class="hide"><?php echo Kohana::lang('simplegroups.hide');?></a></h3>
 					</div>
 				<?php
 				}

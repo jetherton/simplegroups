@@ -1,6 +1,6 @@
 <div >
 
-	<h2>Categories For Message:</h2>
+	<h2><?php echo Kohana::lang('simplegroups.categories');?></h2>
 	<h3><?php echo $message->message ?></h3>	
 	<div class="row" style="text-align:left;">
 		<h4>
@@ -26,7 +26,7 @@
 	<div class="btns">
 		<ul>
 			<li>
-				<a href="#" onclick="saveCategories(<?php echo $message->id; ?>); return false; " class="btn_save">Save Categories</a>
+				<a href="#" onclick="saveCategories(<?php echo $message->id; ?>); return false; " class="btn_save"><?php echo Kohana::lang('simplegroups.save');?></a>
 			</li>	
 		</ul>
 	</div>

@@ -238,10 +238,10 @@
 									<?php print form::input('longitude', $form['longitude'], ' class="text"'); ?>
 								</div>
 								<ul class="map-toggles">
-						          <li><a href="#" class="smaller-map">Smaller map</a></li>
-						          <li style="display:block;"><a href="#" class="wider-map">Wider map</a></li>
-						          <li><a href="#" class="taller-map">Taller map</a></li>
-						          <li><a href="#" class="shorter-map">Shorter Map</a></li>
+						          <li><a href="#" class="smaller-map"><?php echo Kohana::lang('simplegroups.smaller');?></a></li>
+						          <li style="display:block;"><a href="#" class="wider-map"><?php echo Kohana::lang('simplegroups.wider');?></a></li>
+						          <li><a href="#" class="taller-map"><?php echo Kohana::lang('simplegroups.taller');?></a></li>
+						          <li><a href="#" class="shorter-map"><?php echo Kohana::lang('simplegroups.shorter');?></a></li>
 						        </ul>
 								<div id="divMap" class="map_holder_reports">
 									<div id="geometryLabelerHolder" class="olControlNoSelect">

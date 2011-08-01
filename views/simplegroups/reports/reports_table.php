@@ -159,7 +159,7 @@
 											</div>
 											<ul class="info">
 												<li class="none-separator"><?php echo Kohana::lang('ui_main.location');?>: <strong><?php echo $incident_location; ?></strong>, <strong><?php echo $countries[Kohana::config('settings.default_country')]; ?></strong></li>
-												<li><?php echo Kohana::lang('ui_main.submitted_by');?> <strong><?php echo $submit_by; ?></strong> via <strong><?php echo $submit_mode; ?></strong></li>
+												<li><?php echo Kohana::lang('ui_main.submitted_by');?> <strong><?php echo $submit_by; ?></strong><?php echo Kohana::lang('simplegroups.via');?><strong><?php echo $submit_mode; ?></strong></li>
 											</ul>
 											<ul class="links">
 												<li class="none-separator"><?php echo Kohana::lang('ui_main.categories');?>:<?php echo $incident_category; ?></li>
@@ -178,7 +178,7 @@
 													<?php if($incident_approved) {?>
 														<a title="Click to Unapprove this report" href="#"<?php if ($incident_approved) echo " class=\"status_yes\"" ?> onclick="reportAction('a','APPROVE', '<?php echo $incident_id; ?>', 'individual_report_action_<?php echo $incident_id; ?>'); return false;"><?php echo Kohana::lang('ui_main.approve');?></a>
 													<?php } else { ?>
-													Unapproved: <a title="Click to Approve this report" style="font-size:75%;" href="#"<?php if ($incident_approved) echo " class=\"status_yes\"" ?> onclick="reportAction('a','APPROVE', '<?php echo $incident_id; ?>', 'individual_report_action_<?php echo $incident_id; ?>'); return false;">Approve</a>
+													<?php echo Kohana::lang('simplegroups.unprove');?><a title="Click to Approve this report" style="font-size:75%;" href="#"<?php if ($incident_approved) echo " class=\"status_yes\"" ?> onclick="reportAction('a','APPROVE', '<?php echo $incident_id; ?>', 'individual_report_action_<?php echo $incident_id; ?>'); return false;"><?php echo Kohana::lang('simplegroups.approve');?></a>
 													<?php } ?>
 													
 													

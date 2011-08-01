@@ -88,7 +88,7 @@ td ul{
 					<!-- tabset -->
 					<a name="add"></a>
 					<ul class="tabset">
-						<li><a href="#" class="active" onclick="show_addedit(false)"><?php echo Kohana::lang('ui_main.add_edit');?><?php echo Kohana::lang('explain_applies_to_reports.category');?></a></li>
+						<li><a href="#" class="active" onclick="show_addedit(false)"><?php echo Kohana::lang('ui_main.add_edit');?><?php echo Kohana::lang('simplegroups.category');?></a></li>
 					</ul>
 					<!-- tab -->
 					<div class="tab" id="addedit" style="display:none">
@@ -99,7 +99,7 @@ td ul{
 						<div class="tab_form_item">
 							<strong><?php echo Kohana::lang('ui_main.category_name');?>:</strong><br />
 							<?php print form::input('category_title', $form['category_title'], ' class="text"'); ?><br/>
-							<a href="#" id="category_translations" class="new-cat" style="clear:both;"><?php echo Kohana::lang('explain_applies_to_reports.translations');?></a>
+							<a href="#" id="category_translations" class="new-cat" style="clear:both;"><?php echo Kohana::lang('simplegroups.translations');?></a>
 							<div id="category_translations_form_fields" style="display:none;">
 								<div style="clear:both;"></div>
 								<?php
@@ -130,7 +130,7 @@ td ul{
 							<?php print form::input('category_description', $form['category_description'], ' class="text"'); ?>
 						</div>
 						<div class="tab_form_item">
-							<strong><?php echo Kohana::lang('explain_applies_to_reports.color');?></strong><br />
+							<strong><?php echo Kohana::lang('simplegroups.color');?></strong><br />
 							<?php print form::input('category_color', $form['category_color'], ' class="text"'); ?>
 							<script type="text/javascript" charset="utf-8">
 								$(document).ready(function() {
@@ -169,7 +169,7 @@ td ul{
 						<div class="tab_form_item">
 							<strong>
 								<span style="cursor:help;text-transform:none;color:#bb0000;" title=" <?php echo Kohana::lang("simplegroups.explain_visible"); ?> ">?</span>
-								<?php echo Kohana::lang('explain_applies_to_reports.visible');?></strong><br />
+								<?php echo Kohana::lang('simplegroups.visible');?></strong><br />
 							<?php
 								print form::checkbox('category_visible', 'true', true);
 							?>
@@ -178,7 +178,7 @@ td ul{
 						<div class="tab_form_item">								
 								<strong>
 								<span style="cursor:help;text-transform:none;color:#bb0000;" title=" <?php echo Kohana::lang("simplegroups.explain_applies_to_reports"); ?> ">?</span>
-								<?php echo Kohana::lang('explain_applies_to_reports.applies');?></strong><br />								
+								<?php echo Kohana::lang('simplegroups.applies');?></strong><br />								
 								<?php
 									print form::checkbox('applies_to_report', 'true', TRUE);
 								?>
@@ -187,7 +187,7 @@ td ul{
 						<div class="tab_form_item">
 							<strong>
 							<span style="cursor:help;text-transform:none;color:#bb0000;" title=" <?php echo Kohana::lang("simplegroups.explain_applies_to_messages"); ?> ">?</span>
-							<?php echo Kohana::lang('explain_applies_to_reports.messages');?></strong><br />
+							<?php echo Kohana::lang('simplegroups.messages');?></strong><br />
 							<?php
 								print form::checkbox('applies_to_message', 'true', true);
 							?>
@@ -196,7 +196,7 @@ td ul{
 						<div class="tab_form_item">							
 							<strong>
 							<span style="cursor:help;text-transform:none;color:#bb0000;" title=" <?php echo Kohana::lang("simplegroups.explain_selected_by_default"); ?> ">?</span>
-							<?php echo Kohana::lang('explain_applies_to_reports.assign');?></strong><br />							
+							<?php echo Kohana::lang('simplegroups.assign');?></strong><br />							
 							<?php
 								print form::checkbox('selected_by_default', '', false);
 							?>
@@ -225,8 +225,8 @@ td ul{
 									<tr>
 										<th class="col-1">&nbsp;</th>
 										<th class="col-2"><?php echo Kohana::lang('ui_main.category');?></th>
-										<th class="col-3"><?php echo Kohana::lang('explain_applies_to_reports.properties');?></th>
-										<th class="col-3"><?php echo Kohana::lang('ui_main.color');?> / <?php echo Kohana::lang('explain_applies_to_reports.icon');?></th>
+										<th class="col-3"><?php echo Kohana::lang('simplegroups.properties');?></th>
+										<th class="col-3"><?php echo Kohana::lang('ui_main.color');?> / <?php echo Kohana::lang('simplegroups.icon');?></th>
 										<th class="col-4"><?php echo Kohana::lang('ui_main.actions');?></th>
 									</tr>
 								</thead>

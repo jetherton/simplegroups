@@ -2,9 +2,9 @@
 
 	<br/>
 	<br/>
-	<h5 style="font-size:14px;border-top:1px dotted #c0c2b8;"><?php echo Kohana::lang('explain_applies_to_reports.credit_group');?></h5>
+	<h5 style="font-size:14px;border-top:1px dotted #c0c2b8;"><?php echo Kohana::lang('simplegroups.credit_group');?></h5>
 	
-	<?php echo Kohana::lang('explain_applies_to_reports.created');?><a style="float:none;font-size:14px;" href="<?php echo $group_page; ?>"> <?php echo $group_name; ?></a>
+	<?php echo Kohana::lang('simplegroups.created');?><a style="float:none;font-size:14px;" href="<?php echo $group_page; ?>"> <?php echo $group_name; ?></a>
 	<br/>
 	<?php
 		$thumb = $logo_file."_t.jpg";

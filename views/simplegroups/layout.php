@@ -157,17 +157,17 @@
 			<div class="nav-holder">
 				<!-- main-nav -->
 				<ul class="main-nav">
-						<li><a <?php if($this_page=="dashboard") echo 'class="active"' ;?> href="<?php echo url::site(); ?>admin/simplegroups/dashboard" >Dashboard</a></li>
-						<li><a <?php if($this_page=="reports") echo 'class="active"' ;?> href="<?php echo url::site(); ?>admin/simplegroups/reports" >Reports</a></li>
-						<li><a <?php if($this_page=="messages") echo 'class="active"' ;?> href="<?php echo url::site(); ?>admin/simplegroups/messages" >Messages</a></li>
-						<li><a <?php if($this_page=="adminmap") echo 'class="active"' ;?> href="<?php echo url::site(); ?>admin/simplegroups/adminmap" >Map</a></li>
+						<li><a <?php if($this_page=="dashboard") echo 'class="active"' ;?> href="<?php echo url::site(); ?>admin/simplegroups/dashboard" ><?php echo Kohana::lang('simplegroups.dash');?></a></li>
+						<li><a <?php if($this_page=="reports") echo 'class="active"' ;?> href="<?php echo url::site(); ?>admin/simplegroups/reports" ><?php echo Kohana::lang('simplegroups.rep');?></a></li>
+						<li><a <?php if($this_page=="messages") echo 'class="active"' ;?> href="<?php echo url::site(); ?>admin/simplegroups/messages" ><?php echo Kohana::lang('simplegroups.mess');?></a></li>
+						<li><a <?php if($this_page=="adminmap") echo 'class="active"' ;?> href="<?php echo url::site(); ?>admin/simplegroups/adminmap" ><?php echo Kohana::lang('simplegroups.pam');?></a></li>
 						<?php 
 							//get permissions
 							$permissions = groups::get_permissions_for_user($this->user->id);
 							if($permissions["add_users"] || $permissions["delete_users"])
 							{
 						?>
-								<li><a <?php if($this_page=="users") echo 'class="active"' ;?> href="<?php echo url::site(); ?>admin/simplegroups/users" >Users</a></li>
+								<li><a <?php if($this_page=="users") echo 'class="active"' ;?> href="<?php echo url::site(); ?>admin/simplegroups/users" ><?php echo Kohana::lang('simplegroups.use');?></a></li>
 						<?php
 							}
 						?>
@@ -177,7 +177,7 @@
 							if($permissions["edit_group_settings"] )
 							{
 						?>
-								<li><a <?php if($this_page=="simple_group_settings") echo 'class="active"' ;?> href="<?php echo url::site(); ?>admin/simplegroups/settings" >Group Settings</a></li>
+								<li><a <?php if($this_page=="simple_group_settings") echo 'class="active"' ;?> href="<?php echo url::site(); ?>admin/simplegroups/settings" ><?php echo Kohana::lang('simplegroups.group_set');?></a></li>
 						<?php
 							}
 						?>

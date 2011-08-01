@@ -20,7 +20,7 @@
 								<tr>
 									<th class="col-1"><input id="checkall" type="checkbox" class="check-box" onclick="CheckAll( this.id, 'message_id[]' )" /></th>
 									<th class="col-2"><?php echo Kohana::lang('ui_main.message_details');?></th>
-									<th class="col-3">Categories</th>
+									<th class="col-3"><?php echo Kohana::lang('simplegroups.cat');?></th>
 									<th class="col-4"><?php echo Kohana::lang('ui_main.actions');?></th>
 								</tr>
 							</thead>
@@ -145,16 +145,16 @@
 												if ($message_type == 2)
 												{
 													?>
-														<li class="none-separator">To: <strong><?php echo $message_to; ?></strong></li>
+														<li class="none-separator"><?php echo Kohana::lang('simplegroups.to');?><strong><?php echo $message_to; ?></strong></li>
 													<?php
 												}
 													?>
-												<li class="none-separator">From: <strong class="reporters_<?php echo $level_id?>"><?php echo $message_from; ?></strong></li>
+												<li class="none-separator"><?php echo Kohana::lang('simplegroups.fro');?><strong class="reporters_<?php echo $level_id?>"><?php echo $message_from; ?></strong></li>
 												
-												<li class="none-separator">Date: <strong class="reporters_0"><?php echo $message_date; ?></strong></li>
+												<li class="none-separator"><?php echo Kohana::lang('simplegroups.date');?><strong class="reporters_0"><?php echo $message_date; ?></strong></li>
 												
 											</ul>
-											<div><span style="font-size:10px; color:#636363;">Message Comments:</span> 
+											<div><span style="font-size:10px; color:#636363;"><?php echo Kohana::lang('simplegroups.comets');?></span> 
 												<textarea rows="3" cols="38" id="comments_<?php echo $message->id; ?>"><?php echo $message->comments; ?></textarea>
 											</div>
 										</td>
@@ -181,8 +181,8 @@
 												}
 												?>
 												
-												<a class="comments_button" id="commentsButton_<?php echo(rawurlencode($message_id)); ?>"  href="#" onclick="editComments('<?php echo(rawurlencode($message_id)); ?>'); return false;">Update Comments</a>
-												<a  class="comments_button"  href="#" onclick="editCategory(<?php echo $message->id; ?>,this); return false;">Edit Categories</a>
+												<a class="comments_button" id="commentsButton_<?php echo(rawurlencode($message_id)); ?>"  href="#" onclick="editComments('<?php echo(rawurlencode($message_id)); ?>'); return false;"><?php echo Kohana::lang('simplegroups.up');?></a>
+												<a  class="comments_button"  href="#" onclick="editCategory(<?php echo $message->id; ?>,this); return false;"><?php echo Kohana::lang('simplegroups.edit');?></a>
 												<a class="delete_button" href="javascript:messagesAction('d','DELETE','<?php echo(rawurlencode($message_id)); ?>')" id="delete_message_<?php echo(rawurlencode($message_id)); ?>" class="del"><?php echo Kohana::lang('ui_main.delete');?></a>
 										</td>
 									</tr>
