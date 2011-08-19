@@ -136,7 +136,7 @@ class Reports_Controller extends Main_Controller
 	$joins = groups::get_joins_for_groups($category_ids);		
 	$sg_category_to_table_mapping = groups::get_category_to_table_mapping();
 	
-	$reports_count = reports::get_reports_count($category_ids, $approved_text, $location_where. " AND ". $filter. $group_where, $logical_operator, 
+	$reports_count = adminmap_reports::get_reports_count($category_ids, $approved_text, $location_where. " AND ". $filter. $group_where, $logical_operator, 
 		$joins, $sg_category_to_table_mapping);
 			
 	
@@ -148,7 +148,7 @@ class Reports_Controller extends Main_Controller
 			'total_items' => $reports_count
 			));
 
-	$incidents = reports::get_reports($category_ids,  $approved_text, $location_where. " AND ". $filter. $group_where, $logical_operator, 	
+	$incidents = adminmap_reports::get_reports($category_ids,  $approved_text, $location_where. " AND ". $filter. $group_where, $logical_operator, 	
 		"incident.incident_date", "asc",
 		(int) Kohana::config('settings.items_per_page'), $pagination->sql_offset, $joins, $sg_category_to_table_mapping );
 		

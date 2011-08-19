@@ -295,7 +295,7 @@ class groups_Core {
 		$sg_category_to_table_mapping = groups::get_category_to_table_mapping();
 		
 		
-		$incidents = reports::get_reports($category_ids, 
+		$incidents = adminmap_reports::get_reports($category_ids, 
 			$approved_text, 
 			$where_text. " ". $group_where,
 			$logical_operator,
@@ -328,7 +328,7 @@ class groups_Core {
 		
 		$sg_category_to_table_mapping = groups::get_category_to_table_mapping();
 		
-		$incidents_count = reports::get_reports_count($category_ids, 
+		$incidents_count = adminmap_reports::get_reports_count($category_ids, 
 			$approved_text, 
 			$where_text. " ". $group_where,
 			$logical_operator,			
@@ -345,7 +345,7 @@ class groups_Core {
 	 * This will check to see if there's a group category
 	 * catgory ID in the category_ids list and then 
 	 * create the necessary join arguements for the 
-	 * reports::get_reports/_count methods
+	 * adminmap_reports::get_reports/_count methods
 	 **********************************************/
 	 public static function get_joins_for_groups($category_ids)
 	 {
