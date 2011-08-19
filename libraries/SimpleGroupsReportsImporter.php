@@ -152,6 +152,9 @@ class SimpleGroupsReportsImporter {
 				{
 					if(!isset($this->category_ids[$categoryname]))
 					{
+						$this->notices[] = 'There exists no category "'.htmlspecialchars($categoryname).'" in database yet. This category was skipped.';
+						continue;
+						/*
 						$this->notices[] = 'There exists no category "'.htmlspecialchars($categoryname).'" in database yet. Added to database.';
 						$category = new Category_Model;
 						$category->category_title = $categoryname;
@@ -162,6 +165,7 @@ class SimpleGroupsReportsImporter {
 						$category->save();
 						$this->categories_added[] = $category->id;
 						$this->category_ids[$categoryname] = $category->id; // Now category_id is known: This time, and for the rest of the import.
+						*/
 					}
 					$incident_category = new Incident_Category_Model();
 					$incident_category->incident_id = $incident->id;
