@@ -36,7 +36,7 @@ function forwardMessage<?php echo $message_id; ?>()
 		echo "<span id=\"msg_fwrd_to_".$message_id."\"></span><br/>";
 	}
 ?>
-Forward To:
+<?php echo Kohana::lang('simplegroups.forward_to');?>
 <?php print form::dropdown("input_forwardto_".$message_id, $groups_array, 'standard'); ?>
-<a href="#" onclick="javascript:forwardMessage<?php echo $message_id; ?>(); return false;"  style="border: #d1d1d1 1px solid; background-color:#F2F7Fa; color: #5c5c5c; padding: 0px 9px; line-height:24px; text-decoration:none;">Forward</a>
-<span id="forwarded_<?php echo $message_id; ?>"style="width: 70px; display:none; color:#555; background-color:#d8f1d8; border: 2px solid #a7d1a7;">Forwarded</span>
+<a href="#" onclick="javascript:forwardMessage<?php echo $message_id; ?>(); return false;"  style="border: #d1d1d1 1px solid; background-color:#F2F7Fa; color: #5c5c5c; padding: 0px 9px; line-height:24px; text-decoration:none;"><?php echo Kohana::lang('simplegroups.forward');?></a>
+<span id="forwarded_<?php echo $message_id; ?>"style="width: 70px; display:none; color:#555; background-color:#d8f1d8; border: 2px solid #a7d1a7;">F<?php echo Kohana::lang('simplegroups.forwarded');?></span>

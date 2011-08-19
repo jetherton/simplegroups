@@ -72,7 +72,7 @@
 
                                 </tr>
 				<tr>					
-					<td><?php print form::checkbox('strip_html','true', TRUE); ?>Remove HTML tags</td>
+					<td><?php print form::checkbox('strip_html','true', TRUE); ?><?php echo Kohana::lang('simplegroups.tags');?></td>
 					<td></td>
 				</tr>
 				<tr>

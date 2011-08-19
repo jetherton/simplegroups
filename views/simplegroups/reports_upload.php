@@ -47,12 +47,9 @@
 			<li><?php echo Kohana::lang('ui_main.upload_reports_detail_3');?>.</li>
 			<li><?php echo Kohana::lang('ui_main.upload_reports_detail_4');?></li>
 		</ul>
-			<p style="font-size:75%;">
-				INCIDENT TITLE,INCIDENT DATE,LOCATION,DESCRIPTION,CATEGORY, GROUP CATEGORY, LATITUDE, LONGITUDE, APPROVED,VERIFIED
-				<p style="font-size:75%;">					
-					"Riot","2009-05-15 01:06:00","Gbanga","Three cases have been confirmed in C. del Uruguay","DEATHS, CIVILIANS, ","POLICE NOTIFIED, SENSATIVE, ", 7.0133, -10.513, YES,YES
-					<br/>
-					"Looting","2009-03-18 10:10:00","Accra","Looting happening everywhere","RIOTS, DEATHS, PROPERTY LOSS, ", "POLICE NOT NOTIFIED, SENSATIVE, ",6.34309, -11.7422, YES,NO
+			<p style="font-size:75%;"><?php echo Kohana::lang('simplegroups.approved');?>
+				<p style="font-size:75%;"><?php echo Kohana::lang('simplegroups.riot');?>					
+					
 					
 				</p>
 			</p>
