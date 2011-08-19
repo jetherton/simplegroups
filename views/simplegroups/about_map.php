@@ -1,10 +1,10 @@
 <!-- main body -->
 <div id="main" class="clearingfix" style="padding: 15px 0px;">
 	<div style="padding: 0px 29px;">
-		<h1><?php echo Kohana::lang('simplegroups.about');?><?php echo $group_name ?>:</h1>
+		<h1><?php echo Kohana::lang('simplegroups.about');?> <?php echo $group_name ?>:</h1>
 		<?php
 			$thumb = $group_logo.".jpg";
-				$prefix = url::base().Kohana::config('simplegroups.relative_directory')."/groups";
+				$prefix = url::base().Kohana::config('upload.relative_directory')."/groups";
 				print "<img src=\"$prefix/$thumb\" >";
 		?>
 		<div class="page_text"><?php echo $group_description ?></div>
