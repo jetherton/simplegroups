@@ -2,6 +2,10 @@
 /**
  * simplegroups helper class.
  */
+use Ushahidi_API_Library\Site_Info as Site_info;
+use Ushahidi_API_Library\Report_Task_Parameter as Report_param;
+use Ushahidi_API_Library\Report_Task as Report_task;
+use Ushahidi_API_Library\Report_Response as ReportResponse;
 
 
 class groups_Core {
@@ -69,11 +73,11 @@ class groups_Core {
 		
 		$api_url = substr($group->own_instance, 0, strpos($group->own_instance, "frontlinesms")). "api";
 		
-		$siteInfo = new Site_Info($api_url);
+		$siteInfo = new Site_info($api_url);
 		
-		$reportParams = Report_Task_Parameter::fromORM($incident);
+		$reportParams = Report_param::fromORM($incident);
 		
-		$reportTask = new Report_Task($reportParams, $siteInfo);
+		$reportTask = new Report_task($reportParams, $siteInfo);
 		$reportResponse = $reportTask->execute();
 		
 	
