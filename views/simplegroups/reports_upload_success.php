@@ -15,7 +15,9 @@
 ?>
 
 <div class="bg">
-	<h2><?php print $title; ?> <span></span><a href="<?php print url::site() ?>admin/reports/download"><?php echo Kohana::lang('ui_main.download_reports');?></a><a href="<?php print url::site() ?>admin/reports"><?php echo Kohana::lang('ui_main.view_reports');?></a><a href="<?php print url::site() ?>admin/reports/edit"><?php echo Kohana::lang('ui_main.create_report');?></a></h2>
+	<h2>
+		<?php groups::reports_subtabs("upload"); ?>
+	</h2>
 	
 	<h3><?php echo Kohana::lang('ui_main.upload_successful');?></h3>
 	   <p><?php echo Kohana::lang('ui_main.successfuly_imported');?> <?php echo $imported; ?> of <?php echo $rowcount; ?> <?php echo Kohana::lang('ui_main.reports');?>.</p>

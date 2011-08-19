@@ -37,10 +37,25 @@ class SimpleGroupsReportsImporter {
 			return false;
 		}
 		
-		$this->category_ids = ORM::factory('category')->select_list('category_title','id'); // so we can assign category id to incidents, based on category title
-		$this->group_category_ids = ORM::factory('simplegroups_category')
+		$category_ids_temp = ORM::factory('category')->select_list('category_title','id'); // so we can assign category id to incidents, based on category title
+		$group_category_ids_temp = ORM::factory('simplegroups_category')
 			->where("simplegroups_groups_id", $group->id)
 			->select_list('category_title','id'); // so we can assign category id to incidents, based on category title
+		
+		//make trim and capitalize the categories so they will match if the case is different.
+		$this->category_ids = array();
+		foreach($category_ids_temp as $cat => $id)
+		{
+			$this->category_ids[strtoupper(trim($cat))] = $id;
+		}
+		
+		$this->group_category_ids = array();
+		foreach($group_category_ids_temp as $cat => $id)
+		{
+			$this->group_category_ids[strtoupper(trim($cat))] = $id;
+		}
+			
+			
 		$this->incident_ids = ORM::factory('incident')->select_list('id','id'); // so we can check if incident already exists in database
 		$this->time = date("Y-m-d H:i:s",time());
 		$rows = $csvtable->getRows();
@@ -132,7 +147,7 @@ class SimpleGroupsReportsImporter {
 			$categorynames = explode(',',trim($row['CATEGORY']));
 			foreach($categorynames as $categoryname)
 			{
-				//$categoryname = strtoupper(trim($categoryname)); // There seems to be an uppercase convention for categories... Don't know why.
+				$categoryname = strtoupper(trim($categoryname)); // There seems to be an uppercase convention for categories... Don't know why.
 				if($categoryname != '')
 				{
 					if(!isset($this->category_ids[$categoryname]))
@@ -163,7 +178,7 @@ class SimpleGroupsReportsImporter {
 			$categorynames = explode(',',trim($row['GROUP CATEGORY']));
 			foreach($categorynames as $categoryname)
 			{
-				//$categoryname = strtoupper(trim($categoryname)); // There seems to be an uppercase convention for categories... Don't know why.
+				$categoryname = strtoupper(trim($categoryname)); // There seems to be an uppercase convention for categories... Don't know why.
 				if($categoryname != '')
 				{
 					if(!isset($this->group_category_ids[$categoryname]))
