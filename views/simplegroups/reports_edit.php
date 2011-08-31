@@ -15,7 +15,7 @@
 ?>
 			<div class="bg">
 				<h2>
-					<?php admin::reports_subtabs("edit"); ?>
+					<?php groups::reports_subtabs("edit"); ?>
 				</h2>
 				<?php print form::open(NULL, array('enctype' => 'multipart/form-data', 'id' => 'reportForm', 'name' => 'reportForm')); ?>
 					<input type="hidden" name="save" id="save" value="">
@@ -155,22 +155,8 @@
 							</div>
 							<?php Event::run('ushahidi_action.report_form_admin_after_time', $id); ?>
 							<div class="row">
-								<h4><?php echo Kohana::lang('ui_main.categories');?> 
-								<span><?php echo Kohana::lang('ui_main.select_multiple');?>.</span></h4>
-								<?php print $new_category_toggle_js; ?>
-								<!--category_add form goes here-->
-
-				<!--Site wide categories-->
-				<div class="report_category">
-					<?php
-						$selected_categories = array();
-						if (!empty($form['incident_category']) && is_array($form['incident_category'])) {
-							$selected_categories = $form['incident_category'];
-						}
-						$columns = 2;
-						echo groups_category::tree($categories, $selected_categories, 'incident_category', $columns);
-					?>
-				</div>
+							
+							
 				<!--group categories-->
 				<h4>
 					<?php echo $group_name. " ". Kohana::lang('ui_main.categories');?> 
@@ -184,6 +170,23 @@
 						}
 						$columns = 2;
 						echo groups_category::tree($group_categories, $selected_group_categories, 'incident_group_category', $columns);
+					?>
+				</div>
+							
+							
+				<!--Site wide categories-->
+				<h4>
+					<?php echo Kohana::lang('ui_main.categories');?> 
+					<span><?php echo Kohana::lang('ui_main.select_multiple');?>.</span>
+				</h4>
+				<div class="report_category">
+					<?php
+						$selected_categories = array();
+						if (!empty($form['incident_category']) && is_array($form['incident_category'])) {
+							$selected_categories = $form['incident_category'];
+						}
+						$columns = 2;
+						echo groups_category::tree($categories, $selected_categories, 'incident_category', $columns);
 					?>
 				</div>
 							
@@ -238,10 +241,10 @@
 									<?php print form::input('longitude', $form['longitude'], ' class="text"'); ?>
 								</div>
 								<ul class="map-toggles">
-						          <li><a href="#" class="smaller-map">Smaller map</a></li>
-						          <li style="display:block;"><a href="#" class="wider-map">Wider map</a></li>
-						          <li><a href="#" class="taller-map">Taller map</a></li>
-						          <li><a href="#" class="shorter-map">Shorter Map</a></li>
+						          <li><a href="#" class="smaller-map"><?php echo Kohana::lang('simplegroups.smaller');?></a></li>
+						          <li style="display:block;"><a href="#" class="wider-map"><?php echo Kohana::lang('simplegroups.wider');?></a></li>
+						          <li><a href="#" class="taller-map"><?php echo Kohana::lang('simplegroups.taller');?></a></li>
+						          <li><a href="#" class="shorter-map"><?php echo Kohana::lang('simplegroups.shorter');?></a></li>
 						        </ul>
 								<div id="divMap" class="map_holder_reports">
 									<div id="geometryLabelerHolder" class="olControlNoSelect">

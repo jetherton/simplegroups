@@ -227,6 +227,33 @@ class Simplegroups_Install {
 			PRIMARY KEY (`id`)
 			) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
 		
+		
+		////////////////////////////////////////////////////////////////////////////////////////////
+		////////////////////////////// ADD CONTACT INFO TO A GROUP
+		//////////////////////////////////////////////////////////////////////////////////////////
+		//check and see if the simplegroups_groups table already has a contact name field
+		$result = $this->db->query('DESCRIBE `'.Kohana::config('database.default.table_prefix').'simplegroups_groups`');
+		$has_contacts = false;
+		foreach($result as $row)
+		{
+			if($row->Field == "contact_person")
+			{
+				$has_contacts = true;
+				break;
+			}
+		}
+		
+		if(!$has_contacts )
+		{
+			$this->db->query('ALTER TABLE `'.Kohana::config('database.default.table_prefix').'simplegroups_groups` ADD `contact_person` varchar(100)');
+			$this->db->query('ALTER TABLE `'.Kohana::config('database.default.table_prefix').'simplegroups_groups` ADD `contact_email` varchar(100)');
+			$this->db->query('ALTER TABLE `'.Kohana::config('database.default.table_prefix').'simplegroups_groups` ADD `contact_phone` varchar(100)');			
+			$this->db->query('ALTER TABLE `'.Kohana::config('database.default.table_prefix').'simplegroups_groups` ADD `contact_address` longtext');
+			$this->db->query('ALTER TABLE `'.Kohana::config('database.default.table_prefix').'simplegroups_groups` ADD `group_site` longtext');
+			
+		}
+		
+		
 					
 	}//end of run_install
 
@@ -235,6 +262,7 @@ class Simplegroups_Install {
 	 */
 	public function uninstall()
 	{
-		$this->db->query('DROP TABLE `'.Kohana::config('database.default.table_prefix').'simplegroups_groups`');
+		//don't do anything, this plugin is too valuable to us at Ushahidid liberia to make it so easy for someone to delete all of our data.
+		//$this->db->query('DROP TABLE `'.Kohana::config('database.default.table_prefix').'simplegroups_groups`');
 	}
 }

@@ -1,16 +1,13 @@
 <?php 
 /**
- * Comments view page.
+ *  End Time English Language file
  *
- * PHP version 5
- * LICENSE: This source file is subject to LGPL license 
- * that is available through the world-wide-web at the following URI:
- * http://www.gnu.org/copyleft/lesser.html
- * @author     Ushahidi Team <team@ushahidi.com> 
- * @package    Ushahidi - http://source.ushahididev.com
- * @module     API Controller
- * @copyright  Ushahidi - http://www.ushahidi.com
- * @license    http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License (LGPL) 
+ * This plugin was written for Ushahidi Liberia, by the contractors of Ushahidi Liberia
+ * 2011
+ *
+ * @package  End Time plugin
+ * @author     Ushahidi Liberia <admin@ushahihiliberia.com>
+ * 
  */
 ?>
 			<div class="bg">

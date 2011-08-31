@@ -161,6 +161,14 @@ class Reports_Controller extends Admin_simplegroup_Controller
 			$approved_text = " (incident.incident_active = 0 OR incident.incident_active = 1) ";
 		}
 		
+		// Start Date
+	    $start_date = (isset($_GET['s']) AND !empty($_GET['s'])) ? (int) $_GET['s'] : "0";
+	
+	    // End Date
+	    $end_date = (isset($_GET['e']) AND !empty($_GET['e'])) ? (int) $_GET['e'] : "0";
+		
+		$filter .= ($start_date) ? " AND incident.incident_date >= '" . date("Y-m-d H:i:s", $start_date) . "'" : "";
+	    $filter .= ($end_date) ? " AND incident.incident_date <= '" . date("Y-m-d H:i:s", $end_date) . "'" : "";
 		
 		
 		$location_where = "";
@@ -2068,6 +2076,73 @@ class Reports_Controller extends Admin_simplegroup_Controller
 		}
 		
 		return $stroke_width_array;
+	}
+	
+	
+	
+	public function upload()
+	{
+
+		$permissions = groups::get_permissions_for_user($this->user->id);
+		if(!$permissions["edit_group_settings"] )
+		{
+			url::redirect(url::site().'admin/simplegroups/dashboard');
+		}
+
+		if($_SERVER['REQUEST_METHOD'] == 'GET') {
+			$this->template->content = new View('simplegroups/reports_upload');
+			$this->template->content->title = 'Upload Reports';
+			$this->template->content->form_error = false;
+		}
+		if ($_SERVER['REQUEST_METHOD']=='POST')
+		{
+			$errors = array();
+			$notices = array();
+			
+			if (!$_FILES['csvfile']['error']) 
+			{
+				if (file_exists($_FILES['csvfile']['tmp_name']))
+				{
+					if($filehandle = fopen($_FILES['csvfile']['tmp_name'], 'r'))
+					{
+						$importer = new SimpleGroupsReportsImporter;
+						
+						if ($importer->import($filehandle, $this->group))
+						{
+							$this->template->content = new View('simplegroups/reports_upload_success');
+							$this->template->content->title = 'Upload Reports';
+							$this->template->content->rowcount = $importer->totalrows;
+							$this->template->content->imported = $importer->importedrows;
+							$this->template->content->notices = $importer->notices;
+						}
+						else
+						{
+							$errors = $importer->errors;
+						}
+					}
+					else
+					{
+						$errors[] = Kohana::lang('ui_admin.file_open_error');
+					}
+				} // file exists?
+				else
+				{
+					$errors[] = Kohana::lang('ui_admin.file_not_found_upload');
+				}
+			} // upload errors?
+			else
+			{
+				$errors[] = $_FILES['csvfile']['error'];
+			}
+
+			if(count($errors))
+			{
+				$this->template->content = new View('simplegroups/reports_upload');
+				$this->template->content->title = Kohana::lang('ui_admin.upload_reports');
+				$this->template->content->errors = $errors;
+				$this->template->content->form_error = 1;
+			}
+		} // _POST
 	}
     
 }//end class

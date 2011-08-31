@@ -20,9 +20,9 @@
 	<table class="table">
 		<thead>
 			<tr>
-				<th>Group Name</th>
-				<th># Group Members</th>
-				<th># Group Reports</th>
+				<th><?php echo Kohana::lang('simplegroups.group_name');?></th>
+				<th><?php echo Kohana::lang('simplegroups.group_members');?></th>
+				<th><?php echo Kohana::lang('simplegroups.group_reports');?></th>
 			</tr>
 		</thead>
 		<tfoot>		

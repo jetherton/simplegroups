@@ -172,9 +172,15 @@ class groups_Core {
 		
 		$user = new User_Model($_SESSION['auth_user']->id);
 		$permissions = groups::get_permissions_for_user($user->id);
+		
 		if($permissions["edit_group_settings"] )
 		{
 			$menu .= ($this_sub_page == "download") ? Kohana::lang('ui_main.download_reports') : "<a href=\"".url::base()."admin/simplegroups/reports/download\">".Kohana::lang('ui_main.download_reports')."</a>";
+		}
+		
+		if($permissions["edit_group_settings"] )
+		{
+			$menu .= ($this_sub_page == "upload") ? Kohana::lang('ui_main.upload_reports') : "<a href=\"".url::base()."admin/simplegroups/reports/upload\">".Kohana::lang('ui_main.upload_reports')."</a>";
 		}
 
 		echo $menu;

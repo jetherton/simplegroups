@@ -47,20 +47,20 @@
 
 				
 				<div class="row">
-					<h4>Group Name</h4>
+					<h4><?php echo Kohana::lang('simplegroups.group_name');?></h4>
 					<?php print form::input('name', $form['name'], ' class="text title"'); ?>
 				</div>
 				<div class="row">
-					<h4>Group Description<span></span></h4>
+					<h4><?php echo Kohana::lang('simplegroups.group_description');?><span></span></h4>
 					<?php print form::textarea('description', $form['description'], ' rows="17" cols="80" style="width:800px; height:300px;"') ?>
 				</div>
 				<div class="row">
-					<h4>Group's Own Ushahidi FrontlineSMS URL<span><br/>Optional. Must be in the format http://myhost/frontlinesms/?key=*MY_KEY*&s=${sender_number}&m=${message_content}</span></h4>
+					<h4><?php echo Kohana::lang('simplegroups.url');?><span><br/><?php echo Kohana::lang('simplegroups.http');?></span></h4>
 					<?php print form::input('own_instance', $form['own_instance'], ' class="text title"'); ?>
 				</div>
 				<!-- Photo Fields -->
 				<div class="row link-row">
-					<h4>Logo</h4>
+					<h4><?php echo Kohana::lang('simplegroups.logo');?></h4>
 					<?php								
 					if ($logo_file)
 					{
@@ -86,10 +86,10 @@
 			</div>
 			
 			<div class="row">
-				<h4>Group Users</h4>
+				<h4><?php echo Kohana::lang('simplegroups.users');?></h4>
 				<table class="table">
 					<thead>
-						<tr><th>User</th><th colspan="<?php //echo count($group_roles); ?>">User's Roles</th></tr>
+						<tr><th><?php echo Kohana::lang('simplegroups.use');?></th><th colspan="<?php //echo count($group_roles); ?>"><?php echo Kohana::lang('simplegroups.users');?><?php echo Kohana::lang('simplegroups.user_role');?></th></tr>
 					</thead>
 				<?php
 					foreach($users as $user)
@@ -139,10 +139,10 @@
 			</div>
 			
 			<div class="row">
-				<h4>White Listed Phone Numbers<span><br/>Enter phone numbers that are allowed to send in SMSs to this group.  
-				<br/>Numbers must be in the exact same format as when they're recieved.</span></h4>
+				<h4><?php echo Kohana::lang('simplegroups.white');?><span><br/><?php echo Kohana::lang('simplegroups.enter');?>  
+				<br/><?php echo Kohana::lang('simplegroups.exact');?></span></h4>
 				<table style="width:500px;" border="1" id="white_list_table">
-				<tr><th>Number</th><th>Name</th><th>Organization</th><th></th></tr>
+				<tr><th><?php echo Kohana::lang('simplegroups.number');?></th><th><?php echo Kohana::lang('simplegroups.name');?></th><th><?php echo Kohana::lang('simplegroups.organ');?></th><th></th></tr>
 				<?php
 					$last_id = 1;
 					foreach($whitelist as $item)
