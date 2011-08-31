@@ -128,6 +128,7 @@
 		'fro' =>'From:',
 		'to' => 'To:',
 		'categories' => 'Categories For Message:',
+		'categories_report' => 'Group categories for report:',
 		'save' => 'Save Categories',
 		'date' => 'Date:',
 		'comets' => 'Message Comments:',

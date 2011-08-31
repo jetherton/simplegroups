@@ -39,7 +39,7 @@ class simplegroups {
 		
 		
 		//whenever a report detail is being drawn add this for some credit
-		Event::add('ushahidi_action.report_meta', array($this, '_give_credit'));
+		Event::add('ushahidi_action.report_meta', array($this, '_give_credit_front_end'));
 		Event::add('ushahidi_action.report_form_admin', array($this, '_give_credit'));
 		Event::add('ushahidi_action.report_form_admin', array($this, '_get_number_info_for_report'));		
 		
@@ -369,7 +369,7 @@ class simplegroups {
 	* Puts a little by line in for our estemeed
 	* groups
 	**************************************/
-	public function _give_credit()
+	public function _give_credit($is_front_end = false)
 	{
 		$report_id = Event::$data;
 		//check and see if this is a group report
@@ -380,13 +380,35 @@ class simplegroups {
 			
 		foreach($group_reports as $group_report)
 		{
+						
 			$credit = View::factory('simplegroups/credit');
+			if(!$is_front_end)
+			{
+				$credit->categories = array();	
+			}
+			else
+			{
+				$categories = ORM::factory("simplegroups_category")
+					->join($this->table_prefix."simplegroups_incident_category", $this->table_prefix."simplegroups_category.id", $this->table_prefix."simplegroups_incident_category.simplegroups_category_id")
+					->where($this->table_prefix."simplegroups_incident_category.incident_id", $report_id)
+					->find_all();
+				$credit->categories = $categories;
+			}
 			$credit->group_name = $group_report->name;
 			$credit->group_id = $group_report->id;
 			$credit->logo_file = $group_report->logo;
 			$credit->render(TRUE);
 		}
 	}//end of _give_credit()
+	
+	
+	/**
+	 * Used to run give credit, but formated with categories
+	 */
+	public function _give_credit_front_end()
+	{
+		$this->_give_credit(true);
+	}
 	
 	/**************************************
 	* Checks to see if the user is allowed
