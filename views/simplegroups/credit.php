@@ -2,11 +2,10 @@
 
 	<br/>
 	<br/>
-	<div>
+	
+		<div style="height:140px;">
 		<h5 style="font-size:14px;border-top:1px dotted #c0c2b8;"><?php echo Kohana::lang('simplegroups.credit_group');?></h5>
-		
 		<?php echo Kohana::lang('simplegroups.created');?><a style="float:none;font-size:14px;" href="<?php echo $group_page; ?>"> <?php echo $group_name; ?></a>
-		<br/>
 		<?php
 			$thumb = $logo_file."_t.jpg";
 			$prefix = url::base().Kohana::config('upload.relative_directory')."/groups";
@@ -14,7 +13,7 @@
 				print "<img src=\"$prefix/$thumb\" >";
 				print "</a>";
 		?>
-		
+		</div>
 		<h5 style="font-size:14px;border-top:1px dotted #c0c2b8;"><?php echo Kohana::lang('simplegroups.categories_report');?></h5>
 			<p>
 			<?php
@@ -47,4 +46,3 @@
 				}
 			?>
 			</p>
-	</div>
