@@ -186,6 +186,13 @@
 				</div>
 				<!-- / filters -->
 				
+				<div id="adminmap_map_embedd">
+				<?php echo Kohana::lang("adminmap.embedd_html")?>
+				<br/>
+					<input type="text" value="&lt;iframe src=&quot;<?php echo url::base()."group_iframemap/index/".$group_id; ?>&quot; width=&quot;515px&quot; height=&quot;430px&quot;&gt;&lt;/iframe&gt;"/>					
+				</div>
+				
+				
 				<?php								
 				// Map and Timeline Blocks
 				echo $div_map;
