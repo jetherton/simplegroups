@@ -137,7 +137,7 @@
 		'cat' => 'Categories',
 		'via' => 'via',
 		'unprove' => 'Unapproved:',
-		'aprove' => 'Approve',
+		'approve' => 'Approve',
 		'dash' => 'Dashboard', 
 		'rep' => 'Reports',
 		'mess' => 'Messages',
