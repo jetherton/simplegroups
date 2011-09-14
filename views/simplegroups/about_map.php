@@ -10,7 +10,7 @@
 		<div class="page_text"><?php echo $group_description ?></div>
 		
 		<div style="border-top: 2px solid black; margin-top:20px; padding-top:20px;">
-			<h1><?php echo Kohana::lang('simplegroups.map');?><?php echo $group_name ?>:</h1>
+			<h1><?php echo Kohana::lang('simplegroups.map');?> <?php echo $group_name ?>:</h1>
 		</div>
 	</div>
 	<div id="mainmiddle" class="floatbox withright">
@@ -199,7 +199,8 @@
 				<!-- / filters -->
 				
 				<div id="adminmap_map_embedd">
-				<?php echo Kohana::lang("simplegroups.print_map")?> <a href="<?php echo url::base()."printmap/groups/".$group_id; ?>"><?php echo Kohana::lang("simplegroups.here")?></a>
+
+					<INPUT style="width: auto; margin:6px; font-size:18px;" TYPE="BUTTON" VALUE="Print this Map" ONCLICK="window.location.href='<?php echo url::base()."printmap/groups/".$group_id; ?>'">  				
 				<br/>
 				<?php echo Kohana::lang("adminmap.embedd_html")?>
 				<br/>
