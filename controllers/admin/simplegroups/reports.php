@@ -1387,9 +1387,9 @@ class Reports_Controller extends Admin_simplegroup_Controller
         $this->template->map_enabled = TRUE;
         $this->template->colorpicker_enabled = TRUE;
         $this->template->treeview_enabled = TRUE;
-	$this->template->editor_enabled = TRUE;
-        //$this->template->js = new View('simplegroups/reports_edit_js');
-	$this->template->js = new View('admin/reports_edit_js');
+		$this->template->editor_enabled = TRUE;
+		$this->template->js = new View('reports_submit_edit_js');
+		$this->template->js->edit_mode = TRUE;
         $this->template->js->default_map = Kohana::config('settings.default_map');
         $this->template->js->default_zoom = Kohana::config('settings.default_zoom');
 
