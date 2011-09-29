@@ -242,6 +242,15 @@ class simplegroups {
 		{
 			return; 
 		}
+		
+		
+		//it seems that newer versions of Ushahidi now pass around the entier report DB object
+		//and not just a string of the id
+		if(!is_string($id) AND $item_type == 'incident')
+		{
+			$id = $id->incident_id;
+		}
+		
 			
 		//figure out if the current message/incident has already been assigned to a group
 		
