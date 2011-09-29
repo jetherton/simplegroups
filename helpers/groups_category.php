@@ -41,7 +41,7 @@ class groups_category_Core {
 
 			// Display parent category.
 			$html .= '<li style="width:100%;">';
-			$html .= category::display_category_checkbox($category, $selected_categories, $form_field);
+			$html .= groups_category::display_category_checkbox($category, $selected_categories, $form_field);
 			if(!$category->category_visible)
 			{
 				$html .= " - ".Kohana::lang("simplegroups.not_visible");
@@ -54,7 +54,7 @@ class groups_category_Core {
 				foreach ($category->children as $child)
 				{
 					$html .= '<li>';
-					$html .= category::display_category_checkbox($child, $selected_categories, $form_field);
+					$html .= groups_category::display_category_checkbox($child, $selected_categories, $form_field);
 					if(!$child->category_visible)
 					{
 						$html .= " - ".Kohana::lang("simplegroups.not_visible");
@@ -72,6 +72,51 @@ class groups_category_Core {
 				$this_col++;
 			}
 		}
+
+		return $html;
+	}
+	
+	
+	/**
+	 * Displays a single category checkbox.
+	 */
+	public static function display_category_checkbox($category, $selected_categories, $form_field, $enable_parents = FALSE)
+	{
+		$html = '';
+
+		$cid = $category->id;
+
+		// Get locale
+		$l = Kohana::config('locale.language.0');
+		
+		
+
+		$category_title = $category->category_title;
+		$category_color = $category->category_color;
+
+		// Category is selected.
+		$category_checked = in_array($cid, $selected_categories);
+		
+		// Visible Child Count
+		$vis_child_count = 0;
+		foreach ($category->children as $child)
+		{
+			$child_visible = $child->category_visible;
+			if ($child_visible)
+			{
+				// Increment Visible Child count
+				++$vis_child_count;
+			}
+		}
+
+		$disabled = "";
+		if (!$enable_parents AND $category->children->count() > 0 AND $vis_child_count >0)
+		{
+			$disabled = " disabled=\"disabled\"";	
+		}
+
+		$html .= form::checkbox($form_field.'[]', $cid, $category_checked, ' class="check-box"'.$disabled);
+		$html .= $category_title;
 
 		return $html;
 	}
