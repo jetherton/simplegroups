@@ -112,6 +112,7 @@ class simplegroups {
 			$categories = ORM::factory('simplegroups_category')			
 				->where('parent_id', '0')
 				->where('applies_to_report', 1)
+				->where('category_visible', 1)
 				->where('simplegroups_groups_id', $group->id)
 				->orderby('category_title', 'ASC')
 				->find_all();
