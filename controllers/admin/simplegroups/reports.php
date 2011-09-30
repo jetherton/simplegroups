@@ -608,24 +608,24 @@ class Reports_Controller extends Admin_simplegroup_Controller
         $form['incident_ampm'] = date('a');
         // initialize custom field array
         $form['custom_field'] = $this->_get_custom_form_fields($id,'',true);
-	$number_of_message_sender = null;
+		$number_of_message_sender = null;
 
         // Locale (Language) Array
         $this->template->content->locale_array = Kohana::config('locale.all_languages');
 
         // Create Categories
         $this->template->content->categories = $this->_get_categories();
-	$this->template->content->group_categories = $this->_get_group_categories();
+		$this->template->content->group_categories = $this->_get_group_categories();
         $this->template->content->new_categories_form = $this->_new_categories_form_arr();
 	
-	$this->template->content->group_name = $this->group->name;
+		$this->template->content->group_name = $this->group->name;
 
         // Time formatting
         $this->template->content->hour_array = $this->_hour_array();
         $this->template->content->minute_array = $this->_minute_array();
         $this->template->content->ampm_array = $this->_ampm_array();
 	
-	$this->template->content->stroke_width_array = $this->_stroke_width_array();
+		$this->template->content->stroke_width_array = $this->_stroke_width_array();
 
         // Get Countries
         $countries = array();

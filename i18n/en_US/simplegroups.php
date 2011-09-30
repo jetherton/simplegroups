@@ -145,6 +145,7 @@
 		'group_set' => 'Group Settings',
 		'print_map'=> 'To view a printer friendly version of this map click',
 		'here'=>'here',
+		'groups_plain'=>'Groups',
 		
 		
 		

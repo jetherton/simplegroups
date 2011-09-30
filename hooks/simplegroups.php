@@ -66,6 +66,159 @@ class simplegroups {
 		
 		//hook into the user being saved so we can save our change of user
 		Event::add('ushahidi_action.user_edit', array($this, '_edit_user'));
+		
+		//if dealing with the
+		if(Router::$controller == "reports")
+		{
+			Event::add('ushahidi_filter.fetch_incidents_set_params', array($this,'_add_simple_group_filter'));
+			
+			Event::add('ushahidi_action.report_filters_ui', array($this,'_add_report_filter_ui'));
+			
+			Event::add('ushahidi_action.header_scripts', array($this, '_add_report_filter_js'));
+		}
+	}
+	
+	
+	/**
+	 * Creates the JS for the reports page so we can turn off and on filtering by group
+	 */
+	public function _add_report_filter_js()
+	{
+		if (isset($_GET['sgid']) AND !is_array($_GET['sgid']) AND intval($_GET['sgid']) >= 0)
+		{
+
+			$view = new View('simplegroups/report_filter_js');
+			$view->selected_group_categories = implode(",", $this->_get_group_categories());
+			$view->render(true);
+		}
+	}
+	
+	
+	/**
+	 * Creates a custom UI for filtering things in the reports page
+	 * 
+	 */
+	public function _add_report_filter_ui()
+	{
+		if (isset($_GET['sgid']) AND !is_array($_GET['sgid']) AND intval($_GET['sgid']) >= 0)
+		{
+			$group = ORM::factory("simplegroups_groups")->where("id", $_GET['sgid'])->find();
+			$view = new View('simplegroups/report_filter_ui');
+			$view->group_name = $group->name;
+			$view->group_id = $group->id;
+			
+			
+			//now the categories
+			$categories = ORM::factory('simplegroups_category')			
+				->where('parent_id', '0')
+				->where('applies_to_report', 1)
+				->where('simplegroups_groups_id', $group->id)
+				->orderby('category_title', 'ASC')
+				->find_all();
+			$view->group_categories = $categories;
+			$view->selected_group_categories = $this->_get_group_categories();
+			
+			$view->render(true);
+			
+
+		}
+	}
+	
+	/**
+	 * This little zinger does all the HTTP GET parsing to figure out what categories are in play
+	 * Enter description here ...
+	 */
+	private function _get_group_categories()
+	{
+		$category_ids = array();
+			
+			//add sql for any simplegroup categories
+			if ( isset($_GET['c']) AND !is_array($_GET['c']) AND strpos($_GET['c'],"sg_") === 0)
+			{
+				// Get the category ID
+				$category_ids[] = intval(substr($_GET['c'],3));			
+			}
+			elseif (isset($_GET['c']) AND is_array($_GET['c']))
+			{
+				// Sanitize each of the category ids
+				
+				foreach ($_GET['c'] as $c_id)
+				{
+					if (strpos($c_id,"sg_") === 0)
+					{
+						$category_ids[] = intval(substr($c_id,3));
+					}
+				}
+			}
+			
+			return $category_ids;
+	}
+	
+	
+	/**
+	 * figures out what the logical operator is
+	 * defaults to OR
+	 */
+	private function _get_logical_operator()
+	{
+		$lo = "or";
+		if ( isset($_GET['lo']) AND !is_array($_GET['lo']) AND strtolower($_GET['lo']) == "and" )
+		{
+			$lo = "and";
+		}
+		return $lo;
+	}
+	
+	/********************************************
+	 * Sets the reports filters to handle simple group stuff
+	 */
+	public function _add_simple_group_filter()
+	{
+		//check for the "sgid" get parameter
+		if (isset($_GET['sgid']) AND !is_array($_GET['sgid']) AND intval($_GET['sgid']) >= 0)
+		{
+			//get the table prefix
+			$table_prefix = Kohana::config('database.default.table_prefix');
+			
+			//get the params
+			$sg_id = intval($_GET['sgid']);
+			$params = Event::$data;
+			array_push($params,	'i.id IN (SELECT DISTINCT incident_id FROM '.$table_prefix.'simplegroups_groups_incident WHERE simplegroups_groups_id = '. $sg_id. ')');
+			
+			//figure out if we're on the backend or not, and if we're not hide private categories
+			$after_base = substr(url::current(), strlen(url::base()));
+			$only_public = (strpos($after_base, "admin") === 0) ? "" : " AND sgc.category_visible = 1 "; 
+			
+			$category_ids = $this->_get_group_categories();
+			
+			// Check if there are any category ids
+			if (count($category_ids) > 0)
+			{
+				//what's the logical operator:
+				if($this->_get_logical_operator() == "or")
+				{
+					$category_ids = implode(",", $category_ids);
+					//at some point this'll need to differential between AND and OR
+					array_push($params,
+						'i.id IN (SELECT DISTINCT incident_id FROM '.$table_prefix.'simplegroups_incident_category sgic '.
+							'INNER JOIN '.$table_prefix.'simplegroups_category sgc ON (sgc.id = sgic.simplegroups_category_id) '.
+							'WHERE (sgc.id IN ('. $category_ids . ') OR sgc.parent_id IN ('.$category_ids.'))'.$only_public.' ) ');
+				}
+				else
+				{
+					foreach($category_ids as $c)
+					{
+						array_push($params,
+						'i.id IN (SELECT DISTINCT incident_id FROM '.$table_prefix.'simplegroups_incident_category sgic '.
+							'INNER JOIN '.$table_prefix.'simplegroups_category sgc ON (sgc.id = sgic.simplegroups_category_id) '.
+							'WHERE ((sgc.id = '. $c . ') OR sgc.parent_id = (' . $c . '))'.$only_public.' ) ');
+					}
+				}
+			}
+			
+			
+			Event::$data = $params;
+		}
 	}
 	
 	/*************************************

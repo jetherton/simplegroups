@@ -13,7 +13,7 @@ class groups_category_Core {
 	/**
 	 * Display category tree with input checkboxes.
 	 */
-	public static function tree($categories, array $selected_categories, $form_field, $columns = 1)
+	public static function tree($categories, array $selected_categories, $form_field, $columns = 1, $enable_parents = false)
 	{
 		$html = '';
 
@@ -41,7 +41,7 @@ class groups_category_Core {
 
 			// Display parent category.
 			$html .= '<li style="width:100%;">';
-			$html .= groups_category::display_category_checkbox($category, $selected_categories, $form_field);
+			$html .= groups_category::display_category_checkbox($category, $selected_categories, $form_field, $enable_parents);
 			if(!$category->category_visible)
 			{
 				$html .= " - ".Kohana::lang("simplegroups.not_visible");
@@ -115,7 +115,7 @@ class groups_category_Core {
 			$disabled = " disabled=\"disabled\"";	
 		}
 
-		$html .= form::checkbox($form_field.'[]', $cid, $category_checked, ' class="check-box"'.$disabled);
+		$html .= form::checkbox($form_field.'[]', $cid, $category_checked, ' class="check-box '.$form_field.'"'.$disabled);
 		$html .= $category_title;
 
 		return $html;

@@ -109,8 +109,8 @@ class Simplegroupmap_json_Controller extends Template_Controller
         
 	adminmap_helper::json_cluster($this, 
 		"reports/view/", 
-		"simplegroups/reports/index/1/".$group_id, 
-		true,
+		"reports?sgid=".$group_id, 
+		false,
 		$group_where, 
 		$joins,
 		$sg_category_to_table_mapping);
