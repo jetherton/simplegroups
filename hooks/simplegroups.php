@@ -67,6 +67,15 @@ class simplegroups {
 		//hook into the user being saved so we can save our change of user
 		Event::add('ushahidi_action.user_edit', array($this, '_edit_user'));
 		
+		//hook into reports being added via the API so we can associate them with a group
+		//if appropriate.
+		Event::add('ushahidi_action.report_submit_api', array($this, '_edit_api_post_incident'));
+		Event::add('ushahidi_action.report_edit_api', array($this, '_edit_api_saved_incident'));
+		
+		
+		
+		
+		
 		//if dealing with the
 		if(Router::$controller == "reports")
 		{
@@ -78,6 +87,56 @@ class simplegroups {
 		}
 	}
 	
+	/**
+	 * when a report is submitted via the API this will check and see if it should be assigned to a
+	 * group.
+	 */
+	public function _report_edit_api()
+	{
+		$incident = Event::$data;
+		
+		//is there any simple groups stuff set?
+		if( isset($this->post_data["sgn"]))
+		{
+			//they are using a simple group name
+			//find the group
+			$group = ORM::factory("simplegroups_groups")
+				->where("name", $this->post_data["sgn"])
+				->find();
+			if(!$group->loaded)
+			{
+				return; //no group found with that name
+			}
+			
+		}
+		elseif(isset($this->post_data["sg"]))
+		{
+			//they are using a simple group ID
+			$group = ORM::factory("simplegroups_groups")
+				->where("id", $this->post_data["sg"])
+				->find();
+			if(!$group->loaded)
+			{
+				return; //no group found with that name
+			}
+		}
+		
+		//now link up the group and the report
+		$group_incident = ORM::factory("simplegroups_groups_incident");
+		$group_incident->incident_id = $incident->id;
+		$group_incident->simplegroups_groups_id = $group->id;
+		$group_incident->save();
+		
+		
+	}
+	
+	/**
+	* Grabs the post data when a report is added via the API
+	 */
+	public function _edit_api_post_incident()
+	{
+		$this->post_data = Event::$data;	
+	}
 	
 	/**
 	 * Creates the JS for the reports page so we can turn off and on filtering by group
