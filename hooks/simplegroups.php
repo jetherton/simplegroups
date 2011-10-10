@@ -94,18 +94,22 @@ class simplegroups {
 	public function _report_edit_api()
 	{
 		$incident = Event::$data;
-		
+		$group = null;
 		//is there any simple groups stuff set?
 		if( isset($this->post_data["sgn"]))
 		{
 			//they are using a simple group name
 			//find the group
-			$group = ORM::factory("simplegroups_groups")
-				->where("name", $this->post_data["sgn"])
-				->find();
-			if(!$group->loaded)
+			$groups = ORM::factory("simplegroups_groups")
+				->find_all();
+			foreach($groups as $g)
 			{
-				return; //no group found with that name
+				$name = strtolower($g->name);
+				if($name == strtolower($this->post_data["sgn"]))
+				{
+					$group = $g;
+					break;
+				}
 			}
 			
 		}
@@ -121,13 +125,15 @@ class simplegroups {
 			}
 		}
 		
+		if($group == null)
+		{
+			return;
+		}
+		
 		//now link up the group and the report
 		$group_incident = ORM::factory("simplegroups_groups_incident");
 		$group_incident->incident_id = $incident->id;
 		$group_incident->simplegroups_groups_id = $group->id;
-		$group_incident->save();
-		
-		
 	}
 	
 	/**
