@@ -91,7 +91,7 @@ class simplegroups {
 	 * when a report is submitted via the API this will check and see if it should be assigned to a
 	 * group.
 	 */
-	public function _report_edit_api()
+	public function _edit_api_saved_incident()
 	{
 		$incident = Event::$data;
 		$group = null;
@@ -129,11 +129,11 @@ class simplegroups {
 		{
 			return;
 		}
-		
 		//now link up the group and the report
 		$group_incident = ORM::factory("simplegroups_groups_incident");
 		$group_incident->incident_id = $incident->id;
 		$group_incident->simplegroups_groups_id = $group->id;
+		$group_incident->save();
 	}
 	
 	/**
@@ -426,6 +426,7 @@ class simplegroups {
 	***************************************/
 	public function _add_forward_to()
 	{
+		
 		//if the person is a group user don't show them this:
 		$user = new User_Model($_SESSION['auth_user']->id);
 		//figure out what group this user is
@@ -485,6 +486,7 @@ class simplegroups {
 		$view->groups_array = $groups_array;
 		$view->item_type = $item_type;
 		$view->render(TRUE);
+		
 	}
 
 	
