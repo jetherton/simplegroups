@@ -2,10 +2,6 @@
 /**
  * simplegroups helper class.
  */
-<<<<<<< HEAD
-=======
-
->>>>>>> 59bb21fec45f69c8809099f023bd1f8ba086660b
 
 
 class groups_Core {
