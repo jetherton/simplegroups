@@ -2,10 +2,6 @@
 /**
  * simplegroups helper class.
  */
-use Ushahidi_API_Library\Site_Info as Site_info;
-use Ushahidi_API_Library\Report_Task_Parameter as Report_param;
-use Ushahidi_API_Library\Report_Task as Report_task;
-use Ushahidi_API_Library\Report_Response as ReportResponse;
 
 
 class groups_Core {
@@ -75,9 +71,10 @@ class groups_Core {
 		
 		$siteInfo = new Site_info($api_url);
 		
-		$reportParams = Report_param::fromORM($incident);
+		$reportParams = UshApiLib_Report_Task_Parameter::fromORM($incident);
 		
-		$reportTask = new Report_task($reportParams, $siteInfo);
+		
+		$reportTask = new UshApiLib_Report_Task($reportParams, $siteInfo);
 		$reportResponse = $reportTask->execute();
 		
 	
