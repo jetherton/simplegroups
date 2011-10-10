@@ -2,6 +2,10 @@
 /**
  * simplegroups helper class.
  */
+<<<<<<< HEAD
+=======
+
+>>>>>>> 59bb21fec45f69c8809099f023bd1f8ba086660b
 
 
 class groups_Core {
@@ -69,11 +73,10 @@ class groups_Core {
 		
 		$api_url = substr($group->own_instance, 0, strpos($group->own_instance, "frontlinesms")). "api";
 		
-		$siteInfo = new Site_info($api_url);
+		$siteInfo = new UshApiLib_Site_Info($api_url);
 		
 		$reportParams = UshApiLib_Report_Task_Parameter::fromORM($incident);
-		
-		
+
 		$reportTask = new UshApiLib_Report_Task($reportParams, $siteInfo);
 		$reportResponse = $reportTask->execute();
 		
