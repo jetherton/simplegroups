@@ -580,8 +580,8 @@ class Reports_Controller extends Admin_simplegroup_Controller
             'custom_field' => array(),
             'incident_active' => '',
             'incident_verified' => '',
-            'incident_source' => '',
-            'incident_information' => '',
+            //'incident_source' => '',
+            //'incident_information' => '',
 	    	'incident_zoom' => ''
         );
 
@@ -852,8 +852,8 @@ class Reports_Controller extends Admin_simplegroup_Controller
 
             $post->add_rules('incident_active','required', 'between[0,1]');
             $post->add_rules('incident_verified','required', 'length[0,1]');
-            $post->add_rules('incident_source','numeric', 'length[1,1]');
-            $post->add_rules('incident_information','numeric', 'length[1,1]');
+            //$post->add_rules('incident_source','numeric', 'length[1,1]');
+            //$post->add_rules('incident_information','numeric', 'length[1,1]');
 
 
             // Action::report_submit_admin - Report Posted
@@ -927,9 +927,9 @@ class Reports_Controller extends Admin_simplegroup_Controller
                 // Incident Evaluation Info
                 $incident->incident_active = $post->incident_active;
                 $incident->incident_verified = $post->incident_verified;
-                $incident->incident_source = $post->incident_source;
-                $incident->incident_information = $post->incident_information;
-		$incident->incident_zoom = (int) $post->incident_zoom;
+                //$incident->incident_source = $post->incident_source;
+                //$incident->incident_information = $post->incident_information;
+				//$incident->incident_zoom = (int) $post->incident_zoom;
                 //Save
                 $incident->save();
 
@@ -1280,7 +1280,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
                         'location_name' => $incident->location->location_name,
                         'country_id' => $incident->location->country_id,
                         'incident_category' => $incident_category,
-			'incident_group_category' => $incident_group_category,
+						'incident_group_category' => $incident_group_category,
                         'incident_news' => $incident_news,
                         'incident_video' => $incident_video,
                         'incident_photo' => $incident_photo,
@@ -1290,9 +1290,9 @@ class Reports_Controller extends Admin_simplegroup_Controller
                         'custom_field' => $this->_get_custom_form_fields($id,$incident->form_id,true),
                         'incident_active' => $incident->incident_active,
                         'incident_verified' => $incident->incident_verified,
-                        'incident_source' => $incident->incident_source,
-                        'incident_information' => $incident->incident_information,
-			'incident_zoom' => $incident->incident_zoom
+                        //'incident_source' => $incident->incident_source,
+                        //'incident_information' => $incident->incident_information,
+						//'incident_zoom' => Kohana::config('settings.default_zoom')
                     );
 
                     // Merge To Form Array For Display
@@ -1404,8 +1404,8 @@ class Reports_Controller extends Admin_simplegroup_Controller
             $this->template->js->longitude = $form['longitude'];
         }
 	
-	$this->template->js->incident_zoom = $form['incident_zoom'];
-	$this->template->js->geometries = $form['geometry'];
+		$this->template->js->incident_zoom = Kohana::config('settings.default_zoom');
+		$this->template->js->geometries = $form['geometry'];
 
         // Inline Javascript
         $this->template->content->date_picker_js = $this->_date_picker_js();
