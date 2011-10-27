@@ -72,7 +72,9 @@ class simplegroups {
 		Event::add('ushahidi_action.report_submit_api', array($this, '_edit_api_post_incident'));
 		Event::add('ushahidi_action.report_edit_api', array($this, '_edit_api_saved_incident'));
 		
-		
+		//hooks for writing out CSV data
+		Event::add('ushahidi_filter.report_download_csv_header', array($this, '_add_csv_headers'));
+		Event::add('ushahidi_filter.report_download_csv_incident', array($this, '_add_csv_incident_info'));
 		
 		
 		
@@ -86,6 +88,56 @@ class simplegroups {
 			Event::add('ushahidi_action.header_scripts', array($this, '_add_report_filter_js'));
 		}
 	}
+	
+	
+	/**
+	 * Adds incident specific data to an CSV
+	 */
+	public function _add_csv_incident_info()
+	{
+		$incident = Event::$data['incident'];
+		$report_csv = Event::$data['report_csv'];
+		
+		//get group name incident		
+		$group = ORM::factory("simplegroups_groups")
+			->join("simplegroups_groups_incident", "simplegroups_groups.id", "simplegroups_groups_incident.simplegroups_groups_id")
+			->where("simplegroups_groups_incident.incident_id", $incident->id)
+			->find();
+		if($group->loaded)
+		{
+			$report_csv .= ",\"".$group->name . "\",\"";
+		}
+		else
+		{
+			$report_csv .= ",,\"";
+		}
+		
+		//get group categories
+		$group_cats = ORM::factory("simplegroups_category")
+			->join("simplegroups_incident_category", "simplegroups_category.id", "simplegroups_incident_category.simplegroups_category_id")
+			->where("simplegroups_incident_category.incident_id", $incident->id)
+			->find_all();
+		$i = 0;
+		foreach($group_cats as $group_cat)
+		{
+			$i++;
+			if($i > 1){$report_csv .= ",";}
+			$report_csv .= $group_cat->category_title;
+		}
+		$report_csv .= "\"";
+		Event::$data['report_csv'] = $report_csv;
+	}
+	
+	/**
+	 * event for adding CSV headers to the CSV output
+	 */
+	public function _add_csv_headers()
+	{
+		$csv = Event::$data;
+		$csv .= ",SIMPLE GROUP NAME,SIMPLE GROUP CATEGORIES";
+		Event::$data = $csv; 
+	}
+	
 	
 	/**
 	 * when a report is submitted via the API this will check and see if it should be assigned to a
