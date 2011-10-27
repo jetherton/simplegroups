@@ -24,6 +24,8 @@ class simplegroups {
 		Event::add('system.pre_controller', array($this, 'add'));
 		$this->table_prefix = Kohana::config('database.default.table_prefix');
 		$this->post_data = null; //initialize this for later use
+		$this->incident_to_groups = null;
+		$this->incident_to_group_categories = null;
 	}
 	
 	/**
@@ -99,13 +101,9 @@ class simplegroups {
 		$report_csv = "";
 		
 		//get group name incident		
-		$group = ORM::factory("simplegroups_groups")
-			->join("simplegroups_groups_incident", "simplegroups_groups.id", "simplegroups_groups_incident.simplegroups_groups_id")
-			->where("simplegroups_groups_incident.incident_id", $incident->id)
-			->find();
-		if($group->loaded)
+		if(isset($this->incident_to_groups[$incident->id]))
 		{
-			$report_csv .= ",\"".$group->name . "\",\"";
+			$report_csv .= ",\"". $this->incident_to_groups[$incident->id] . "\",\"";
 		}
 		else
 		{
@@ -117,20 +115,21 @@ class simplegroups {
 			return;
 		}
 		
-		//get group categories
-		$group_cats = ORM::factory("simplegroups_category")
-			->join("simplegroups_incident_category", "simplegroups_category.id", "simplegroups_incident_category.simplegroups_category_id")
-			->where("simplegroups_incident_category.incident_id", $incident->id)
-			->find_all();
-		$i = 0;
-		foreach($group_cats as $group_cat)
+		//get group categories/////////////////////////////////////////////////////////////
+		if(isset($this->incident_to_group_categories[$incident->id]))
 		{
-			$i++;
-			if($i > 1){$report_csv .= ",";}
-			$report_csv .= $group_cat->category_title;
+			$i = 0;
+			foreach($this->incident_to_group_categories[$incident->id] as $title)
+			{
+				$i++;
+				if($i > 1){$report_csv .= ",";}
+				$report_csv .= $title;
+			}
 		}
+
 		$report_csv .= "\"";
 		Event::$data['report_csv'] = $report_csv;
+		
 	}
 	
 	/**
@@ -141,6 +140,40 @@ class simplegroups {
 		$csv = Event::$data;
 		$csv .= ",SIMPLE GROUP NAME,SIMPLE GROUP CATEGORIES";
 		Event::$data = $csv; 
+		
+		/////////////////////////////////////////////////
+		//preload all the incident and their groups:		
+		$this->incident_to_groups = array();
+		// Get the table prefix
+		$table_prefix = Kohana::config('database.default.table_prefix');
+		$sql = 'SELECT sc.name, sgi.incident_id FROM `'.$table_prefix.'simplegroups_groups` as sc 
+					RIGHT JOIN  '.$table_prefix.'simplegroups_groups_incident as sgi
+					ON sc.id = sgi.simplegroups_groups_id';
+		$db = new Database();
+		$rows = $db->query($sql);
+		foreach($rows as $row)
+		{
+			$this->incident_to_groups[$row->incident_id] = $row->name;	
+		}
+		
+		///////////////////////////////////////////////
+		//preload group category info
+		$this->incident_to_group_categories = array();
+		$sql = 'SELECT sc.category_title, incident_id FROM '.$table_prefix.'simplegroups_category as sc
+					RIGHT JOIN '.$table_prefix.'simplegroups_incident_category as sic ON sic.simplegroups_category_id = sc.id';
+		$db = new Database();
+		$rows = $db->query($sql);
+		foreach($rows as $row)
+		{
+			if(isset($this->incident_to_group_categories[$row->incident_id]))
+			{
+				$this->incident_to_group_categories[$row->incident_id][] = $row->category_title;
+			}	
+			else
+			{
+				$this->incident_to_group_categories[$row->incident_id] = array($row->category_title);
+			}
+		}
 	}
 	
 	
