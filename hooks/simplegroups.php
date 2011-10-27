@@ -96,7 +96,7 @@ class simplegroups {
 	public function _add_csv_incident_info()
 	{
 		$incident = Event::$data['incident'];
-		$report_csv = Event::$data['report_csv'];
+		$report_csv = "";
 		
 		//get group name incident		
 		$group = ORM::factory("simplegroups_groups")
@@ -110,6 +110,11 @@ class simplegroups {
 		else
 		{
 			$report_csv .= ",,\"";
+			//if they aren't part of a group then don't bother
+			//looking for group categories
+			$report_csv .= "\"";
+			Event::$data['report_csv'] = $report_csv;	
+			return;
 		}
 		
 		//get group categories
