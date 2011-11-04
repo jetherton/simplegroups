@@ -89,6 +89,10 @@ class simplegroups {
 			
 			Event::add('ushahidi_action.header_scripts', array($this, '_add_report_filter_js'));
 		}
+		if(Router::$controller == "json" || Router::$controller == "densitymap") //any time the map is brought up
+		{
+			Event::add('ushahidi_filter.fetch_incidents_set_params', array($this,'_add_simple_group_filter'));
+		}
 	}
 	
 	
