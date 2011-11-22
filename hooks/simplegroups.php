@@ -89,10 +89,15 @@ class simplegroups {
 			
 			Event::add('ushahidi_action.header_scripts', array($this, '_add_report_filter_js'));
 		}
-		if(Router::$controller == "json" || Router::$controller == "densitymap") //any time the map is brought up
+		if(Router::$controller == "json" || Router::$controller == "densitymap" ||
+		   Router::$controller == "bigmap_json" || Router::$controller == "iframemap_json" ||
+		   Router::$controller == "adminmap_json") //any time the map is brought up
 		{
 			Event::add('ushahidi_filter.fetch_incidents_set_params', array($this,'_add_simple_group_filter'));
 		}
+		
+		//changing the color of dots and lines when SG categories are in play
+		Event::add('adminmap_filter.features_color', array($this, '_set_colors'));
 	}
 	
 	
@@ -292,6 +297,7 @@ class simplegroups {
 	{
 		$category_ids = array();
 			
+			//the case when it's just one category
 			//add sql for any simplegroup categories
 			if ( isset($_GET['c']) AND !is_array($_GET['c']) AND strpos($_GET['c'],"sg_") === 0)
 			{
@@ -301,15 +307,20 @@ class simplegroups {
 			elseif (isset($_GET['c']) AND is_array($_GET['c']))
 			{
 				// Sanitize each of the category ids
-				
 				foreach ($_GET['c'] as $c_id)
 				{
 					if (strpos($c_id,"sg_") === 0)
 					{
 						$category_ids[] = intval(substr($c_id,3));
 					}
+					else
+					{
+						$non_group_categories[] = $c_id;
+					}
 				}
 			}
+			
+			
 			
 			return $category_ids;
 	}
@@ -357,12 +368,35 @@ class simplegroups {
 				//what's the logical operator:
 				if($this->_get_logical_operator() == "or")
 				{
+					//first we need to find out what the original SQL for categories looked like:
+					$category_sql = $this->_create_default_category_sql();
+					$i = 0;
+					$found_it = false;
+					while($i < count($params))
+					{
+						if($params[$i] == $category_sql)
+						{
+							$found_it = true;
+							break;					
+						}
+						$i++;
+					}
+					//if we found it, lets remove it.
+					if($found_it)
+					{
+						unset($params[$i]);
+					}
+					if(strlen($category_sql) > 0)
+					{
+						$category_sql = ' OR ('.$category_sql.')' ;
+					}
 					$category_ids = implode(",", $category_ids);
-					//at some point this'll need to differential between AND and OR
 					array_push($params,
-						'i.id IN (SELECT DISTINCT incident_id FROM '.$table_prefix.'simplegroups_incident_category sgic '.
+						'(i.id IN (SELECT DISTINCT incident_id FROM '.$table_prefix.'simplegroups_incident_category sgic '.
 							'INNER JOIN '.$table_prefix.'simplegroups_category sgc ON (sgc.id = sgic.simplegroups_category_id) '.
-							'WHERE (sgc.id IN ('. $category_ids . ') OR sgc.parent_id IN ('.$category_ids.'))'.$only_public.' ) ');
+							'WHERE (sgc.id IN ('. $category_ids . ') OR sgc.parent_id IN ('.$category_ids.'))'.$only_public.' ) '.$category_sql. ')');
+					
+					
 				}
 				else
 				{
@@ -832,6 +866,187 @@ class simplegroups {
 		url::redirect(url::site().'admin/simplegroups/dashboard');
 			
 	}//end method _check_for_group
+	
+	
+	//creates the same SQL as the reports helper, so we can then remove it later on
+	private function _create_default_category_sql()
+	{
+		// 
+		// Check for the category parameter
+		//
+
+		$category_sql = "";
+		if ( isset($_GET['c']) AND !is_array($_GET['c']) AND intval($_GET['c']) > 0)
+		{
+			//just one category, so AND has no effect, so just return an empty string
+			return "";
+		}
+		elseif (isset($_GET['c']) AND is_array($_GET['c']))
+		{
+			// Sanitize each of the category ids
+			$category_ids = array();
+			foreach ($_GET['c'] as $c_id)
+			{
+				if (intval($c_id) > 0)
+				{
+					$category_ids[] = intval($c_id);
+				}
+			}
+			// Check if there are any category ids
+			if (count($category_ids) > 0)
+			{
+				$category_ids = implode(",", $category_ids);
+			
+				$category_sql = '(c.id IN ('.$category_ids.') OR c.parent_id IN ('.$category_ids.'))';
+			}
+		}
+		return $category_sql;
+	}
+	
+	
+	/************************************************************************************************
+	* Function, this'll merge colors. Given an array of category IDs it'll return a hex string
+	* of all the colors merged together
+	*/
+	public function _set_colors()
+	{
+		$orginal_colors = Event::$data;
+		//Group categories
+		$sg_cats = $this->_get_group_categories();
+		$category_id = $this->_get_categories();
+
+		
+		
+		//get color
+  		if(((count($sg_cats) == 1 AND intval($sg_cats[0]) == 0) AND (count($category_id) == 1 AND intval($category_id[0]) == 0 )) OR 
+  		(count($sg_cats) == 0 AND count($category_id) == 0))
+		{
+			$colors = array(Kohana::config('settings.default_map_all'));
+		}		
+		else 
+		{	
+			//more than one color
+			$colors = array();
+			foreach($sg_cats as $cat)
+			{
+				$colors[] = ORM::factory('simplegroups_category', $cat)->category_color;
+			}
+			foreach($category_id as $cat)
+			{
+				$colors[] = ORM::factory('category', $cat)->category_color;
+			}			
+		}
+		
+		//check if we're dealing with just one color
+		if(count($colors)==1)
+		{
+			foreach($colors as $color)
+			{
+				Event::$data = $color;	
+				return;
+			}
+		}
+		
+		//now for each color break it into RGB, add them up, then normalize
+		$red = 0;
+		$green = 0;
+		$blue = 0;
+		foreach($colors as $color)
+		{
+			$numeric_colors = $this->_hex2RGB($color);
+			$red = $red + $numeric_colors['red'];
+			$green = $green + $numeric_colors['green'];
+			$blue = $blue + $numeric_colors['blue'];
+		}
+		//now normalize
+		$color_length = sqrt( ($red*$red) + ($green*$green) + ($blue*$blue));
+	
+		//make sure there's no divide by zero
+		if($color_length == 0)
+		{
+			$color_length = 255;
+		}
+		$red = ($red / $color_length) * 255;
+		$green = ($green / $color_length) * 255;
+		$blue = ($blue / $color_length) * 255;
+	
+		
+		//pad with zeros if there's too much space
+		$red = dechex($red);
+		if(strlen($red) < 2)
+		{
+			$red = "0".$red;
+		}
+		$green = dechex($green);
+		if(strlen($green) < 2)
+		{
+			$green = "0".$green;
+		}
+		$blue = dechex($blue);
+		if(strlen($blue) < 2)
+		{
+			$blue = "0".$blue;
+		}
+		//now put the color back together and return it
+		$color_str = $red.$green.$blue;
+		//in case other plugins have something to say about this
+		Event::$data = $color_str;		
+	}//end method merge colors
+	
+	
+	private function _hex2RGB($hexStr, $returnAsString = false, $seperator = ',') 
+	{
+		$hexStr = preg_replace("/[^0-9A-Fa-f]/", '', $hexStr); // Gets a proper hex string
+		$rgbArray = array();
+		if (strlen($hexStr) == 6) 
+		{ //If a proper hex code, convert using bitwise operation. No overhead... faster
+			$colorVal = hexdec($hexStr);
+			$rgbArray['red'] = 0xFF & ($colorVal >> 0x10);
+			$rgbArray['green'] = 0xFF & ($colorVal >> 0x8);
+			$rgbArray['blue'] = 0xFF & $colorVal;
+		} 
+		elseif (strlen($hexStr) == 3) 
+		{ //if shorthand notation, need some string manipulations
+			$rgbArray['red'] = hexdec(str_repeat(substr($hexStr, 0, 1), 2));
+			$rgbArray['green'] = hexdec(str_repeat(substr($hexStr, 1, 1), 2));
+			$rgbArray['blue'] = hexdec(str_repeat(substr($hexStr, 2, 1), 2));
+		} 
+		else 
+		{
+			return false; //Invalid hex color code
+		}
+		return $returnAsString ? implode($seperator, $rgbArray) : $rgbArray; // returns the rgb string or the associative array
+	}
+	
+	
+	/**
+	 * This little zinger does all the HTTP GET parsing to figure out what categories are in play
+	 * Enter description here ...
+	 */
+	private function _get_categories()
+	{
+		$category_ids = array();
+			
+			if ( isset($_GET['c']) AND !is_array($_GET['c']) AND intval($_GET['c']) > 0)
+			{
+				// Get the category ID
+				$category_ids[] = intval($_GET['c']);			
+			}
+			elseif (isset($_GET['c']) AND is_array($_GET['c']))
+			{
+				// Sanitize each of the category ids
+				
+				foreach ($_GET['c'] as $c_id)
+				{
+					if (intval($c_id) > 0)
+					{
+						$category_ids[] = intval($c_id);
+					}
+				}
+			}
+			
+			return $category_ids;
+	}
 	
 
 }//end class

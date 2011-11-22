@@ -67,10 +67,14 @@ class Simplegroups_Controller extends Main_Controller {
 		
 		//setup the map
 		$clustering = Kohana::config('settings.allow_clustering');
-		$json_url = ($clustering == 1) ? "simplegroupmap_json/cluster/$group_id" : "simplegroupmap_json/index/$group_id";
-		$json_timeline_url = "simplegroupmap_json/timeline/$group_id/";
-		adminmap_helper::set_map($this->template, $this->themes, $json_url, $json_timeline_url, 'simplegroups/mapview_js',
-								'simplegroups/frontend_map/main_map', 'simplegroups/frontend_map/main_timeline');
+		
+		$json_url = ($clustering == 1) ? "bigmap_json/cluster" : "bigmap_json";
+		$json_timeline_url = "bigmap_json/timeline/";
+		
+		$urlParams = array('sgid'=>$group_id);
+		
+		adminmap_helper::set_map($this->template, $this->themes, $json_url, $json_timeline_url, 'adminmap/adminmap_js',
+								'simplegroups/frontend_map/main_map', 'simplegroups/frontend_map/main_timeline', $urlParams);
 		
 		//setup the overlays and shares
 		adminmap_helper::set_overlays_shares($this);
