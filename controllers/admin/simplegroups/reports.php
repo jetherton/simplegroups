@@ -184,6 +184,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
 		{
 			$incidents_ids[] = $incident->incident_id;
 		}
+		
 		$category_mapping = array();
 		//make sure there are some messages
 		if(count($incidents_ids) > 0)
@@ -198,6 +199,23 @@ class Reports_Controller extends Admin_simplegroup_Controller
 			foreach($incident_categories as $incident_category)
 			{
 				$category_mapping[$incident_category->incident_id][] = $incident_category;
+			}
+		}
+		
+	
+		$reg_category_mapping = array();
+		//make sure there are some messages
+		if(count($incidents_ids) > 0)
+		{
+		$incident_categories = ORM::factory('category')
+					->select("category.*, incident_category.incident_id AS incident_id")
+					->join('incident_category', 'category.id', 'incident_category.category_id')
+					->in("incident_category.incident_id", implode(',', $incidents_ids))
+					->find_all();
+
+			foreach($incident_categories as $incident_category)
+			{
+				$reg_category_mapping[$incident_category->incident_id][] = $incident_category;
 			}
 		}
 
@@ -258,6 +276,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
 		$view->persons = $persons;
 		$view->verifieds = $verifieds;
 		$view->incident_translations = $incident_translations;
+		$view->reg_category_mapping = $reg_category_mapping;
 		$view->total_items = $pagination->total_items;
 		
 		return $view;

@@ -100,6 +100,19 @@
 									$incident_category = "";
 									$i = 0;
 									
+									if(isset($reg_category_mapping[$incident_id]))
+									{
+										foreach($reg_category_mapping[$incident_id] as $category)
+										{
+											$i++;
+											if($i > 1)
+											{
+												$incident_category.= "&nbsp;|&nbsp;";
+											}
+											$incident_category .= "<span style=\"color:#9b0000;\">" . $category->category_title . "</span>&nbsp;&nbsp;";
+										}
+									}
+									
 									if(isset($category_mapping[$incident_id]))
 									{
 										foreach($category_mapping[$incident_id] as $category)
@@ -112,6 +125,7 @@
 											$incident_category .= "<span style=\"color:#9b0000;\">" . $category->category_title . "</span>&nbsp;&nbsp;";
 										}
 									}
+									
 
 									// Incident Status
 									$incident_approved = $incident->incident_active;

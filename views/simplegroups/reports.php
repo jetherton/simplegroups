@@ -73,6 +73,7 @@
 							$table_view->persons = $persons;
 							$table_view->verifieds = $verifieds;
 							$table_view->incident_translations = $incident_translations;
+							$table_view->reg_category_mapping = $reg_category_mapping;
 							$table_view->render(TRUE);
 						?>
 					</div>
