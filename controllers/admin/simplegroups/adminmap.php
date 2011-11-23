@@ -31,7 +31,8 @@ class adminmap_Controller extends Admin_simplegroup_Controller
 		$clustering = Kohana::config('settings.allow_clustering');
 		$json_url = ($clustering == 1) ? "admin/simplegroups/adminmap_json/cluster" : "admin/simplegroups/adminmap_json";
 		$json_timeline_url = "admin/simplegroups/adminmap_json/timeline/";
-		adminmap_helper::set_map($this->template, $this->template, $json_url, $json_timeline_url, 'simplegroups/mapview_js');
+		//adminmap_helper::set_map($this->template, $this->template, $json_url, $json_timeline_url, 'simplegroups/mapview_js');
+		adminmap_helper::set_map($this->template, $this->template, $json_url, $json_timeline_url);
 		
 		//setup the overlays and shares
 		adminmap_helper::set_overlays_shares($this);

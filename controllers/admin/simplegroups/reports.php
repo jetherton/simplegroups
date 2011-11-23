@@ -21,6 +21,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
         parent::__construct();
 
         $this->template->this_page = 'reports';
+        $this->params = array('all_reports' => TRUE);
     }
 
 
@@ -33,38 +34,41 @@ class Reports_Controller extends Admin_simplegroup_Controller
 
         $this->template->content = new View('simplegroups/reports');
         $this->template->content->title = Kohana::lang('ui_admin.reports');
+        
+        //hook into the event for the reports::fetch_incidents() method
+		Event::add('ushahidi_filter.fetch_incidents_set_params', array($this,'_add_incident_filters'));
 
         // check, has the form been submitted?
         $form_error = FALSE;
         $form_saved = FALSE;
         $form_action = "";
         
-	$this->handle_post_variables();
-
-
-	$db = new Database;
-
-
-	$this->template->content = $this->setup_report_table($this->template->content);
-		
-        $this->template->content->form_error = $form_error;
-        $this->template->content->form_saved = $form_saved;
-        $this->template->content->form_action = $form_action;
-	$this->template->content->category_array = $this->setup_category_dropdown_filter();
-        
-	// Status Tab
-	if (!empty($_GET['status']))
-	{
-		$status = $_GET['status'];
-	}
-	else
-	{
-		$status = "0";
-	}
-        $this->template->content->status = $status;
-
-        // Javascript Header
-        $this->template->js = new View('simplegroups/reports_js');
+		$this->handle_post_variables();
+	
+	
+		$db = new Database;
+	
+	
+		$this->template->content = $this->setup_report_table($this->template->content);
+			
+	    $this->template->content->form_error = $form_error;
+	    $this->template->content->form_saved = $form_saved;
+	    $this->template->content->form_action = $form_action;
+		$this->template->content->category_array = $this->setup_category_dropdown_filter();
+	        
+		// Status Tab
+		if (!empty($_GET['status']))
+		{
+			$status = $_GET['status'];
+		}
+		else
+		{
+			$status = "0";
+		}
+		$this->template->content->status = $status;
+	
+	        // Javascript Header
+	    $this->template->js = new View('simplegroups/reports_js');
     }//end of index()
 
 
@@ -81,24 +85,14 @@ class Reports_Controller extends Admin_simplegroup_Controller
 
 			if (strtolower($status) == 'a')
 			{
-			$filter = 'incident_active = 0';
+				array_push($this->params, 'i.incident_active = 0');
 			}
 			elseif (strtolower($status) == 'v')
 			{
-			$filter = 'incident_verified = 0';
-			}
-			else
-			{
-			$status = "0";
-			$filter = '1=1';
-			}
+				array_push($this->params, 'i.incident_verified = 0');
+			}			
 		}
-		else
-		{
-			$status = "0";
-			$filter = "1=1";
-		}
-
+		
 		// Get Search Keywords (If Any)
 		if (isset($_GET['k']))
 		{
@@ -115,94 +109,18 @@ class Reports_Controller extends Admin_simplegroup_Controller
 			$keyword_raw = $this->input->xss_clean($keyword_raw);
 
 			$filter .= " AND (".$this->_get_searchstring($keyword_raw).")";
-		}
-		else
-		{
-			$keyword_raw = "";
+			
+			array_push($this->params, $filter);
 		}
 
 
 
-		// Category ID
-		$category_ids=array();
-		if( isset($_GET['c']) AND ! empty($_GET['c']) )
-		{
-			$category_ids = explode(",", $_GET['c']); //get rid of that trailing ","
-		}
-		else
-		{
-			$category_ids = array("0");
-		}
-		
-		// logical operator
-		$logical_operator = "or";
-		if( isset($_GET['lo']) AND ! empty($_GET['lo']) )
-		{
-			$logical_operator = $_GET['lo'];
-		}
-
-		$show_unapproved="3"; //1 show only approved, 2 show only unapproved, 3 show all
-		//figure out if we're showing unapproved stuff or what.
-		if (isset($_GET['u']) AND !empty($_GET['u']))
-		{
-		    $show_unapproved = (int) $_GET['u'];
-		}
-		$approved_text = "";
-		if($show_unapproved == 1)
-		{
-			$approved_text = "incident.incident_active = 1 ";
-		}
-		else if ($show_unapproved == 2)
-		{
-			$approved_text = "incident.incident_active = 0 ";
-		}
-		else if ($show_unapproved == 3)
-		{
-			$approved_text = " (incident.incident_active = 0 OR incident.incident_active = 1) ";
-		}
-		
-		// Start Date
-	    $start_date = (isset($_GET['s']) AND !empty($_GET['s'])) ? (int) $_GET['s'] : "0";
+		//make sure they always get reports from their group
+		$_GET['sgid'] = $this->group->id;
 	
-	    // End Date
-	    $end_date = (isset($_GET['e']) AND !empty($_GET['e'])) ? (int) $_GET['e'] : "0";
 		
-		$filter .= ($start_date) ? " AND incident.incident_date >= '" . date("Y-m-d H:i:s", $start_date) . "'" : "";
-	    $filter .= ($end_date) ? " AND incident.incident_date <= '" . date("Y-m-d H:i:s", $end_date) . "'" : "";
-		
-		
-		$location_where = "";
-		// Break apart location variables, if necessary
-		$southwest = array();
-		if (isset($_GET['sw']))
-		{
-			$southwest = explode(",",$_GET['sw']);
-		}
-
-		$northeast = array();
-		if (isset($_GET['ne']))
-		{
-			$northeast = explode(",",$_GET['ne']);
-		}
-
-		if ( count($southwest) == 2 AND count($northeast) == 2 )
-		{
-			$lon_min = (float) $southwest[0];
-			$lon_max = (float) $northeast[0];
-			$lat_min = (float) $southwest[1];
-			$lat_max = (float) $northeast[1];
-
-			$location_where = ' AND (location.latitude >='.$lat_min.' AND location.latitude <='.$lat_max.' AND location.longitude >='.$lon_min.' AND location.longitude <='.$lon_max.') ';
-
-		}
-		
-		$group_where = " (simplegroups_groups_incident.simplegroups_groups_id = ".$this->group->id.") ";
-		
-		////////////////////////////////////////////////////////////////////////////////////////////
-		//Get the incidents and the number of incidents
-		$reports_count = groups::get_reports_count($category_ids, $approved_text, $location_where. " AND ". $filter. " AND ". $group_where
-			, $logical_operator);
-		
+		// Fetch all incidents
+		$all_incidents = reports::fetch_incidents();
 		
 		// Pagination
 		$pagination = new Pagination(array(
@@ -210,14 +128,15 @@ class Reports_Controller extends Admin_simplegroup_Controller
 				'style' => 'ajax_classic',
 				'query_string' => 'page',
 				'items_per_page' => (int) Kohana::config('settings.items_per_page_admin'),
-				'total_items' => $reports_count
+				'total_items' => $all_incidents->count()
 				));
 				
+		Event::run('ushahidi_filter.pagination',$pagination);				
 
-		$incidents = groups::get_reports($category_ids,  $approved_text, $location_where. " AND ". $filter. " AND ". $group_where, 
-			$logical_operator, 
-			"incident.incident_date", "DESC",
-			(int) Kohana::config('settings.items_per_page_admin'), $pagination->sql_offset );
+		// Reports
+		$incidents = Incident_Model::get_incidents(reports::$params, $pagination);
+		
+		
 			
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//Setup the Location information for each incident
@@ -240,7 +159,22 @@ class Reports_Controller extends Admin_simplegroup_Controller
 		{
 		    $locations = array();
 		}
-
+		
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Setup the person information for each incident
+		$persons = array();
+		foreach ($incidents as $incident)
+		{
+		    $person = ORM::factory('incident_person')->where('incident_id', $incident->incident_id)->find();
+		    if($person->loaded)
+		    {
+		    	$persons[$incident->incident_id] = $person;
+		    }
+		    else 
+		    {
+		    	$persons[$incident->incident_id] = null;
+		    }
+		}
 		
 		
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -248,7 +182,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
 		$incidents_ids = array();
 		foreach($incidents as $incident)
 		{
-		$incidents_ids[] = $incident->id;
+			$incidents_ids[] = $incident->incident_id;
 		}
 		$category_mapping = array();
 		//make sure there are some messages
@@ -268,6 +202,38 @@ class Reports_Controller extends Admin_simplegroup_Controller
 		}
 
 
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Get verified info for the edit log
+		$verifieds = array();
+		foreach ($incidents as $incident)
+		{
+		    $verified = ORM::factory('verify')->where('incident_id', $incident->incident_id)->find_all();
+		    if(count($verified) > 0)
+		    {
+		    	$verifieds[$incident->incident_id] = $verified;
+		    }
+		    else 
+		    {
+		    	$verifieds[$incident->incident_id] = null;
+		    }
+		}
+		
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Get the translations for each incident
+		$incident_translations = array();
+		foreach ($incidents as $incident)
+		{
+		    $translations = ORM::factory('incident_lang')->where('incident_id', $incident->incident_id)->find_all();
+		    if(count($translations) > 0)
+		    {
+		    	$incident_translations[$incident->incident_id] = $translations;
+		    }
+		    else 
+		    {
+		    	$incident_translations[$incident->incident_id] = null;
+		    }
+		}
+		
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//Gets a list of countries to better specify the location
@@ -289,6 +255,9 @@ class Reports_Controller extends Admin_simplegroup_Controller
 		$view->countries = $countries;
 		$view->incidents = $incidents;
 		$view->pagination = $pagination;
+		$view->persons = $persons;
+		$view->verifieds = $verifieds;
+		$view->incident_translations = $incident_translations;
 		$view->total_items = $pagination->total_items;
 		
 		return $view;
@@ -2143,6 +2112,22 @@ class Reports_Controller extends Admin_simplegroup_Controller
 				$this->template->content->form_error = 1;
 			}
 		} // _POST
+	}
+	
+	
+	/**
+	 * Adds extra filter paramters to the reports::fetch_incidents()
+	 * method. This way we can add 'all_reports=>true and other filters
+	 * that don't come standard sinc we are on the backend. 
+	 * Works by simply adding in SQL conditions to the params
+	 * array of the reprots::fetch_incidents() method
+	 * @return none
+	 */
+	public function _add_incident_filters()
+	{
+		$params = Event::$data;
+		$params = array_merge($params, $this->params);
+		Event::$data = $params;
 	}
     
 }//end class

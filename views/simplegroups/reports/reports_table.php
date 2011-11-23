@@ -43,7 +43,7 @@
 								}
 								foreach ($incidents as $incident)
 								{
-									$incident_id = $incident->id;
+									$incident_id = $incident->incident_id;
 									$incident_title = $incident->incident_title;
 									$incident_description = text::limit_chars(strip_tags($incident->incident_description), 150, "...", true);
 									$incident_date = $incident->incident_date;
@@ -55,10 +55,11 @@
 									{
 										$submit_mode = "WEB";
 										// Who submitted the report?
-										if ($incident->incident_person->id)
+										$person = $persons[$incident_id];
+										if ($person != null)
 										{
 											// Report was submitted by a visitor
-											$submit_by = $incident->incident_person->person_first . " " . $incident->incident_person->person_last;
+											$submit_by = $person->person_first . " " . $person->person_last;
 										}
 										else
 										{
@@ -98,15 +99,6 @@
 									// Retrieve Incident Categories
 									$incident_category = "";
 									$i = 0;
-									foreach($incident->incident_category as $category)
-									{
-										$i++;
-										if($i > 1)
-										{
-											$incident_category .= "&nbsp;|&nbsp;";
-										}
-										$incident_category .= "<span style=\"color:#9b0000;\">" . $category->category->category_title . "</span>";
-									}
 									
 									if(isset($category_mapping[$incident_id]))
 									{
@@ -126,12 +118,13 @@
 									$incident_verified = $incident->incident_verified;
 									
 									// Get Edit Log
-									$edit_count = $incident->verify->count();
+									$incident_log = $verifieds[$incident_id];
+									$edit_count = count($incident_log);
 									$edit_css = ($edit_count == 0) ? "post-edit-log-red" : "post-edit-log-gray";
 									$edit_log  = "<div class=\"".$edit_css."\">";
 									$edit_log .= "<a href=\"javascript:showLog('edit_log_".$incident_id."')\">".Kohana::lang('ui_admin.edit_log').":</a> (".$edit_count.")</div>";
 									$edit_log .= "<div id=\"edit_log_".$incident_id."\" class=\"post-edit-log\"><ul>";
-									foreach ($incident->verify as $verify)
+									foreach ($incident_log as $verify)
 									{
 										$edit_log .= "<li>".Kohana::lang('ui_admin.edited_by')." ".$verify->user->name." : ".$verify->verified_date."</li>";
 									}
@@ -141,13 +134,17 @@
 									$i = 1;
 									$incident_translation  = "<div class=\"post-trans-new\">";
 									$incident_translation .= "<a href=\"" . url::base() . 'admin/simplegroups/reports/translate/?iid=' . $incident_id . "\">".strtoupper(Kohana::lang('ui_main.add_translation')).":</a></div>";
-									foreach ($incident->incident_lang as $translation) {
-										$incident_translation .= "<div class=\"post-trans\">";
-										$incident_translation .= Kohana::lang('ui_main.translation'). $i . ": ";
-										$incident_translation .= "<a href=\"" . url::base() . 'admin/simplegroups/reports/translate/'. $translation->id .'/?iid=' . $incident_id . "\">"
-											. text::limit_chars($translation->incident_title, 150, "...", true)
-											. "</a>";
-										$incident_translation .= "</div>";
+									if(isset($incident_translations[$incident_id]))
+									{
+										$incident_langs = $incident_translations[$incident_id];
+										foreach ($incident_langs as $translation) {
+											$incident_translation .= "<div class=\"post-trans\">";
+											$incident_translation .= Kohana::lang('ui_main.translation'). $i . ": ";
+											$incident_translation .= "<a href=\"" . url::base() . 'admin/simplegroups/reports/translate/'. $translation->id .'/?iid=' . $incident_id . "\">"
+												. text::limit_chars($translation->incident_title, 150, "...", true)
+												. "</a>";
+											$incident_translation .= "</div>";
+										}
 									}
 									?>
 									<tr>

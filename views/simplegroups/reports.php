@@ -70,6 +70,9 @@
 							$table_view->locations = $locations;
 							$table_view->countries = $countries;
 							$table_view->category_mapping = $category_mapping;
+							$table_view->persons = $persons;
+							$table_view->verifieds = $verifieds;
+							$table_view->incident_translations = $incident_translations;
 							$table_view->render(TRUE);
 						?>
 					</div>
