@@ -357,8 +357,7 @@ class simplegroups {
 			array_push($params,	'i.id IN (SELECT DISTINCT incident_id FROM '.$table_prefix.'simplegroups_groups_incident WHERE simplegroups_groups_id = '. $sg_id. ')');
 			
 			//figure out if we're on the backend or not, and if we're not hide private categories
-			$after_base = substr(url::current(), strlen(url::base()));
-			$only_public = (strpos($after_base, "admin") === 0) ? "" : " AND sgc.category_visible = 1 "; 
+			$only_public = (strpos(url::current(), "admin/") === 0) ? "" : " AND sgc.category_visible = 1 "; 
 			
 			$category_ids = $this->_get_group_categories();
 			
@@ -372,10 +371,11 @@ class simplegroups {
 					$category_sql = $this->_create_default_category_sql();
 					$i = 0;
 					$found_it = false;
-					while($i < count($params))
+					foreach($params as $key=>$value)
 					{
-						if($params[$i] == $category_sql)
+						if(strcmp($value, $category_sql) == 0)
 						{
+							$i = $key;
 							$found_it = true;
 							break;					
 						}
@@ -408,9 +408,7 @@ class simplegroups {
 							'WHERE ((sgc.id = '. $c . ') OR sgc.parent_id = (' . $c . '))'.$only_public.' ) ');
 					}
 				}
-			}
-			
-			
+			}			
 			Event::$data = $params;
 		}
 	}
