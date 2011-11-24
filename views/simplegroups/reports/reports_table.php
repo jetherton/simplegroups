@@ -41,9 +41,10 @@
 									</tr>
 								<?php
 								}
-								foreach ($incidents as $incident)
+								//foreach ($incidents as $incident)
+								foreach($orm_incidents as $incident)
 								{
-									$incident_id = $incident->incident_id;
+									$incident_id = $incident->id;
 									$incident_title = $incident->incident_title;
 									$incident_description = text::limit_chars(strip_tags($incident->incident_description), 150, "...", true);
 									$incident_date = $incident->incident_date;
@@ -132,8 +133,16 @@
 									$incident_verified = $incident->incident_verified;
 									
 									// Get Edit Log
-									$incident_log = $verifieds[$incident_id];
-									$edit_count = count($incident_log);
+									if(!isset($verifieds[$incident_id]))
+									{
+										$incident_log = array();
+										$edit_count = 0;
+									}
+									else 
+									{
+										$incident_log = $verifieds[$incident_id];
+										$edit_count = count($incident_log);
+									}
 									$edit_css = ($edit_count == 0) ? "post-edit-log-red" : "post-edit-log-gray";
 									$edit_log  = "<div class=\"".$edit_css."\">";
 									$edit_log .= "<a href=\"javascript:showLog('edit_log_".$incident_id."')\">".Kohana::lang('ui_admin.edit_log').":</a> (".$edit_count.")</div>";

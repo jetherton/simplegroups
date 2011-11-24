@@ -177,6 +177,23 @@ class Reports_Controller extends Admin_simplegroup_Controller
 		}
 		
 		
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Setup the user information for each incident
+		$orm_incidents = array();
+		foreach ($incidents as $incident)
+		{
+		    $orm_incident = ORM::factory('incident')->where('id', $incident->incident_id)->find();
+		    if($orm_incident->loaded)
+		    {
+		    	$orm_incidents[$incident->incident_id] = $orm_incident;
+		    }
+		    else 
+		    {
+		    	$orm_incidents[$incident->incident_id] = null;
+		    }
+		}
+		
+		
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//use this to make a mapping of simplegroup categories to reports	
 		$incidents_ids = array();
@@ -278,6 +295,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
 		$view->incident_translations = $incident_translations;
 		$view->reg_category_mapping = $reg_category_mapping;
 		$view->total_items = $pagination->total_items;
+		$view->orm_incidents = $orm_incidents;
 		
 		return $view;
 		
