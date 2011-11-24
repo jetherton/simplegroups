@@ -20,7 +20,6 @@
  
 		var currentPage = "1";
 		var currentStatus = "O";
-		var currentStatus = "O";
 
 		// Ajax Submission
 		function reportAction ( action, confirmAction, incident_id, ui_id )
@@ -130,7 +129,7 @@
 			var cat_id = encodeURIComponent($("#cat_filter").val());
 			
 			//get the HTML for the next set of kid admin areas
-			$.get("<?php echo url::base() ?>admin/simplegroups/reports/get_table?c="+cat_id+"&page="+currentPage+"&status="+currentStatus,
+			$.get("<?php echo url::base() ?>admin/simplegroups/reports/get_table?c="+cat_id+"&page="+currentPage+"&u="+currentStatus,
 				function(data){								
 					var parent = $('#table_holder').parent();
 					$('#table_holder').remove();

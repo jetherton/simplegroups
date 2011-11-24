@@ -21,8 +21,8 @@
 				<div class="tabs">
 					<!-- tabset -->
 					<ul class="tabset">
-						<li><a id="status_filter_0" href="#" onclick="changeStatus('0'); return false;" <?php if ($status != 'a' && $status !='v') echo "class=\"active\""; ?>><?php echo Kohana::lang('ui_main.show_all');?></a></li>
-						<li><a id="status_filter_a"href="#" onclick="changeStatus('a'); return false;"<?php if ($status == 'a') echo "class=\"active\""; ?>><?php echo Kohana::lang('ui_main.awaiting_approval');?></a></li>
+						<li><a id="status_filter_0" href="#" onclick="changeStatus('0'); return false;" <?php if ($status != '2' && $status !='v') echo "class=\"active\""; ?>><?php echo Kohana::lang('ui_main.show_all');?></a></li>
+						<li><a id="status_filter_2"href="#" onclick="changeStatus('2'); return false;"<?php if ($status == '2') echo "class=\"active\""; ?>><?php echo Kohana::lang('ui_main.awaiting_approval');?></a></li>
 						<li><a id="status_filter_v"href="#" onclick="changeStatus('v'); return false;"<?php if ($status == 'v') echo "class=\"active\""; ?>><?php echo Kohana::lang('ui_main.awaiting_verification');?></a></li>
 					</ul>
 					<!-- tab -->
