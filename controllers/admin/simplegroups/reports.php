@@ -35,8 +35,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
         $this->template->content = new View('simplegroups/reports');
         $this->template->content->title = Kohana::lang('ui_admin.reports');
         
-        //hook into the event for the reports::fetch_incidents() method
-		Event::add('ushahidi_filter.fetch_incidents_set_params', array($this,'_add_incident_filters'));
+        
 
         // check, has the form been submitted?
         $form_error = FALSE;
@@ -77,17 +76,16 @@ class Reports_Controller extends Admin_simplegroup_Controller
 	//creates the table of messages
 	private function setup_report_table($view)
 	{
+		//hook into the event for the reports::fetch_incidents() method
+		Event::add('ushahidi_filter.fetch_incidents_set_params', array($this,'_add_incident_filters'));
+		
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//Setup the filters and such.
-		if (!empty($_GET['status']))
+		if (!empty($_GET['u']))
 		{
-			$status = $_GET['status'];
+			$status = $_GET['u'];
 
-			if (strtolower($status) == 'a')
-			{
-				array_push($this->params, 'i.incident_active = 0');
-			}
-			elseif (strtolower($status) == 'v')
+			if (strtolower($status) == 'v')
 			{
 				array_push($this->params, 'i.incident_verified = 0');
 			}			
@@ -2166,5 +2164,18 @@ class Reports_Controller extends Admin_simplegroup_Controller
 		$params = array_merge($params, $this->params);
 		Event::$data = $params;
 	}
+	
+	/**
+	* Adds extra filter paramters to the reports::fetch_incidents()
+	* method. This way we can add filters for non-verified incidents
+	* @return none
+	*/
+	public function _add_incident_verified_filters()
+	{
+		$params = Event::$data;
+		array_push($params, 'i.incident_verified = 0');
+		Event::$data = $params;
+	}
+	
     
 }//end class
