@@ -67,14 +67,7 @@
 							$table_view->pagination = $pagination;
 							$table_view->total_items = $total_items;
 							$table_view->incidents = $incidents;
-							$table_view->locations = $locations;
-							$table_view->countries = $countries;
 							$table_view->category_mapping = $category_mapping;
-							$table_view->persons = $persons;
-							$table_view->verifieds = $verifieds;
-							$table_view->incident_translations = $incident_translations;
-							$table_view->reg_category_mapping = $reg_category_mapping;
-							$table_view->orm_incidents = $orm_incidents;
 							$table_view->render(TRUE);
 						?>
 					</div>

@@ -41,8 +41,7 @@
 									</tr>
 								<?php
 								}
-								//foreach ($incidents as $incident)
-								foreach($orm_incidents as $incident)
+								foreach ($incidents as $incident)
 								{
 									$incident_id = $incident->id;
 									$incident_title = $incident->incident_title;
@@ -56,7 +55,7 @@
 									{
 										$submit_mode = "WEB";
 										// Who submitted the report?
-										$person = $persons[$incident_id];
+										$person = $incident->incident_person;
 										if ($person != null)
 										{
 											// Report was submitted by a visitor
@@ -95,24 +94,11 @@
 										$submit_by = $incident->message->message_from;
 									}
 
-									$incident_location = $locations[$incident->location_id];
+									$incident_location = $incident->location;
 
 									// Retrieve Incident Categories
 									$incident_category = "";
 									$i = 0;
-									
-									if(isset($reg_category_mapping[$incident_id]))
-									{
-										foreach($reg_category_mapping[$incident_id] as $category)
-										{
-											$i++;
-											if($i > 1)
-											{
-												$incident_category.= "&nbsp;|&nbsp;";
-											}
-											$incident_category .= "<span style=\"color:#9b0000;\">" . $category->category_title . "</span>&nbsp;&nbsp;";
-										}
-									}
 									
 									if(isset($category_mapping[$incident_id]))
 									{
@@ -127,20 +113,31 @@
 										}
 									}
 									
+									foreach($incident->category as $category)
+									{
+										$i++;
+										if($i > 1)
+										{
+											$incident_category.= "&nbsp;|&nbsp;";
+										}
+										$incident_category .= "<span style=\"color:#9b0000;\">" . $category->category_title . "</span>&nbsp;&nbsp;";
+									}
+
+									
 
 									// Incident Status
 									$incident_approved = $incident->incident_active;
 									$incident_verified = $incident->incident_verified;
 									
 									// Get Edit Log
-									if(!isset($verifieds[$incident_id]))
+									if($incident->verify)
 									{
 										$incident_log = array();
 										$edit_count = 0;
 									}
 									else 
 									{
-										$incident_log = $verifieds[$incident_id];
+										$incident_log = $incident->verify;
 										$edit_count = count($incident_log);
 									}
 									$edit_css = ($edit_count == 0) ? "post-edit-log-red" : "post-edit-log-gray";
@@ -157,9 +154,9 @@
 									$i = 1;
 									$incident_translation  = "<div class=\"post-trans-new\">";
 									$incident_translation .= "<a href=\"" . url::base() . 'admin/simplegroups/reports/translate/?iid=' . $incident_id . "\">".strtoupper(Kohana::lang('ui_main.add_translation')).":</a></div>";
-									if(isset($incident_translations[$incident_id]))
+									if($incident->incident_lang)
 									{
-										$incident_langs = $incident_translations[$incident_id];
+										$incident_langs = $incident->incident_lang;
 										foreach ($incident_langs as $translation) {
 											$incident_translation .= "<div class=\"post-trans\">";
 											$incident_translation .= Kohana::lang('ui_main.translation'). $i . ": ";
@@ -178,11 +175,11 @@
 												<p><?php echo $incident_description; ?>... <a href="<?php echo url::base() . 'admin/simplegroups/reports/edit/' . $incident_id; ?>" class="more"><?php echo Kohana::lang('ui_main.more');?></a></p>
 											</div>
 											<ul class="info">
-												<li class="none-separator"><?php echo Kohana::lang('ui_main.location');?>: <strong><?php echo $incident_location; ?></strong>, <strong><?php echo $countries[Kohana::config('settings.default_country')]; ?></strong></li>
-												<li><?php echo Kohana::lang('ui_main.submitted_by');?> <strong><?php echo $submit_by; ?></strong><?php echo Kohana::lang('simplegroups.via');?><strong><?php echo $submit_mode; ?></strong></li>
+												<li class="none-separator"><?php echo Kohana::lang('ui_main.location');?>: <strong><?php echo $incident_location; ?></strong></li>
+												<li><?php echo Kohana::lang('ui_main.submitted_by');?> <strong> <?php echo $submit_by; ?></strong> <?php echo Kohana::lang('simplegroups.via');?><strong> <?php echo $submit_mode; ?></strong></li>
 											</ul>
 											<ul class="links">
-												<li class="none-separator"><?php echo Kohana::lang('ui_main.categories');?>:<?php echo $incident_category; ?></li>
+												<li class="none-separator"><?php echo Kohana::lang('ui_main.categories');?>: <?php echo $incident_category; ?></li>
 											</ul>
 											<?php
 											echo $edit_log;

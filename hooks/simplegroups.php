@@ -408,7 +408,7 @@ class simplegroups {
 							'WHERE ((sgc.id = '. $c . ') OR sgc.parent_id = (' . $c . '))'.$only_public.' ) ');
 					}
 				}
-			}			
+			}	
 			Event::$data = $params;
 		}
 	}

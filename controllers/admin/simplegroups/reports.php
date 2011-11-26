@@ -22,6 +22,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
 
         $this->template->this_page = 'reports';
         $this->params = array('all_reports' => TRUE);
+        
     }
 
 
@@ -136,61 +137,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
 		
 		
 			
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Setup the Location information for each incident
-		$location_ids = array();
-		foreach ($incidents as $incident)
-		{
-		    $location_ids[] = $incident->location_id;
-		}
-		//check if location_ids is not empty
-		if( count($location_ids ) > 0 ) 
-		{
-		    $locations_result = ORM::factory('location')->in('id',implode(',',$location_ids))->find_all();
-		    $locations = array();
-		    foreach ($locations_result as $loc)
-		    {
-			$locations[$loc->id] = $loc->location_name;
-		    }
-		}
-		else
-		{
-		    $locations = array();
-		}
-		
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Setup the person information for each incident
-		$persons = array();
-		foreach ($incidents as $incident)
-		{
-		    $person = ORM::factory('incident_person')->where('incident_id', $incident->incident_id)->find();
-		    if($person->loaded)
-		    {
-		    	$persons[$incident->incident_id] = $person;
-		    }
-		    else 
-		    {
-		    	$persons[$incident->incident_id] = null;
-		    }
-		}
-		
-		
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Setup the user information for each incident
-		$orm_incidents = array();
-		foreach ($incidents as $incident)
-		{
-		    $orm_incident = ORM::factory('incident')->where('id', $incident->incident_id)->find();
-		    if($orm_incident->loaded)
-		    {
-		    	$orm_incidents[$incident->incident_id] = $orm_incident;
-		    }
-		    else 
-		    {
-		    	$orm_incidents[$incident->incident_id] = null;
-		    }
-		}
-		
+	
 		
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//use this to make a mapping of simplegroup categories to reports	
@@ -218,82 +165,19 @@ class Reports_Controller extends Admin_simplegroup_Controller
 		}
 		
 	
-		$reg_category_mapping = array();
-		//make sure there are some messages
-		if(count($incidents_ids) > 0)
+		if(count($incidents) > 0)
 		{
-		$incident_categories = ORM::factory('category')
-					->select("category.*, incident_category.incident_id AS incident_id")
-					->join('incident_category', 'category.id', 'incident_category.category_id')
-					->in("incident_category.incident_id", implode(',', $incidents_ids))
-					->find_all();
-
-			foreach($incident_categories as $incident_category)
-			{
-				$reg_category_mapping[$incident_category->incident_id][] = $incident_category;
-			}
-		}
-
-
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Get verified info for the edit log
-		$verifieds = array();
-		foreach ($incidents as $incident)
-		{
-		    $verified = ORM::factory('verify')->where('incident_id', $incident->incident_id)->find_all();
-		    if(count($verified) > 0)
-		    {
-		    	$verifieds[$incident->incident_id] = $verified;
-		    }
-		    else 
-		    {
-		    	$verifieds[$incident->incident_id] = null;
-		    }
-		}
-		
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Get the translations for each incident
-		$incident_translations = array();
-		foreach ($incidents as $incident)
-		{
-		    $translations = ORM::factory('incident_lang')->where('incident_id', $incident->incident_id)->find_all();
-		    if(count($translations) > 0)
-		    {
-		    	$incident_translations[$incident->incident_id] = $translations;
-		    }
-		    else 
-		    {
-		    	$incident_translations[$incident->incident_id] = null;
-		    }
-		}
-		
-
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//Gets a list of countries to better specify the location
-		$countries = array();
-		foreach (ORM::factory('country')->orderby('country')->find_all() as $country)
-		{
-		    // Create a list of all categories
-		    $this_country = $country->country;
-		    if (strlen($this_country) > 35)
-		    {
-			$this_country = substr($this_country, 0, 35) . "...";
-		    }
-		    $countries[$country->id] = $this_country;
-		}
+			$incidents = ORM::factory("incident")
+				->in("incident.id", implode(',', $incidents_ids))
+				->find_all();
+		}	
 		
 		
-		$view->locations = $locations;	
+			
 		$view->category_mapping = $category_mapping;
-		$view->countries = $countries;
 		$view->incidents = $incidents;
 		$view->pagination = $pagination;
-		$view->persons = $persons;
-		$view->verifieds = $verifieds;
-		$view->incident_translations = $incident_translations;
-		$view->reg_category_mapping = $reg_category_mapping;
-		$view->total_items = $pagination->total_items;
-		$view->orm_incidents = $orm_incidents;
+		$view->total_items = $pagination->total_items;		
 		
 		return $view;
 		

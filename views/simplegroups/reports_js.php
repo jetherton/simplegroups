@@ -129,7 +129,7 @@
 			var cat_id = encodeURIComponent($("#cat_filter").val());
 			
 			//get the HTML for the next set of kid admin areas
-			$.get("<?php echo url::base() ?>admin/simplegroups/reports/get_table?c="+cat_id+"&page="+currentPage+"&u="+currentStatus,
+			$.get("<?php echo url::base() ?>admin/simplegroups/reports/get_table?c%5B%5D="+cat_id+"&page="+currentPage+"&u="+currentStatus,
 				function(data){								
 					var parent = $('#table_holder').parent();
 					$('#table_holder').remove();
