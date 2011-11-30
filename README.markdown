@@ -29,8 +29,8 @@ This plugin requires:
 
 Installation
 ----------------
-1. Install the Admin Map plugin found here: http://apps.ushahidi.com/p/adminmap/source/download/master/. This plugin allows the group users to see a map of their reports on the backend.
-2. Install the Ushahidi API Library plugin found here: http://apps.ushahidi.com/p/ushahidiapilibrary/ - You only need to do this if you want to be able to forward reports to another ushahidi instance
+1. Install the Admin Map plugin found here: https://github.com/jetherton/adminmap. This plugin allows the group users to see a map of their reports on the backend.
+2. Install the Ushahidi API Library plugin found here: https://github.com/jetherton/ushahidiapilibrary - You only need to do this if you want to be able to forward reports to another ushahidi instance
 3. Copy the entire /simplegroups/ directory into your /plugins/ directory.
 4. Activate the plugin.
 5. Then use the plugin settings page to create groups and assign members to them. Note, for a user to be a member they must be given the role of "groupuser"
