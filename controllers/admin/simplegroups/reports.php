@@ -133,7 +133,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
 		Event::run('ushahidi_filter.pagination',$pagination);				
 
 		// Reports
-		$incidents = Incident_Model::get_incidents(reports::$params, $pagination);
+		$incidents = Incident_Model::get_incidents(reports::$params, $pagination, "i.incident_date", "DESC");
 		
 		
 			
@@ -169,6 +169,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
 		{
 			$incidents = ORM::factory("incident")
 				->in("incident.id", implode(',', $incidents_ids))
+				->orderby('incident_date', 'desc')
 				->find_all();
 		}	
 		
