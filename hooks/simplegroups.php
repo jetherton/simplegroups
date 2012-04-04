@@ -33,6 +33,11 @@ class simplegroups {
 	 */
 	public function add()
 	{
+	
+		//if we're using v2.2 the makers of Ushahidi were nice enough to give a event that lets us know
+		//we have a new login
+		Event::add('ushahidi_action.user_login', array($this, '_check_for_group_login'));
+		
 		//sends group users to the group only part of the site
 		Event::add('ushahidi_action.admin_header_top_left', array($this, '_check_for_group'));	
 
@@ -842,6 +847,39 @@ class simplegroups {
 	public function _check_for_group()
 	{
 		$user = new User_Model($_SESSION['auth_user']->id);
+		$group_id = groups::get_user_group($user);
+		$role = ORM::factory("role")
+			->join("roles_users", "roles_users.role_id", "roles.id")
+			->where("roles_users.user_id", $user->id)
+			->where("name", "simplegroups")
+			->find();
+					
+		if (!$group_id) //don't belong to a group
+		{
+			//but do they have the role of a groupie and they're just not assigned to a group yet?
+			if($role->name == "simplegroups")
+			{
+				url::redirect(url::site().'admin/simplegroups/nogroup');
+			}
+			
+			return;
+		}
+		
+		//the person is a member of a group so redirect them to the group dashboard
+		url::redirect(url::site().'admin/simplegroups/dashboard');
+			
+	}//end method _check_for_group
+	
+	
+		/**
+	 * Here we check and see if the user logged in is part of a group
+	 * If they are we re direct them to only the content they can see
+	 * This differs from the above in that it's called right when the
+	 * user is logged in and the user object is passed in by the event
+	 */
+	public function _check_for_group_login()
+	{
+		$user = Event::$data;
 		$group_id = groups::get_user_group($user);
 		$role = ORM::factory("role")
 			->join("roles_users", "roles_users.role_id", "roles.id")
