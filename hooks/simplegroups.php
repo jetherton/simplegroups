@@ -260,6 +260,12 @@ class simplegroups {
 			$view->selected_group_categories = implode(",", $this->_get_group_categories());
 			$view->render(true);
 		}
+		else
+		{		
+			$view = new View('simplegroups/report_filter_js_g');
+			$view->selected_group_categories = array();
+			$view->render(true);
+		}
 	}
 	
 	
@@ -289,9 +295,16 @@ class simplegroups {
 			$view->selected_group_categories = $this->_get_group_categories();
 			
 			$view->render(true);
-			
-
 		}
+		else
+		{
+			//get a list of groups
+			$groups = ORM::factory("simplegroups_groups")->find_all();
+			$view = new View('simplegroups/report_filter_ui_g');
+			$view->groups = $groups;
+			$view->render(true);
+		}
+		
 	}
 	
 	/**
@@ -364,11 +377,12 @@ class simplegroups {
 			//figure out if we're on the backend or not, and if we're not hide private categories
 			$only_public = (strpos(url::current(), "admin/") === 0) ? "" : " AND sgc.category_visible = 1 "; 
 			
-			$category_ids = $this->_get_group_categories();
-			
+			$category_ids = $this->_get_group_categories();			
 			// Check if there are any category ids
+			print_r($category_ids);
 			if (count($category_ids) > 0)
 			{
+				
 				//what's the logical operator:
 				if($this->_get_logical_operator() == "or")
 				{

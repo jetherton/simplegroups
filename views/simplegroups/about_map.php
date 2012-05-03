@@ -201,6 +201,8 @@
 				<div id="adminmap_map_embedd">
 
 					<INPUT style="width: auto; margin:6px; font-size:18px;" TYPE="BUTTON" VALUE="Print this Map" ONCLICK="window.location.href='<?php echo url::base()."printmap/groups/".$group_id; ?>'">  				
+					&nbsp;&nbsp;
+					<INPUT style="width: auto; margin:6px; font-size:18px;" TYPE="BUTTON" VALUE="List Reports" ONCLICK="window.location.href='<?php echo url::base()."reports?sgid=".$group_id; ?>'">  				
 				<br/>
 				<?php echo Kohana::lang("adminmap.embedd_html")?>
 				<br/>
