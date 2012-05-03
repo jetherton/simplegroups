@@ -263,6 +263,7 @@ class simplegroups {
 		else
 		{		
 			$view = new View('simplegroups/report_filter_js_g');
+			$view = new View('simplegroups/report_filter_js_g');
 			$view->selected_group_categories = array();
 			$view->render(true);
 		}
@@ -379,7 +380,6 @@ class simplegroups {
 			
 			$category_ids = $this->_get_group_categories();			
 			// Check if there are any category ids
-			print_r($category_ids);
 			if (count($category_ids) > 0)
 			{
 				
