@@ -487,7 +487,7 @@ class Settings_Controller extends Admin_simplegroup_Controller
 					$filename = upload::save('category_image');
 					if ($filename)
 					{
-						$new_filename = "simplegroups_category_".$category->id."_".time();
+						$new_filename = "groups/simplegroups_category_".$category->id."_".time();
 
 						// Resize Image to 32px if greater
 						Image::factory($filename)->resize(32,32,Image::HEIGHT)
