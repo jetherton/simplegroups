@@ -200,11 +200,20 @@ class SimpleGroupsReportsImporter {
 						$this->categories_added[] = $category->id;
 						$this->group_category_ids[$categoryname] = $category->id; // Now category_id is known: This time, and for the rest of the import.
 					}
-					$incident_category = ORM::factory("simplegroups_incident_category");
-					$incident_category->incident_id = $incident->id;
-					$incident_category->simplegroups_category_id = $this->group_category_ids[$categoryname];
-					$incident_category->save();
-					$this->incident_categories_added[] = $incident_category->id;
+					//first check to make sure this isn't a duplicate category. Seems people sometimes like to add the same category more than once, and
+					//of course databases don't like that
+					$ic = ORM::factory("simplegroups_incident_category")
+						->where('incident_id', $incident->id)
+						->where('simplegroups_category_id', $this->group_category_ids[$categoryname])
+						->find();
+					if(!$ic->loaded)
+					{
+						$incident_category = ORM::factory("simplegroups_incident_category");
+						$incident_category->incident_id = $incident->id;
+						$incident_category->simplegroups_category_id = $this->group_category_ids[$categoryname];
+						$incident_category->save();
+						$this->incident_categories_added[] = $incident_category->id;
+					}
 				} // empty categoryname not allowed
 			} // add categories to incident
 		} // if CATEGORIES column exists
