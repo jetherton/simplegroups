@@ -992,7 +992,6 @@ class Reports_Controller extends Admin_simplegroup_Controller
                 // STEP 5: SAVE PERSONAL INFORMATION
                 ORM::factory('Incident_Person')->where('incident_id',$incident->id)->delete_all();      // Delete Previous Entries
                 $person = new Incident_Person_Model();
-                $person->location_id = $location->id;
                 $person->incident_id = $incident->id;
                 $person->person_first = $post->person_first;
                 $person->person_last = $post->person_last;

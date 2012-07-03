@@ -60,10 +60,9 @@ class Simplegroups_Controller extends Main_Controller {
 		}
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Setup the map
-		adminmap_helper::setup_adminmap($this, "simplegroups/about_map", "simplegroups/css/simplegroupmap");
+		enhancedmap_helper::setup_enhancedmap($this, "simplegroups/about_map", "simplegroups/css/simplegroupmap");
 		
-		//get the categories
-		adminmap_helper::set_categories($this, false, $group);
+		
 		
 		//setup the map
 		$clustering = Kohana::config('settings.allow_clustering');
@@ -73,12 +72,29 @@ class Simplegroups_Controller extends Main_Controller {
 		
 		$urlParams = array('sgid'=>$group_id);
 		
-		adminmap_helper::set_map($this->template, $this->themes, $json_url, $json_timeline_url, 'adminmap/adminmap_js',
+		
+		
+			
+		enhancedmap_helper::set_map($this->template, $this->themes, $json_url, $json_timeline_url, 'enhancedmap/adminmap_js',
 								'simplegroups/frontend_map/main_map', 'simplegroups/frontend_map/main_timeline', $urlParams);
 		
+		
+		//boolean filter
+		$this->template->content->div_boolean_filter = enhancedmap_helper::get_boolean_filter();
+		
+		//category filter
+		$this->template->content->div_category_filter = enhancedmap_helper::set_categories(false, $group, 'simplegroups/categories_filter');
+		
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//setup the overlays and shares
-		adminmap_helper::set_overlays_shares($this);
-	
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+		
+		//layers
+		$this->template->content->div_layers_filter = enhancedmap_helper::set_layers();
+		
+		//shares
+		$this->template->content->div_shares_filter = enhancedmap_helper::set_shares(false, false);
 		
 		
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
