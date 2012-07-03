@@ -1698,7 +1698,8 @@ class Reports_Controller extends Admin_simplegroup_Controller
 
     function download()
     {
-        
+        $cat_array = array();
+        $group_cat_array = array();
 	$permissions = groups::get_permissions_for_user($this->user->id);
 	if(!$permissions["edit_group_settings"] )
 	{
@@ -1812,7 +1813,13 @@ class Reports_Controller extends Admin_simplegroup_Controller
                     }
                     
                     if ($item == 3) {
-                        $report_csv .= ",CATEGORY";			
+                        $cats = ORM::factory('category')->where('category_visible','1')->find_all();
+                        foreach($cats as $cat)
+                        {
+                        	$report_csv .= ',"'.$this->_csv_text($cat->category_title).'"';
+                        	$cat_array[$cat->id] = $cat->category_title;
+                        }			
+                        
                     }
                     
                     if ($item == 4) {
@@ -1824,7 +1831,13 @@ class Reports_Controller extends Admin_simplegroup_Controller
                     }
 		    if($item == 6)
 		    {
-			$report_csv .= ",GROUP CATEGORY";
+				
+				$cats = ORM::factory('simplegroups_category')->where('category_visible','1')->find_all();
+				foreach($cats as $cat)
+				{
+					$report_csv .= ',"'.$this->_csv_text($cat->category_title).'"';
+					$group_cat_array[$cat->id] = $cat->category_title;
+				}
 		    }
                 }
                 $report_csv .= ",APPROVED,VERIFIED";
@@ -1857,16 +1870,29 @@ class Reports_Controller extends Admin_simplegroup_Controller
 
                             case 3:
 				//first do the site wide categories
-                                $report_csv .= ',"';
-                            
-                                foreach($incident->incident_category as $category)
+                                                            	
+                                foreach($cat_array as $cat_id=>$cat_title)
                                 {
-                                    if ($category->category->category_title)
-                                    {
-                                        $report_csv .= $this->_csv_text($category->category->category_title) . ", ";
-                                    }
+                                	$found = false;
+                                	foreach($incident->incident_category as $category)
+                                	{
+                                		if($category->category->id == $cat_id)
+                                		{
+                                			$found = true;
+                                			break;
+                                		}
+                                	}
+                                	
+                                	if($found)
+                                	{
+                                		$report_csv .= ', "'.$this->_csv_text($cat_title).'"';
+                                	}
+                                	else
+                                	{
+                                		$report_csv .= ', ""';
+                                	}
                                 }
-                                $report_csv .= '"';
+                                                                
 				
                             break;
                         
@@ -1880,20 +1906,36 @@ class Reports_Controller extends Admin_simplegroup_Controller
 			    
 			    case 6:
 				//the do the group specific categories
-				$report_csv .= ',"';
+				
 				//get the categories
 				$group_categories = ORM::factory("simplegroups_category")
 					->join("simplegroups_incident_category", "simplegroups_incident_category.simplegroups_category_id", "simplegroups_category.id")
 					->where("simplegroups_incident_category.incident_id", $incident->id)
 					->find_all();
-                                foreach($group_categories as $category)
+				
+                                      
+                                foreach($group_cat_array as $cat_id=>$cat_title)
                                 {
-                                    if ($category->category_title)
-                                    {
-                                        $report_csv .= $this->_csv_text($category->category_title) . ", ";
-                                    }
+                                	$found = false;
+                                	foreach($group_categories as $category)
+                                	{
+                                		if($category->id == $cat_id)
+                                		{
+                                			$found = true;
+                                			break;
+                                		}
+                                	}
+                                	 
+                                	if($found)
+                                	{
+                                		$report_csv .= ', "'.$this->_csv_text($cat_title).'"';
+                                	}
+                                	else
+                                	{
+                                		$report_csv .= ', ""';
+                                	}
                                 }
-                                $report_csv .= '"';
+                
 			    break;
                         }
                     }
