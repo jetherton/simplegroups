@@ -12,7 +12,7 @@ class Adminmap_json_Controller extends Admin_simplegroup_Controller
     public $auto_render = TRUE;
 
     // Main template
-    public $template = 'json';
+    public $template = 'bigmap_json';
 
     // Table Prefix
     protected $table_prefix;
@@ -39,7 +39,7 @@ class Adminmap_json_Controller extends Admin_simplegroup_Controller
 	*/
 	function index()
 	{
-		adminmap_helper::json_index($this);
+		enhancedmap_helper::json_index($this);
 	}
 
 
@@ -49,7 +49,7 @@ class Adminmap_json_Controller extends Admin_simplegroup_Controller
      public function cluster()
     {
     	
-		adminmap_helper::json_cluster($this, true, '_self', 'simplegroups/');
+		enhancedmap_helper::json_cluster($this, true, '_self', 'simplegroups/');
     }
 
 
@@ -58,7 +58,7 @@ class Adminmap_json_Controller extends Admin_simplegroup_Controller
 	*/
 	public function timeline( $category_ids = "0," )
 	{
-		adminmap_helper::json_timeline($this);		
+		enhancedmap_helper::json_timeline($this);		
 	}
 
 
