@@ -1795,10 +1795,65 @@ class Reports_Controller extends Admin_simplegroup_Controller
 
                 // Retrieve reports
                 $incidents = ORM::factory('incident')
-			->join("simplegroups_groups_incident", "simplegroups_groups_incident.incident_id", "incident.id")
-			->where($filter)
-			->orderby('incident_dateadd', 'desc')
-			->find_all();
+					->join("simplegroups_groups_incident", "simplegroups_groups_incident.incident_id", "incident.id")
+					->where($filter)
+					->orderby('incident_dateadd', 'desc')
+					->find_all();
+                
+                
+                //the idea here is to reduce database load
+                //get category mappings
+                $db = new Database();                
+                $table_prefix = Kohana::config('database.default.table_prefix');                
+                $results = $db->query('SELECT '.$table_prefix.'incident_category.incident_id, incident_category.category_id
+                		FROM  `'.$table_prefix.'incident_category`
+                		JOIN '.$table_prefix.'simplegroups_groups_incident ON 
+                			'.$table_prefix.'simplegroups_groups_incident.incident_id = '.$table_prefix.'incident_category.incident_id
+						JOIN '.$table_prefix.'incident ON 
+                			'.$table_prefix.'incident.id = '.$table_prefix.'incident_category.incident_id                		
+                		WHERE '. $filter .' ORDER BY '.$table_prefix.'incident_category.incident_id');
+                
+				//setup an array to map incidents to categories                
+                $incidents_to_cats = array();
+                $current_incident = 0;
+                foreach($results as $r)
+                {
+                	if($current_incident != $r->incident_id)
+                	{
+                		$current_incident = $r->incident_id;
+                		$incidents_to_cats[$current_incident] = array();                		
+                	}
+                	
+                	$incidents_to_cats[$current_incident][$r->category_id] = $r->category_id;
+                }
+                
+                
+                
+                //the idea here is to reduce database load
+                //get simple group category mappings
+                $db = new Database();
+                $results = $db->query('SELECT '.$table_prefix.'simplegroups_incident_category.incident_id, simplegroups_incident_category.simplegroups_category_id
+                		FROM  `'.$table_prefix.'simplegroups_incident_category`
+                		JOIN '.$table_prefix.'simplegroups_groups_incident ON
+                		'.$table_prefix.'simplegroups_groups_incident.incident_id = '.$table_prefix.'simplegroups_incident_category.incident_id
+                		JOIN '.$table_prefix.'incident ON
+                		'.$table_prefix.'incident.id = '.$table_prefix.'simplegroups_incident_category.incident_id
+                		WHERE '. $filter .' ORDER BY '.$table_prefix.'simplegroups_incident_category.incident_id');
+                
+                //setup an array to map incidents to categories
+                $incidents_to_simple_cats = array();
+                $current_incident = 0;
+                foreach($results as $r)
+                {
+                	if($current_incident != $r->incident_id)
+                	{
+                		$current_incident = $r->incident_id;
+                		$incidents_to_simple_cats[$current_incident] = array();
+                	}
+                	 
+                	$incidents_to_simple_cats[$current_incident][$r->simplegroups_category_id] = $r->simplegroups_category_id;
+                	
+                }
 
                 // Column Titles
                 $report_csv = "#,INCIDENT TITLE,INCIDENT DATE";
@@ -1858,41 +1913,30 @@ class Reports_Controller extends Admin_simplegroup_Controller
                             break;
 
                             case 2:
-				if($strip_html)
-				{
-					$report_csv .= ',"'.$this->_csv_text(strip_tags($incident->incident_description)).'"';
-				}
-				else
-				{
-					$report_csv .= ',"'.$this->_csv_text($incident->incident_description).'"';
-				}
+								if($strip_html)
+								{
+									$report_csv .= ',"'.$this->_csv_text(strip_tags($incident->incident_description)).'"';
+								}
+								else
+								{
+									$report_csv .= ',"'.$this->_csv_text($incident->incident_description).'"';
+								}
                             break;
 
                             case 3:
-				//first do the site wide categories
-                                                            	
+								//first do the site wide categories
+           	
                                 foreach($cat_array as $cat_id=>$cat_title)
                                 {
-                                	$found = false;
-                                	foreach($incident->incident_category as $category)
+                                	if(isset($incidents_to_cats[$incident->id][$cat_id]))
                                 	{
-                                		if($category->category->id == $cat_id)
-                                		{
-                                			$found = true;
-                                			break;
-                                		}
-                                	}
-                                	
-                                	if($found)
-                                	{
-                                		$report_csv .= ', "'.$this->_csv_text($cat_title).'"';
+                                		$report_csv .= ',"'.$this->_csv_text($cat_title).'"';
                                 	}
                                 	else
                                 	{
-                                		$report_csv .= ', ""';
+                                		$report_csv .= ',""';
                                 	}
                                 }
-                                                                
 				
                             break;
                         
@@ -1904,41 +1948,23 @@ class Reports_Controller extends Admin_simplegroup_Controller
                                 $report_csv .= ',"'.$this->_csv_text($incident->location->longitude).'"';
                             break;
 			    
-			    case 6:
-				//the do the group specific categories
-				
-				//get the categories
-				$group_categories = ORM::factory("simplegroups_category")
-					->join("simplegroups_incident_category", "simplegroups_incident_category.simplegroups_category_id", "simplegroups_category.id")
-					->where("simplegroups_incident_category.incident_id", $incident->id)
-					->find_all();
-				
-                                      
+			    			case 6:
+								//the do the group specific categories
+
                                 foreach($group_cat_array as $cat_id=>$cat_title)
                                 {
-                                	$found = false;
-                                	foreach($group_categories as $category)
+                                	if(isset($incidents_to_simple_cats[$incident->id][$cat_id]))
                                 	{
-                                		if($category->id == $cat_id)
-                                		{
-                                			$found = true;
-                                			break;
-                                		}
-                                	}
-                                	 
-                                	if($found)
-                                	{
-                                		$report_csv .= ', "'.$this->_csv_text($cat_title).'"';
+                                		$report_csv .= ',"'.$this->_csv_text($cat_title).'"';
                                 	}
                                 	else
                                 	{
-                                		$report_csv .= ', ""';
+                                		$report_csv .= ',""';
                                 	}
                                 }
-                
-			    break;
+						    break;
                         }
-                    }
+                    }//loop over data in post
                     
                     if ($incident->incident_active)
                     {
@@ -1959,7 +1985,8 @@ class Reports_Controller extends Admin_simplegroup_Controller
                     }
                     
                     $report_csv .= "\n";
-                }
+                    
+                }//loop over incidents
 
                 // Output to browser
                 header("Content-type: text/x-csv");
