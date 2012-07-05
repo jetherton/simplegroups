@@ -1982,7 +1982,8 @@ class Reports_Controller extends Admin_simplegroup_Controller
                                 {
                                 	if(isset($incidents_to_cats[$incident->id][$cat_id]))
                                 	{
-                                		$report_csv .= ',"'.$this->_csv_text($cat_title).'"';
+                                		//$report_csv .= ',"'.$this->_csv_text($cat_title).'"';
+                                		$report_csv .= ',"YES"';
                                 	}
                                 	else
                                 	{
@@ -2007,7 +2008,8 @@ class Reports_Controller extends Admin_simplegroup_Controller
                                 {
                                 	if(isset($incidents_to_simple_cats[$incident->id][$cat_id]))
                                 	{
-                                		$report_csv .= ',"'.$this->_csv_text($cat_title).'"';
+                                		//$report_csv .= ',"'.$this->_csv_text($cat_title).'"';
+                                		$report_csv .= ',"YES"';
                                 	}
                                 	else
                                 	{
