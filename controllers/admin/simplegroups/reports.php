@@ -1756,25 +1756,77 @@ class Reports_Controller extends Admin_simplegroup_Controller
             // Test to see if things passed the rule checks
             if ($post->validate())
             {
-                // Add Filters
-                $filter = " ( 1=1";
-                // Report Type Filter
-                foreach($post->data_point as $item)
-                {
-                    if ($item == 1) {
-                        $filter .= " OR incident_active = 1 ";
-                    }
-                    if ($item == 2) {
-                        $filter .= " OR incident_verified = 1 ";
-                    }
-                    if ($item == 3) {
-                        $filter .= " OR incident_active = 0 ";
-                    }
-                    if ($item == 4) {
-                        $filter .= " OR incident_verified = 0 ";
-                    }
-                }
-                $filter .= ") ";
+              // Set filter
+				$filter = '( ';
+				
+				// Report Type Filter
+				$show_active = false;
+				$show_inactive = false;
+				$show_verified = false;
+				$show_not_verified = false;
+				
+				if (in_array(1, $post->data_point))
+				{
+					$show_active = true;
+				}
+
+				if (in_array(3, $post->data_point))
+				{
+					$show_inactive = true;
+				}
+
+				if (in_array(2, $post->data_point))
+				{
+					$show_verified = true;
+				}
+
+				if (in_array(4, $post->data_point))
+				{
+					$show_not_verified = true;
+				}
+				
+				// Handle active or not active
+				if ($show_active && !$show_inactive)
+				{
+					$filter .= ' incident_active = 1 ';
+				}
+				elseif (!$show_active && $show_inactive)
+				{
+					$filter .= '  incident_active = 0 ';
+				}
+				elseif ($show_active && $show_inactive)
+				{
+					$filter .= ' (incident_active = 1 OR incident_active = 0) ';
+				}
+				
+				// Neither active nor inactive selected: select nothing
+				elseif (!$show_active && !$show_inactive)
+				{
+					// Equivalent to 1 = 0
+					$filter .= ' (incident_active = 0 AND incident_active = 1) ';
+				}
+				
+				$filter .= ' AND ';
+				
+				// Handle verified
+				if($show_verified && !$show_not_verified)
+				{				
+					$filter .= ' incident_verified = 1 ';
+				}
+				elseif (!$show_verified && $show_not_verified)
+				{				
+					$filter .= ' incident_verified = 0 ';
+				}
+				elseif ($show_verified && $show_not_verified)
+				{				
+					$filter .= ' (incident_verified = 0 OR incident_verified = 1) ';
+				}
+				elseif (!$show_verified && !$show_not_verified)
+				{				
+					$filter .= ' (incident_verified = 0 AND incident_verified = 1) ';
+				}
+				
+				$filter .= ') ';
 		
 		//are we stripping out HTML from the description
 		$strip_html = false;
@@ -1795,10 +1847,65 @@ class Reports_Controller extends Admin_simplegroup_Controller
 
                 // Retrieve reports
                 $incidents = ORM::factory('incident')
-			->join("simplegroups_groups_incident", "simplegroups_groups_incident.incident_id", "incident.id")
-			->where($filter)
-			->orderby('incident_dateadd', 'desc')
-			->find_all();
+					->join("simplegroups_groups_incident", "simplegroups_groups_incident.incident_id", "incident.id")
+					->where($filter)
+					->orderby('incident_dateadd', 'desc')
+					->find_all();
+                
+                
+                //the idea here is to reduce database load
+                //get category mappings
+                $db = new Database();                
+                $table_prefix = Kohana::config('database.default.table_prefix');                
+                $results = $db->query('SELECT '.$table_prefix.'incident_category.incident_id, incident_category.category_id
+                		FROM  `'.$table_prefix.'incident_category`
+                		JOIN '.$table_prefix.'simplegroups_groups_incident ON 
+                			'.$table_prefix.'simplegroups_groups_incident.incident_id = '.$table_prefix.'incident_category.incident_id
+						JOIN '.$table_prefix.'incident ON 
+                			'.$table_prefix.'incident.id = '.$table_prefix.'incident_category.incident_id                		
+                		WHERE '. $filter .' ORDER BY '.$table_prefix.'incident_category.incident_id');
+                
+				//setup an array to map incidents to categories                
+                $incidents_to_cats = array();
+                $current_incident = 0;
+                foreach($results as $r)
+                {
+                	if($current_incident != $r->incident_id)
+                	{
+                		$current_incident = $r->incident_id;
+                		$incidents_to_cats[$current_incident] = array();                		
+                	}
+                	
+                	$incidents_to_cats[$current_incident][$r->category_id] = $r->category_id;
+                }
+                
+                
+                
+                //the idea here is to reduce database load
+                //get simple group category mappings
+                $db = new Database();
+                $results = $db->query('SELECT '.$table_prefix.'simplegroups_incident_category.incident_id, simplegroups_incident_category.simplegroups_category_id
+                		FROM  `'.$table_prefix.'simplegroups_incident_category`
+                		JOIN '.$table_prefix.'simplegroups_groups_incident ON
+                		'.$table_prefix.'simplegroups_groups_incident.incident_id = '.$table_prefix.'simplegroups_incident_category.incident_id
+                		JOIN '.$table_prefix.'incident ON
+                		'.$table_prefix.'incident.id = '.$table_prefix.'simplegroups_incident_category.incident_id
+                		WHERE '. $filter .' ORDER BY '.$table_prefix.'simplegroups_incident_category.incident_id');
+                
+                //setup an array to map incidents to categories
+                $incidents_to_simple_cats = array();
+                $current_incident = 0;
+                foreach($results as $r)
+                {
+                	if($current_incident != $r->incident_id)
+                	{
+                		$current_incident = $r->incident_id;
+                		$incidents_to_simple_cats[$current_incident] = array();
+                	}
+                	 
+                	$incidents_to_simple_cats[$current_incident][$r->simplegroups_category_id] = $r->simplegroups_category_id;
+                	
+                }
 
                 // Column Titles
                 $report_csv = "#,INCIDENT TITLE,INCIDENT DATE";
@@ -1858,24 +1965,24 @@ class Reports_Controller extends Admin_simplegroup_Controller
                             break;
 
                             case 2:
-				if($strip_html)
-				{
-					$report_csv .= ',"'.$this->_csv_text(strip_tags($incident->incident_description)).'"';
-				}
-				else
-				{
-					$report_csv .= ',"'.$this->_csv_text($incident->incident_description).'"';
-				}
+								if($strip_html)
+								{
+									$report_csv .= ',"'.$this->_csv_text(strip_tags($incident->incident_description)).'"';
+								}
+								else
+								{
+									$report_csv .= ',"'.$this->_csv_text($incident->incident_description).'"';
+								}
                             break;
 
                             case 3:
-				//first do the site wide categories
-                                                            	
+								//first do the site wide categories
+           	
                                 foreach($cat_array as $cat_id=>$cat_title)
                                 {
-                                	$found = false;
-                                	foreach($incident->incident_category as $category)
+                                	if(isset($incidents_to_cats[$incident->id][$cat_id]))
                                 	{
+
                                 		if($category->category->id == $cat_id)
                                 		{
                                 			$found = true;
@@ -1885,14 +1992,15 @@ class Reports_Controller extends Admin_simplegroup_Controller
                                 	
                                 	if($found)
                                 	{
-                                		$report_csv .= ',"'.$this->_csv_text($cat_title).'"';
+
+                                		//$report_csv .= ',"'.$this->_csv_text($cat_title).'"';
+                                		$report_csv .= ',"YES"';
                                 	}
                                 	else
                                 	{
                                 		$report_csv .= ',""';
                                 	}
                                 }
-                                                                
 				
                             break;
                         
@@ -1904,41 +2012,25 @@ class Reports_Controller extends Admin_simplegroup_Controller
                                 $report_csv .= ',"'.$this->_csv_text($incident->location->longitude).'"';
                             break;
 			    
-			    case 6:
-				//the do the group specific categories
-				
-				//get the categories
-				$group_categories = ORM::factory("simplegroups_category")
-					->join("simplegroups_incident_category", "simplegroups_incident_category.simplegroups_category_id", "simplegroups_category.id")
-					->where("simplegroups_incident_category.incident_id", $incident->id)
-					->find_all();
-				
-                                      
+			    			case 6:
+								//the do the group specific categories
+
                                 foreach($group_cat_array as $cat_id=>$cat_title)
                                 {
-                                	$found = false;
-                                	foreach($group_categories as $category)
+                                	if(isset($incidents_to_simple_cats[$incident->id][$cat_id]))
                                 	{
-                                		if($category->id == $cat_id)
-                                		{
-                                			$found = true;
-                                			break;
-                                		}
-                                	}
-                                	 
-                                	if($found)
-                                	{
-                                		$report_csv .= ',"'.$this->_csv_text($cat_title).'"';
+
+                                		//$report_csv .= ',"'.$this->_csv_text($cat_title).'"';
+                                		$report_csv .= ',"YES"';
                                 	}
                                 	else
                                 	{
                                 		$report_csv .= ',""';
                                 	}
                                 }
-                
-			    break;
+						    break;
                         }
-                    }
+                    }//loop over data in post
                     
                     if ($incident->incident_active)
                     {
@@ -1959,7 +2051,8 @@ class Reports_Controller extends Admin_simplegroup_Controller
                     }
                     
                     $report_csv .= "\n";
-                }
+                    
+                }//loop over incidents
 
                 // Output to browser
                 header("Content-type: text/x-csv");
