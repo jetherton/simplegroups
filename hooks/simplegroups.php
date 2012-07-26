@@ -76,8 +76,11 @@ class simplegroups {
 		
 		//hook into reports being added via the API so we can associate them with a group
 		//if appropriate.
-		Event::add('ushahidi_action.report_submit_api', array($this, '_edit_api_post_incident'));
-		Event::add('ushahidi_action.report_edit_api', array($this, '_edit_api_saved_incident'));
+		if(Router::$controller == "api")
+		{
+			Event::add('ushahidi_action.report_submit', array($this, '_edit_api_post_incident'));
+			Event::add('ushahidi_action.report_add', array($this, '_edit_api_saved_incident'));
+		}
 		
 		//hooks for writing out CSV data
 		Event::add('ushahidi_filter.report_download_csv_header', array($this, '_add_csv_headers'));
@@ -197,6 +200,9 @@ class simplegroups {
 	 */
 	public function _edit_api_saved_incident()
 	{
+		
+		$this->post_data = $_POST;
+		
 		$incident = Event::$data;
 		$group = null;
 		//is there any simple groups stuff set?
@@ -245,7 +251,9 @@ class simplegroups {
 	 */
 	public function _edit_api_post_incident()
 	{
+		
 		$this->post_data = Event::$data;	
+
 	}
 	
 	/**
