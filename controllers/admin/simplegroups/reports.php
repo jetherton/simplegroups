@@ -1885,11 +1885,11 @@ class Reports_Controller extends Admin_simplegroup_Controller
                                 	
                                 	if($found)
                                 	{
-                                		$report_csv .= ', "'.$this->_csv_text($cat_title).'"';
+                                		$report_csv .= ',"'.$this->_csv_text($cat_title).'"';
                                 	}
                                 	else
                                 	{
-                                		$report_csv .= ', ""';
+                                		$report_csv .= ',""';
                                 	}
                                 }
                                                                 
@@ -1928,11 +1928,11 @@ class Reports_Controller extends Admin_simplegroup_Controller
                                 	 
                                 	if($found)
                                 	{
-                                		$report_csv .= ', "'.$this->_csv_text($cat_title).'"';
+                                		$report_csv .= ',"'.$this->_csv_text($cat_title).'"';
                                 	}
                                 	else
                                 	{
-                                		$report_csv .= ', ""';
+                                		$report_csv .= ',""';
                                 	}
                                 }
                 
