@@ -1908,7 +1908,7 @@ class Reports_Controller extends Admin_simplegroup_Controller
                 }
 
                 // Column Titles
-                $report_csv = "#,INCIDENT TITLE,INCIDENT DATE";
+                $report_csv = "#,INCIDENT TITLE,INCIDENT DATE, DATE UPLOADED";
                 foreach($post->data_include as $item)
                 {
                     if ($item == 1) {
@@ -1954,7 +1954,8 @@ class Reports_Controller extends Admin_simplegroup_Controller
                 {
                     $report_csv .= '"'.$incident->id.'",';
                     $report_csv .= '"'.$this->_csv_text($incident->incident_title).'",';
-                    $report_csv .= '"'.$incident->incident_date.'"';
+                    $report_csv .= '"'.$incident->incident_date.'",';
+		    $report_csv .= '"'.$incident->incident_dateadd.'"';
 
                     foreach($post->data_include as $item)
                     {
@@ -1981,16 +1982,6 @@ class Reports_Controller extends Admin_simplegroup_Controller
                                 foreach($cat_array as $cat_id=>$cat_title)
                                 {
                                 	if(isset($incidents_to_cats[$incident->id][$cat_id]))
-                                	{
-
-                                		if($category->category->id == $cat_id)
-                                		{
-                                			$found = true;
-                                			break;
-                                		}
-                                	}
-                                	
-                                	if($found)
                                 	{
 
                                 		//$report_csv .= ',"'.$this->_csv_text($cat_title).'"';
