@@ -255,16 +255,17 @@ class groups_Core {
 	{
 		if ($user AND $section)
 		{
-			$access = FALSE;
 			foreach ($user->roles as $user_role)
 			{
-				if ($user_role->$section == 1)
+				foreach($user_role->permissions as $permission)
 				{
-					$access = TRUE;
+					if($permission->name == $section)
+					{
+						return TRUE;
+					}
 				}
-			}
-			
-			return $access;
+			}			
+			return FALSE;
 		}
 		else
 		{
